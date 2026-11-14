@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: imp-maritimo-sistema
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: ENABLE_API_AUTH
+        value: "true"
+      - key: JSON_LIMIT
+        value: "10mb"

@@ -1,0 +1,322 @@
+@import "tailwindcss";
+
+@layer base {
+  html, body {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Universal Interactive Button Animations */
+  button:not(:disabled) {
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease !important;
+  }
+  button:not(:disabled):hover {
+    transform: translateY(-2px) scale(1.015);
+    box-shadow: 0 6px 16px -2px rgba(0, 0, 0, 0.16);
+  }
+  button:not(:disabled):active {
+    transform: translateY(0.5px) scale(0.97);
+    box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.12);
+  }
+
+  #root {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  .pdf-export-container {
+    /* Force standard HEX colors for PDF generation because html2canvas fails on oklch */
+    --color-blue-50: #eff6ff !important;
+    --color-blue-100: #dbeafe !important;
+    --color-blue-200: #bfdbfe !important;
+    --color-blue-300: #93c5fd !important;
+    --color-blue-400: #60a5fa !important;
+    --color-blue-500: #3b82f6 !important;
+    --color-blue-600: #2563eb !important;
+    --color-blue-700: #1d4ed8 !important;
+    --color-blue-800: #1e40af !important;
+    --color-blue-900: #1e3a8a !important;
+    --color-blue-950: #172554 !important;
+
+    --color-emerald-50: #ecfdf5 !important;
+    --color-emerald-100: #d1fae5 !important;
+    --color-emerald-200: #a7f3d0 !important;
+    --color-emerald-300: #6ee7b7 !important;
+    --color-emerald-400: #34d399 !important;
+    --color-emerald-500: #10b981 !important;
+    --color-emerald-600: #059669 !important;
+    --color-emerald-700: #047857 !important;
+    --color-emerald-800: #065f46 !important;
+    --color-emerald-900: #064e3b !important;
+    --color-emerald-950: #022c22 !important;
+
+    --color-amber-50: #fffbeb !important;
+    --color-amber-100: #fef3c7 !important;
+    --color-amber-200: #fde68a !important;
+    --color-amber-300: #fcd34d !important;
+    --color-amber-400: #fbbf24 !important;
+    --color-amber-500: #f59e0b !important;
+    --color-amber-600: #d97706 !important;
+    --color-amber-700: #b45309 !important;
+    --color-amber-800: #92400e !important;
+    --color-amber-900: #78350f !important;
+    --color-amber-950: #451a03 !important;
+
+    --color-rose-50: #fff1f2 !important;
+    --color-rose-100: #ffe4e6 !important;
+    --color-rose-200: #fecdd3 !important;
+    --color-rose-300: #fda4af !important;
+    --color-rose-400: #fb7185 !important;
+    --color-rose-500: #f43f5e !important;
+    --color-rose-600: #e11d48 !important;
+    --color-rose-700: #be123c !important;
+    --color-rose-800: #9f1239 !important;
+    --color-rose-900: #881337 !important;
+    --color-rose-950: #4c0519 !important;
+
+    --color-slate-50: #f8fafc !important;
+    --color-slate-100: #f1f5f9 !important;
+    --color-slate-200: #e2e8f0 !important;
+    --color-slate-300: #cbd5e1 !important;
+    --color-slate-400: #94a3b8 !important;
+    --color-slate-500: #64748b !important;
+    --color-slate-600: #475569 !important;
+    --color-slate-700: #334155 !important;
+    --color-slate-800: #1e293b !important;
+    --color-slate-900: #0f172a !important;
+    --color-slate-950: #020617 !important;
+    
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  /* Specific fix for text-colors and border-colors inside pdf-export-container */
+  .pdf-export-container * {
+    border-color: #e2e8f0 !important; /* slate-200 fallback */
+  }
+}
+
+/* ==========================================================================
+   OFFICIAL PRINT STYLES (A4 EXCLUSIVE INSTITUTIONAL LAYOUT)
+   ========================================================================== */
+@media print {
+  /* Hide all interactive app elements and chrome */
+  nav,
+  header,
+  aside,
+  footer,
+  .no-print,
+  button,
+  input,
+  select,
+  textarea,
+  .modal-action-bar,
+  #app-sidebar,
+  #app-header {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100% !important;
+    overflow: visible !important;
+    font-size: 11pt !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Reset any modal backdrops or fixed viewport constraints */
+  .fixed,
+  .fixed.inset-0,
+  div[class*="backdrop-blur"],
+  div[class*="overflow-hidden"],
+  div[class*="max-h-"] {
+    position: static !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Hide everything on the page by default */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Make only the active printable document visible */
+  #printable-document,
+  #printable-document *,
+  .printable-document,
+  .printable-document *,
+  .printable-area,
+  .printable-area *,
+  .printable-dual-sheet,
+  .printable-dual-sheet * {
+    visibility: visible !important;
+  }
+
+  /* Position the printable document cleanly on physical A4 paper */
+  #printable-document,
+  .printable-document,
+  .printable-area {
+    position: relative !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    overflow: visible !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-after: avoid !important;
+    transform: none !important;
+  }
+
+  /* Ensure colors, emblems, badges and borders print vividly */
+  #printable-document,
+  #printable-document *,
+  .printable-dual-sheet,
+  .printable-dual-sheet * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Institutional Header and Republic Emblem Print Scaling */
+  .helm-emblem-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .helm-emblem-container img,
+  .helm-emblem-container svg {
+    max-height: 24mm !important;
+    max-width: 24mm !important;
+    width: auto !important;
+    object-fit: contain !important;
+    display: block !important;
+  }
+
+  .republic-emblem-container {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    vertical-align: middle !important;
+  }
+
+  .republic-emblem-container img,
+  .republic-emblem-container svg {
+    max-height: 10mm !important;
+    width: auto !important;
+    object-fit: contain !important;
+    display: inline-block !important;
+  }
+
+  /* Prevent overlapping and force clean separation between invoice blocks */
+  .printable-document .document-header,
+  .printable-document .client-box,
+  .printable-document .items-table,
+  .printable-document .totals-box,
+  .printable-document .payment-instructions,
+  .printable-document .signatures-grid,
+  .printable-document .footer-certificate {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 5mm 6mm;
+  }
+
+  body, html {
+    width: 210mm !important;
+    min-height: 297mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  #printable-document,
+  .printable-document {
+    width: 100% !important;
+    max-width: 198mm !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    font-size: 9.5pt !important;
+    box-shadow: none !important;
+    border: none !important;
+    page-break-after: avoid !important;
+    page-break-before: avoid !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    transform: none !important;
+  }
+
+  .printable-dual-sheet {
+    width: 100% !important;
+    max-width: 198mm !important;
+    height: 285mm !important;
+    max-height: 285mm !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    overflow: hidden !important;
+  }
+}
+
+@media screen {
+  .hidden-on-screen {
+    position: absolute !important;
+    left: -99999px !important;
+    top: -99999px !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}
+
+@media print {
+  .hidden-on-screen {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    display: block !important;
+    visibility: visible !important;
+    z-index: 99999 !important;
+  }
+}
+
