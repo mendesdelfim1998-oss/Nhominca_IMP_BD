@@ -472,7 +472,7 @@ export function VisaoGeralModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-      <div className="w-full max-w-6xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-3xl border border-slate-300 dark:border-slate-800 shadow-2xl overflow-hidden max-h-[96vh] flex flex-col transition-all">
+      <div className="w-full max-w-[98vw] xl:max-w-7xl 2xl:max-w-[1400px] bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-3xl border border-slate-300 dark:border-slate-800 shadow-2xl overflow-hidden max-h-[96vh] flex flex-col transition-all">
         
         {/* ====================================================================
             HEADER INSTITUCIONAL COM IDENTIFICAÇÃO DE PERFIL E TEMPO REAL
@@ -1029,105 +1029,113 @@ export function VisaoGeralModal({
         {/* ====================================================================
             CONTROLOS DE PESQUISA E TABELAS
             ==================================================================== */}
-        <div className="p-3 sm:px-6 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0 bg-slate-50 dark:bg-slate-950/60">
-          {/* Sub-tabs if Admin */}
-          {isAdminOrDG ? (
-            <div className="flex items-center gap-1.5 w-full sm:w-auto flex-wrap">
-              <button
-                type="button"
-                onClick={() => setActiveTab('todos')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === 'todos'
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-                }`}
-              >
-                {tText('Todos')} ({unifiedTableList.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('faturas')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === 'faturas'
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-                }`}
-              >
-                {tText('Faturas')} ({scopedFaturas.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('recibos')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === 'recibos'
-                    ? 'bg-emerald-600 text-white shadow-md'
-                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-                }`}
-              >
-                {tText('Recibos')} ({scopedRecibos.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('caixa')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === 'caixa'
-                    ? 'bg-amber-600 text-white shadow-md'
-                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-                }`}
-              >
-                {tText('Caixa')} ({scopedMovimentos.length})
-              </button>
-            </div>
-          ) : isFaturacao ? (
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-500 font-mono">{tText('Filtrar por Estado:')}</span>
-              <select
-                value={statusFaturaFilter}
-                onChange={(e) => setStatusFaturaFilter(e.target.value)}
-                className="px-3 py-1.5 text-xs rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-medium focus:outline-none"
-              >
-                <option value="todos">{tText('Todos os Estados')}</option>
-                <option value="rascunho">{tText('Rascunho')}</option>
-                <option value="confirmada">{tText('Confirmada')}</option>
-                <option value="parcial">{tText('Amortização Parcial')}</option>
-                <option value="paga">{tText('Totalmente Paga')}</option>
-                <option value="anulada">{tText('Anulada')}</option>
-              </select>
+        <div className="p-3 sm:px-6 border-b border-slate-200 dark:border-slate-800 shrink-0 bg-slate-50 dark:bg-slate-950/60 space-y-3">
+          {/* Secção de registos para operador de caixa */}
+          {isCaixa ? (
+            <div className="flex items-center gap-2 pt-1">
+              <FileText className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <h4 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-slate-100 uppercase tracking-wide">
+                {tText('Registos de Movimentação em Caixa & Recibos Emitidos')}
+              </h4>
             </div>
           ) : (
-            <div className="text-xs font-bold text-slate-600 dark:text-slate-300 font-mono">
-              {tText('Registos de Movimentação em Caixa & Recibos Emitidos')}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+              {/* Sub-tabs if Admin */}
+              {isAdminOrDG ? (
+                <div className="flex items-center gap-1.5 w-full sm:w-auto flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('todos')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      activeTab === 'todos'
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                    }`}
+                  >
+                    {tText('Todos')} ({unifiedTableList.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('faturas')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      activeTab === 'faturas'
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                    }`}
+                  >
+                    {tText('Faturas')} ({scopedFaturas.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('recibos')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      activeTab === 'recibos'
+                        ? 'bg-emerald-600 text-white shadow-md'
+                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                    }`}
+                  >
+                    {tText('Recibos')} ({scopedRecibos.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('caixa')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      activeTab === 'caixa'
+                        ? 'bg-amber-600 text-white shadow-md'
+                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                    }`}
+                  >
+                    {tText('Caixa')} ({scopedMovimentos.length})
+                  </button>
+                </div>
+              ) : isFaturacao ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-500 font-mono">{tText('Filtrar por Estado:')}</span>
+                  <select
+                    value={statusFaturaFilter}
+                    onChange={(e) => setStatusFaturaFilter(e.target.value)}
+                    className="px-3 py-1.5 text-xs rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-medium focus:outline-none"
+                  >
+                    <option value="todos">{tText('Todos os Estados')}</option>
+                    <option value="rascunho">{tText('Rascunho')}</option>
+                    <option value="confirmada">{tText('Confirmada')}</option>
+                    <option value="parcial">{tText('Amortização Parcial')}</option>
+                    <option value="paga">{tText('Totalmente Paga')}</option>
+                    <option value="anulada">{tText('Anulada')}</option>
+                  </select>
+                </div>
+              ) : null}
+
+              {/* Search box */}
+              <div className="relative w-full sm:w-72">
+                <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder={tText('Buscar por código, cliente, navio...')}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 rounded-xl text-xs border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:border-blue-500 font-medium"
+                />
+              </div>
             </div>
           )}
-
-          {/* Search box */}
-          <div className="relative w-full sm:w-72">
-            <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
-            <input
-              type="text"
-              placeholder={tText('Buscar por código, cliente, navio...')}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-xl text-xs border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:border-blue-500 font-medium"
-            />
-          </div>
         </div>
 
         {/* ====================================================================
             TABELA DE OPERAÇÕES COM BOTÕES DE IMPRESSÃO (SÓ ÍCONE DA IMPRESSORA)
             ==================================================================== */}
-        <div className="overflow-y-auto p-4 flex-1">
-          <table className="w-full text-xs text-left">
-            <thead className="bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 font-mono text-[10px] uppercase sticky top-0 z-10 border-b border-slate-200 dark:border-slate-700">
+        <div className="overflow-y-auto overflow-x-hidden p-3 sm:p-4 flex-1">
+          <table className="w-full text-xs text-left table-fixed">
+            <thead className={`bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 font-mono text-[10px] uppercase border-b border-slate-200 dark:border-slate-700 ${isCaixa ? '' : 'sticky top-0 z-10'}`}>
               <tr>
-                <th className="p-3">{tText('DATA')}</th>
-                <th className="p-3">{tText('CÓDIGO')}</th>
-                <th className="p-3">{tText('DESCRIÇÃO / DETALHE')}</th>
-                <th className="p-3">{tText('CLIENTE / ENTIDADE / NAVIO')}</th>
-                <th className="p-3 text-right">{tText('VALOR')}</th>
-                <th className="p-3">{tText('ESTADO / BANCO')}</th>
-                <th className="p-3">{tText('OPERADOR')}</th>
-                <th className="p-3 text-center">{tText('AÇÕES')}</th>
+                <th className="p-2 sm:p-3 w-[92px]">{tText('DATA')}</th>
+                <th className="p-2 sm:p-3 w-[130px]">{tText('CÓDIGO')}</th>
+                <th className="p-2 sm:p-3">{tText('DESCRIÇÃO / DETALHE')}</th>
+                <th className="p-2 sm:p-3 w-[180px]">{tText('CLIENTE / ENTIDADE / NAVIO')}</th>
+                <th className="p-2 sm:p-3 w-[130px] text-right">{tText('VALOR')}</th>
+                <th className="p-2 sm:p-3 w-[120px]">{tText('ESTADO / BANCO')}</th>
+                <th className="p-2 sm:p-3 w-[120px]">{tText('OPERADOR')}</th>
+                <th className="p-2 sm:p-3 w-[72px] text-center">{tText('AÇÕES')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-sans">
@@ -1143,11 +1151,11 @@ export function VisaoGeralModal({
                     key={item.id}
                     className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
                   >
-                    <td className="p-3 font-mono text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                    <td className="p-2 sm:p-3 font-mono text-slate-500 dark:text-slate-400 whitespace-nowrap">
                       {item.dataFormatted}
                     </td>
 
-                    <td className="p-3 whitespace-nowrap">
+                    <td className="p-2 sm:p-3 whitespace-nowrap">
                       <span className="font-mono font-bold text-slate-900 dark:text-white block">
                         {item.codigo}
                       </span>
@@ -1164,14 +1172,14 @@ export function VisaoGeralModal({
                       </span>
                     </td>
 
-                    <td className="p-3">
-                      <span className="font-medium text-slate-800 dark:text-slate-200 block max-w-xs truncate">
+                    <td className="p-2 sm:p-3">
+                      <span className="font-medium text-slate-800 dark:text-slate-200 block truncate">
                         {item.descricao}
                       </span>
                     </td>
 
-                    <td className="p-3">
-                      <div className="font-semibold text-slate-900 dark:text-white">
+                    <td className="p-2 sm:p-3">
+                      <div className="font-semibold text-slate-900 dark:text-white truncate">
                         {item.cliente}
                       </div>
                       {item.vessel && (
@@ -1182,7 +1190,7 @@ export function VisaoGeralModal({
                       )}
                     </td>
 
-                    <td className="p-3 text-right font-mono font-bold whitespace-nowrap">
+                    <td className="p-2 sm:p-3 text-right font-mono font-bold whitespace-nowrap">
                       {item.valorEntrada > 0 ? (
                         <span className="text-emerald-600 dark:text-emerald-400">
                           +{item.valorEntrada.toLocaleString('pt-PT')} XOF
@@ -1196,7 +1204,7 @@ export function VisaoGeralModal({
                       )}
                     </td>
 
-                    <td className="p-3 whitespace-nowrap">
+                    <td className="p-2 sm:p-3 whitespace-nowrap">
                       <span
                         className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
                           item.estadoOuBanco === 'paga'
@@ -1219,7 +1227,7 @@ export function VisaoGeralModal({
                     </td>
 
                     {/* ONLY PRINTER ICON AS EXPLICITLY REQUESTED */}
-                    <td className="p-3 text-center whitespace-nowrap">
+                    <td className="p-2 sm:p-3 text-center whitespace-nowrap">
                       <div className="flex items-center justify-center gap-1.5">
                         {item.tipoModulo === 'fatura' && (
                           <>

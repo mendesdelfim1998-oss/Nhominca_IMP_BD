@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { Header } from './components/layout/Header';
 import { Sidebar, ModuleKey } from './components/layout/Sidebar';
 import { LoginScreen } from './components/auth/LoginScreen';
@@ -95,14 +95,11 @@ export default function App() {
   const { theme } = useTheme();
   const { language } = useLanguage();
 
-  // Authentication State - always start on login screen
-  useEffect(() => {
-    sessionManager.clearSession();
-  }, []);
-
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // Authentication State - restore session to keep user logged in on refresh/update
+  const savedSession = useMemo(() => sessionManager.getSession(), []);
+  const [isLoggedIn, setIsLoggedIn] = useState(savedSession.isLoggedIn);
   const [utilizadores, setUtilizadores] = useState<Utilizador[]>(mockUtilizadores);
-  const [currentUserId, setCurrentUserId] = useState<string>('USR-FAT');
+  const [currentUserId, setCurrentUserId] = useState<string>(savedSession.userId || 'USR-FAT');
 
   const currentUser = utilizadores.find((u) => u.id === currentUserId) || utilizadores[0];
   const userRole = (currentUser?.role || currentUser?.funcao || '').toLowerCase();
@@ -120,7 +117,13 @@ export default function App() {
   }, []);
 
   // Active module
-  const [activeModule, setActiveModule] = useState<ModuleKey>('dashboard');
+  const [activeModule, setActiveModule] = useState<ModuleKey>(
+    ((savedSession.activeModule as ModuleKey) || 'dashboard')
+  );
+
+  useEffect(() => {
+    if (isLoggedIn) sessionManager.updateActiveModule(activeModule);
+  }, [activeModule, isLoggedIn]);
 
   // Enforce Segregation of Duties (SoD): Caixa profile must never open 'facturacao'
   useEffect(() => {
@@ -129,6 +132,7 @@ export default function App() {
     }
   }, [isCaixa, activeModule]);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [profileModalSection, setProfileModalSection] = useState<'photo' | 'email' | 'password' | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openNovaFatura, setOpenNovaFatura] = useState(false);
 
@@ -380,6 +384,7 @@ export default function App() {
     setUtilizadores(
       utilizadores.map((u) => (u.id === usuarioActualizado.id ? usuarioActualizado : u))
     );
+    apiSaveUser(usuarioActualizado).catch((e) => console.warn('Failed to persist user update:', e));
     recordAuditAction('ATUALIZAR_PERFIL_UTILIZADOR', 'USUARIOS', usuarioActualizado.id, {
       nome: usuarioActualizado.nome,
       email: usuarioActualizado.email,
@@ -538,7 +543,8 @@ export default function App() {
         currentUser={currentUser}
         onSelectUserRole={handleSelectRole}
         onLogout={handleLogout}
-        onOpenProfile={() => setIsProfileModalOpen(true)}
+        onOpenProfile={() => { setProfileModalSection(null); setIsProfileModalOpen(true); }}
+        onOpenProfileSection={(section) => { setProfileModalSection(section); setIsProfileModalOpen(true); }}
         onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
         embarcacoes={embarcacoes}
         armadores={armadores}
@@ -549,9 +555,10 @@ export default function App() {
       {/* User Profile & Security Modal */}
       <ProfileModal
         isOpen={isProfileModalOpen}
-        onClose={() => setIsProfileModalOpen(false)}
+        onClose={() => { setIsProfileModalOpen(false); setProfileModalSection(null); }}
         currentUser={currentUser}
         onUpdateUser={handleUpdateUtilizador}
+        initialSection={profileModalSection}
       />
 
       {/* Main Body with Sidebar */}

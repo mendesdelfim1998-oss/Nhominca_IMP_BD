@@ -15,7 +15,11 @@ import {
   Building2,
   FileText,
   X,
-  ExternalLink
+  ExternalLink,
+  KeyRound,
+  Camera,
+  Mail,
+  ChevronDown
 } from 'lucide-react';
 import { Utilizador, IMP_INSTITUTIONAL, Embarcacao, Armador, FaturaIMP } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
@@ -28,6 +32,7 @@ interface HeaderProps {
   onSelectUserRole: (role: string) => void;
   onLogout?: () => void;
   onOpenProfile?: () => void;
+  onOpenProfileSection?: (section: 'photo' | 'email' | 'password' | null) => void;
   onOpenMobileMenu?: () => void;
   embarcacoes?: Embarcacao[];
   armadores?: Armador[];
@@ -40,6 +45,7 @@ export function Header({
   onSelectUserRole,
   onLogout,
   onOpenProfile,
+  onOpenProfileSection,
   onOpenMobileMenu,
   embarcacoes = [],
   armadores = [],
@@ -49,22 +55,29 @@ export function Header({
   const { language, setLanguage, t, tText } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
   // Global search state
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
 
-  // Close search dropdown on click outside or Escape key
+  // Close search/profile dropdown on click outside or Escape key
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
         setIsSearchOpen(false);
       }
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
+        setProfileMenuOpen(false);
+      }
     };
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setIsSearchOpen(false);
+        setProfileMenuOpen(false);
+        setLangDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -463,68 +476,76 @@ export function Header({
           )}
         </div>
 
-        {/* User Profile Info & Click-to-Profile Avatar */}
-        <div
-          className={`flex items-center gap-1.5 sm:gap-2.5 pl-1.5 sm:pl-3 border-l shrink-0 ${
-            theme === 'dark' ? 'border-slate-800' : 'border-slate-200'
-          }`}
-        >
-          {/* User Name on top, Role/Função below */}
+        {/* User Profile Menu */}
+        <div ref={profileMenuRef} className={`relative flex items-center gap-1.5 sm:gap-2.5 pl-1.5 sm:pl-3 border-l shrink-0 ${theme === 'dark' ? 'border-slate-800' : 'border-slate-200'}`}>
           <div className="text-right hidden md:block">
-            <div
-              className={`text-xs font-bold leading-tight ${
-                theme === 'dark' ? 'text-white' : 'text-slate-900'
-              }`}
-            >
-              {currentUser?.nome || 'Sr. António Okica de Sá'}
+            <div className={`text-xs font-bold leading-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+              {currentUser?.nome || 'Utilizador'}
             </div>
             <div className="mt-0.5 flex justify-end">
               {getRoleBadge(currentUser?.role || currentUser?.funcao || 'faturacao')}
             </div>
           </div>
 
-          {/* User Avatar Button: Clicking opens Profile Modal */}
           <button
             id="user-avatar-btn"
             type="button"
-            onClick={onOpenProfile}
-            title="Clique para abrir e gerir o seu Perfil & Senha"
-            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center font-bold text-xs sm:text-sm transition-all overflow-hidden relative border cursor-pointer hover:ring-2 hover:ring-blue-500 shadow-sm shrink-0 ${
-              theme === 'dark'
-                ? 'bg-slate-800 border-slate-700 text-slate-200'
-                : 'bg-white border-slate-300 text-slate-800'
-            }`}
+            onClick={() => { setProfileMenuOpen(!profileMenuOpen); setLangDropdownOpen(false); }}
+            title="Abrir menu de perfil"
+            className={`group flex items-center gap-1.5 p-1 rounded-2xl border transition-all cursor-pointer shadow-sm ${theme === 'dark' ? 'bg-slate-800/70 border-slate-700 hover:border-slate-500' : 'bg-white border-slate-200 hover:border-blue-300'}`}
           >
-            {currentUser?.fotoUrl || currentUser?.avatar ? (
-              <img
-                src={currentUser.avatar || currentUser.fotoUrl}
-                alt={currentUser.nome}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span className="text-blue-600 font-bold">{(currentUser?.nome || 'S').charAt(0).toUpperCase()}</span>
-            )}
-            <span
-              className={`absolute bottom-0 right-0 w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full border-2 ${
-                theme === 'dark' ? 'border-slate-900' : 'border-white'
-              } ${currentUser?.status === 'Inativo' ? 'bg-rose-500' : 'bg-emerald-500'}`}
-              title={currentUser?.status === 'Inativo' ? 'Inativo' : 'Sessão Ativa'}
-            />
+            <span className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl overflow-hidden flex items-center justify-center bg-blue-600/10">
+              {currentUser?.fotoUrl || currentUser?.avatar ? (
+                <img src={currentUser.avatar || currentUser.fotoUrl} alt={currentUser.nome} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-blue-600 font-bold text-sm">{(currentUser?.nome || 'U').charAt(0).toUpperCase()}</span>
+              )}
+              <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 ${theme === 'dark' ? 'border-slate-900' : 'border-white'} ${currentUser?.status === 'Inativo' ? 'bg-rose-500' : 'bg-emerald-500'}`} />
+            </span>
+            <ChevronDown className={`w-3.5 h-3.5 mr-1 transition-transform ${profileMenuOpen ? 'rotate-180' : ''} ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`} />
           </button>
 
-          {/* Dedicated Logout Button (Fechar Conta) */}
-          {onLogout && (
-            <button
-              onClick={onLogout}
-              title="Terminar Sessão (Fechar Conta)"
-              className={`p-1.5 sm:p-2 rounded-xl transition-all shadow-sm flex items-center justify-center shrink-0 cursor-pointer ${
-                theme === 'dark'
-                  ? 'text-rose-400 hover:text-white hover:bg-rose-600/20 border border-slate-800'
-                  : 'bg-[#e01e37] hover:bg-rose-600 text-white border border-rose-600 shadow-rose-600/20'
-              }`}
-            >
-              <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            </button>
+          {profileMenuOpen && (
+            <div className={`absolute right-0 top-full mt-2 w-72 rounded-2xl shadow-2xl border p-2 z-50 animate-in fade-in slide-in-from-top-2 ${theme === 'dark' ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'}`}>
+              <div className="space-y-1">
+                <button
+                  onClick={() => { setProfileMenuOpen(false); if (onOpenProfileSection) onOpenProfileSection(null); else onOpenProfile?.(); }}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors cursor-pointer ${theme === 'dark' ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}`}
+                >
+                  <span className="w-9 h-9 rounded-xl overflow-hidden bg-blue-600/10 border border-blue-500/20 flex items-center justify-center shrink-0">
+                    {currentUser?.fotoUrl || currentUser?.avatar ? (
+                      <img src={currentUser.avatar || currentUser.fotoUrl} alt={currentUser.nome} className="w-full h-full object-cover" />
+                    ) : (
+                      <User className="w-4 h-4 text-blue-500" />
+                    )}
+                  </span>
+                  <span className="flex-1 text-left leading-tight">Meu Perfil</span>
+                </button>
+
+                <button
+                  onClick={() => { setProfileMenuOpen(false); if (onOpenProfileSection) onOpenProfileSection('email'); else onOpenProfile?.(); }}
+                  className={`w-full flex items-start gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors cursor-pointer ${theme === 'dark' ? 'hover:bg-slate-800' : 'hover:bg-slate-100'}`}
+                >
+                  <span className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0"><Mail className="w-4 h-4" /></span>
+                  <span className="flex-1 text-left min-w-0">
+                    <span className="block font-medium leading-tight">Email de contacto</span>
+                    <span className={`block text-[11px] truncate mt-0.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{currentUser?.email || '—'}</span>
+                  </span>
+                </button>
+              </div>
+
+              {onLogout && (
+                <div className={`mt-2 pt-2 border-t ${theme === 'dark' ? 'border-slate-800' : 'border-slate-200'}`}>
+                  <button
+                    onClick={() => { setProfileMenuOpen(false); onLogout(); }}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer ${theme === 'dark' ? 'text-rose-400 hover:bg-rose-500/10' : 'text-rose-600 hover:bg-rose-50'}`}
+                  >
+                    <span className="w-9 h-9 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0"><LogOut className="w-4 h-4" /></span>
+                    <span>Terminar sessão</span>
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>

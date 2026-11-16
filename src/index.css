@@ -250,7 +250,7 @@
 
   @page {
     size: A4 portrait;
-    margin: 5mm 6mm;
+    margin: 0;
   }
 
   body, html {
@@ -264,7 +264,7 @@
   #printable-document,
   .printable-document {
     width: 100% !important;
-    max-width: 198mm !important;
+    max-width: 210mm !important;
     margin: 0 auto !important;
     padding: 0 !important;
     font-size: 9.5pt !important;
@@ -279,9 +279,9 @@
 
   .printable-dual-sheet {
     width: 100% !important;
-    max-width: 198mm !important;
-    height: 285mm !important;
-    max-height: 285mm !important;
+    max-width: 210mm !important;
+    height: 297mm !important;
+    max-height: 297mm !important;
     margin: 0 auto !important;
     padding: 0 !important;
     box-sizing: border-box !important;
