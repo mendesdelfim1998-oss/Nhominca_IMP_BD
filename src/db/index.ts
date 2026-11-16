@@ -15,10 +15,14 @@ export const createPool = () => {
   }
   if (!global._postgresPool) {
     if (process.env.DATABASE_URL) {
-      // Standard connection string for deployments
+      // Standard connection string for deployments (Supabase/Neon/PostgreSQL)
+      const connectionString = process.env.DATABASE_URL;
+      const needsSsl =
+        /sslmode=require/i.test(connectionString) ||
+        /neon\.tech|supabase\.co|supabase\.com/i.test(connectionString);
       global._postgresPool = new Pool({
-        connectionString: process.env.DATABASE_URL,
-        ssl: false,
+        connectionString,
+        ssl: needsSsl ? { rejectUnauthorized: false } : false,
         max: 10,
         connectionTimeoutMillis: 15000,
       });
