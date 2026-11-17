@@ -14,7 +14,7 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 const STORAGE_KEY_LANG = 'nhominca_lang';
-const STORAGE_KEY_I18N = 'nhominca_custom_i18n_v2';
+const STORAGE_KEY_I18N = 'nhominca_custom_i18n_v3';
 
 const textDictionary: Record<Language, Record<string, string>> = {
   pt: {},
