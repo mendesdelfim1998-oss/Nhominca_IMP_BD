@@ -3525,23 +3525,63 @@ const textDictionary: Record<Language, Record<string, string>> = {
 // Helper for deep merging custom translations over base translations
 function deepMerge<T extends Record<string, any>>(target: T, source: any): T {
   const result: any = { ...target };
-  if (!source || typeof source !== 'object') return result;
+  if (!source || typeof source !== 'object' || Array.isArray(source)) return result;
   for (const key of Object.keys(source)) {
     const val = source[key];
     if (val && typeof val === 'object' && !Array.isArray(val)) {
       result[key] = deepMerge(result[key] || {}, val);
-    } else if (val !== undefined && val !== '') {
+    } else if (val !== undefined && val !== null) {
+      // Preserve intentional empty strings only if explicitly set; ignore to avoid wiping base texts
+      if (typeof val === 'string' && val.trim() === '') continue;
       result[key] = val;
     }
   }
   return result as T;
 }
 
+function normalizeTextKey(s: string): string {
+  return s
+    .normalize('NFC')
+    .replace(/[\u2018\u2019\u201A\u201B\u2032]/g, "'")
+    .replace(/[\u201C\u201D\u201E\u201F\u2033]/g, '"')
+    .replace(/[\u2013\u2014\u2212]/g, '-')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+const normalizedTextIndex: Record<Language, Map<string, string>> = {
+  pt: new Map(),
+  fr: new Map(),
+  en: new Map(),
+};
+(['fr', 'en'] as Language[]).forEach((lang) => {
+  const dict = textDictionary[lang] || {};
+  const map = normalizedTextIndex[lang];
+  for (const [k, v] of Object.entries(dict)) {
+    map.set(normalizeTextKey(k), v);
+    // also index value-less normalized variants of key as-is
+    if (k !== k.trim()) map.set(normalizeTextKey(k.trim()), v);
+  }
+});
+
+function buildTranslationsDict(custom?: any): Record<Language, Translations> {
+  const safe = custom && typeof custom === 'object' ? custom : {};
+  return {
+    pt: deepMerge(baseTranslations.pt, safe.pt || {}),
+    fr: deepMerge(baseTranslations.fr, safe.fr || {}),
+    en: deepMerge(baseTranslations.en, safe.en || {}),
+  };
+}
+
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY_LANG);
-    if (saved === 'fr' || saved === 'en' || saved === 'pt') {
-      return saved;
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_LANG);
+      if (saved === 'fr' || saved === 'en' || saved === 'pt') {
+        return saved;
+      }
+    } catch {
+      // ignore
     }
     return 'pt';
   });
@@ -3551,33 +3591,45 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
       const savedDict = localStorage.getItem(STORAGE_KEY_I18N);
       if (savedDict) {
         const parsed = JSON.parse(savedDict);
-        if (parsed && typeof parsed === 'object') {
-          return {
-            pt: deepMerge(baseTranslations.pt, parsed.pt || {}),
-            fr: deepMerge(baseTranslations.fr, parsed.fr || {}),
-            en: deepMerge(baseTranslations.en, parsed.en || {})
-          };
-        }
+        return buildTranslationsDict(parsed);
       }
     } catch (e) {
       console.warn('Error loading custom translations dict:', e);
     }
-    return baseTranslations;
+    return {
+      pt: deepMerge(baseTranslations.pt, {}),
+      fr: deepMerge(baseTranslations.fr, {}),
+      en: deepMerge(baseTranslations.en, {}),
+    };
   });
 
   // Sync language from localStorage on mount / storage change / multi-profile login
   useEffect(() => {
+    const syncFromStorage = () => {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY_LANG);
+        if (saved === 'pt' || saved === 'en' || saved === 'fr') {
+          setLanguageState(saved);
+        }
+      } catch {
+        // ignore
+      }
+    };
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY_LANG && e.newValue && (e.newValue === 'pt' || e.newValue === 'en' || e.newValue === 'fr')) {
-        setLanguageState(e.newValue as Language);
+      if (e.key === STORAGE_KEY_LANG) {
+        if (e.newValue === 'pt' || e.newValue === 'en' || e.newValue === 'fr') {
+          setLanguageState(e.newValue);
+        }
+      }
+      if (e.key === STORAGE_KEY_I18N) {
+        try {
+          setTranslationsDict(e.newValue ? buildTranslationsDict(JSON.parse(e.newValue)) : buildTranslationsDict());
+        } catch {
+          setTranslationsDict(buildTranslationsDict());
+        }
       }
     };
-    const handleCustomLangChange = () => {
-      const saved = localStorage.getItem(STORAGE_KEY_LANG);
-      if (saved && (saved === 'pt' || saved === 'en' || saved === 'fr')) {
-        setLanguageState(saved as Language);
-      }
-    };
+    const handleCustomLangChange = () => syncFromStorage();
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('nhominca_lang_change', handleCustomLangChange);
     return () => {
@@ -3593,16 +3645,20 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     } catch (e) {
       console.warn('Error saving language to localStorage:', e);
     }
-    document.documentElement.lang = lang;
-    window.dispatchEvent(new Event('nhominca_lang_change'));
+    try {
+      document.documentElement.lang = lang;
+    } catch {
+      // ignore
+    }
+    try {
+      window.dispatchEvent(new Event('nhominca_lang_change'));
+    } catch {
+      // ignore
+    }
   };
 
   const updateTranslationsDict = (newDict: Record<Language, Translations>) => {
-    const mergedDict = {
-      pt: deepMerge(baseTranslations.pt, newDict.pt || {}),
-      fr: deepMerge(baseTranslations.fr, newDict.fr || {}),
-      en: deepMerge(baseTranslations.en, newDict.en || {})
-    };
+    const mergedDict = buildTranslationsDict(newDict);
     setTranslationsDict(mergedDict);
     try {
       localStorage.setItem(STORAGE_KEY_I18N, JSON.stringify(mergedDict));
@@ -3612,27 +3668,30 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
   };
 
   const resetTranslationsDict = () => {
-    setTranslationsDict(baseTranslations);
-    localStorage.removeItem(STORAGE_KEY_I18N);
+    setTranslationsDict(buildTranslationsDict());
+    try {
+      localStorage.removeItem(STORAGE_KEY_I18N);
+    } catch {
+      // ignore
+    }
   };
 
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
 
-  const t = translationsDict[language] || translationsDict.pt || baseTranslations.pt;
+  const t = translationsDict[language] || baseTranslations[language] || baseTranslations.pt;
 
   const tText = (text: string): string => {
-    if (!text || language === 'pt') return text;
-    const trimmed = text.trim();
+    if (text == null || text === '') return text;
+    if (language === 'pt') return text;
     const langDict = textDictionary[language];
-    if (langDict && langDict[trimmed]) {
-      return langDict[trimmed];
-    }
-    // Also try checking directly
-    if (langDict && langDict[text]) {
-      return langDict[text];
-    }
+    if (!langDict) return text;
+    const trimmed = typeof text === 'string' ? text.trim() : String(text);
+    if (Object.prototype.hasOwnProperty.call(langDict, trimmed)) return langDict[trimmed];
+    if (Object.prototype.hasOwnProperty.call(langDict, text)) return langDict[text];
+    const norm = normalizedTextIndex[language]?.get(normalizeTextKey(text));
+    if (norm) return norm;
     return text;
   };
 
