@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import crypto from 'crypto';
 import * as dbQueries from './src/db/queries.ts';
+import { startSyncWorker, processSyncOutbox, getSyncStatus, cleanupExpiredTrash } from './src/db/sync.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -88,6 +89,15 @@ async function startServer() {
     console.error('Initial DB seed warning:', err);
   }
 
+  // Start local->Neon sync worker and trash cleanup
+  try {
+    startSyncWorker(15000);
+    await cleanupExpiredTrash();
+    setInterval(() => { cleanupExpiredTrash().catch(() => {}); }, 6 * 60 * 60 * 1000);
+  } catch (err) {
+    console.warn('Sync/trash worker init warning:', err);
+  }
+
   // Health check
   app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', env: NODE_ENV, uptime: process.uptime() });
@@ -156,12 +166,32 @@ async function startServer() {
         dbQueries.getAuditoriaLogs().then(r => r.length).catch(() => 0)
       ]);
 
+      // Resolve the real connection details from DATABASE_URL (or Cloud SQL env vars)
+      let dbHost = process.env.SQL_HOST || 'Local / Dev';
+      let dbName = process.env.SQL_DB_NAME || 'postgres';
+      let dbUser = process.env.SQL_USER || 'postgres';
+      try {
+        if (process.env.DATABASE_URL) {
+          const url = new URL(process.env.DATABASE_URL);
+          dbHost = process.env.SQL_HOST || url.hostname;
+          dbName = decodeURIComponent(url.pathname.replace(/^\//, '')) || dbName;
+          dbUser = decodeURIComponent(url.username) || dbUser;
+        }
+      } catch {
+        // Keep the fallbacks above if the URL is not parseable
+      }
+      const engine = /neon\.tech/i.test(dbHost)
+        ? 'PostgreSQL (Neon)'
+        : process.env.SQL_HOST
+        ? 'PostgreSQL (Cloud SQL)'
+        : 'PostgreSQL (Local)';
+
       res.json({
         status: 'connected',
-        engine: 'PostgreSQL (Cloud SQL)',
-        host: process.env.SQL_HOST ? 'Connected via Cloud SQL Proxy' : 'Local / Dev',
-        database: process.env.SQL_DB_NAME || 'postgres',
-        appUser: process.env.SQL_USER || 'ai_studio_app',
+        engine,
+        host: dbHost,
+        database: dbName,
+        appUser: dbUser,
         tables: {
           faturas: faturasCount,
           users: usersCount,
@@ -182,6 +212,57 @@ async function startServer() {
       res.json(result);
     } catch (err: any) {
       res.status(500).json({ error: err.message || 'Seed failed' });
+    }
+  });
+
+  // Sync status & manual run (local <-> Neon outbox sync)
+  app.get('/api/sync/status', async (_req, res) => {
+    try {
+      const status = await getSyncStatus();
+      res.json(status);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'sync_status_failed' });
+    }
+  });
+
+  app.post('/api/sync/run', async (_req, res) => {
+    try {
+      const result = await processSyncOutbox();
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'sync_run_failed' });
+    }
+  });
+
+  // Developer data management: clear by entity (moves to trash for 60 days) and restore
+  app.get('/api/dev/data-summary', async (_req, res) => {
+    try {
+      const data = await dbQueries.getDataManagementSummary();
+      res.json(data);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'data_summary_failed' });
+    }
+  });
+
+  app.post('/api/dev/clear', async (req, res) => {
+    try {
+      const { entity, deletedBy } = req.body || {};
+      if (!entity) return res.status(400).json({ error: 'entity_required' });
+      const result = await dbQueries.clearEntityData(String(entity), deletedBy ? String(deletedBy) : undefined);
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'clear_failed' });
+    }
+  });
+
+  app.post('/api/dev/restore', async (req, res) => {
+    try {
+      const { trashUid } = req.body || {};
+      if (!trashUid) return res.status(400).json({ error: 'trashUid_required' });
+      const result = await dbQueries.restoreTrashItem(String(trashUid));
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'restore_failed' });
     }
   });
 

@@ -414,6 +414,7 @@ export default function App() {
 
   const handleAddUtilizador = (novoUsuario: Utilizador) => {
     setUtilizadores([novoUsuario, ...utilizadores]);
+    apiSaveUser(novoUsuario).catch((e) => console.warn('Failed to persist new user:', e));
     recordAuditAction('CRIAR_UTILIZADOR', 'USUARIOS', novoUsuario.id, {
       nome: novoUsuario.nome,
       email: novoUsuario.email,

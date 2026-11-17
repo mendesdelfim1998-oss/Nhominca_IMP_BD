@@ -114,7 +114,7 @@ export async function apiSaveFatura(fatura: FaturaIMP): Promise<void> {
 
 export async function apiUpdateFatura(faturaUid: string, updates: Partial<FaturaIMP>): Promise<void> {
   try {
-    await fetch(`/api/faturas/${encodeURIComponent(faturaUid)}`, {
+    await apiRequest(`/api/faturas/${encodeURIComponent(faturaUid)}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates),
@@ -297,5 +297,60 @@ export async function apiSaveUser(user: Partial<Utilizador>): Promise<void> {
     });
   } catch (e) {
     console.warn('Failed to sync user to PostgreSQL:', e);
+  }
+}
+
+export async function apiGetSyncStatus(): Promise<any> {
+  try {
+    const res = await apiRequest('/api/sync/status');
+    if (res.ok) return await res.json();
+  } catch (e) {
+    console.warn('Failed to fetch sync status:', e);
+  }
+  return null;
+}
+
+export async function apiRunSync(): Promise<any> {
+  try {
+    const res = await apiRequest('/api/sync/run', { method: 'POST' });
+    return await res.json().catch(() => ({}));
+  } catch (e: any) {
+    return { ok: false, error: e?.message || 'sync_failed' };
+  }
+}
+
+export async function apiGetDevDataSummary(): Promise<any> {
+  try {
+    const res = await apiRequest('/api/dev/data-summary');
+    if (res.ok) return await res.json();
+  } catch (e) {
+    console.warn('Failed to fetch dev data summary:', e);
+  }
+  return null;
+}
+
+export async function apiClearEntityData(entity: string, deletedBy?: string): Promise<any> {
+  try {
+    const res = await apiRequest('/api/dev/clear', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ entity, deletedBy }),
+    });
+    return await res.json().catch(() => ({}));
+  } catch (e: any) {
+    return { ok: false, error: e?.message || 'clear_failed' };
+  }
+}
+
+export async function apiRestoreTrashItem(trashUid: string): Promise<any> {
+  try {
+    const res = await apiRequest('/api/dev/restore', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ trashUid }),
+    });
+    return await res.json().catch(() => ({}));
+  } catch (e: any) {
+    return { ok: false, error: e?.message || 'restore_failed' };
   }
 }

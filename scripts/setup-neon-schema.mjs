@@ -197,6 +197,36 @@ CREATE INDEX IF NOT EXISTS idx_auditoria_logs_timestamp ON auditoria_logs (times
 CREATE INDEX IF NOT EXISTS idx_auditoria_logs_userid ON auditoria_logs (user_id);
 CREATE INDEX IF NOT EXISTS idx_auditoria_logs_acao ON auditoria_logs (acao);
 CREATE INDEX IF NOT EXISTS idx_auditoria_logs_tabela ON auditoria_logs (tabela);
+
+CREATE TABLE IF NOT EXISTS sync_outbox (
+  id SERIAL PRIMARY KEY,
+  entity TEXT NOT NULL,
+  entity_id TEXT NOT NULL,
+  operation TEXT NOT NULL,
+  payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+  status TEXT NOT NULL DEFAULT 'pending',
+  attempts INTEGER NOT NULL DEFAULT 0,
+  last_error TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  synced_at TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_sync_outbox_status ON sync_outbox (status);
+CREATE INDEX IF NOT EXISTS idx_sync_outbox_entity ON sync_outbox (entity);
+
+CREATE TABLE IF NOT EXISTS deleted_data (
+  id SERIAL PRIMARY KEY,
+  trash_uid TEXT NOT NULL UNIQUE,
+  entity TEXT NOT NULL,
+  entity_id TEXT NOT NULL,
+  label TEXT,
+  payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+  deleted_by TEXT,
+  deleted_at TIMESTAMP DEFAULT NOW(),
+  expires_at TIMESTAMP NOT NULL,
+  restored_at TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_deleted_data_entity ON deleted_data (entity);
+CREATE INDEX IF NOT EXISTS idx_deleted_data_expires ON deleted_data (expires_at);
 `;
 
 const needsSsl = /sslmode=require/i.test(connectionString) || /neon\.tech/i.test(connectionString);

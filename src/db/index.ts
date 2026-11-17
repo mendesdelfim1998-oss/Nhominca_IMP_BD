@@ -3,31 +3,38 @@ import { Pool } from 'pg';
 import * as schema from './schema.ts';
 import { isDatabaseConfigured } from './config.ts';
 
-// Add global connection pool caching to persist across hot-reloads
+// Cache pools across hot-reloads
 declare global {
   var _postgresPool: Pool | undefined;
+  var _remotePostgresPool: Pool | undefined;
+  var _syncWorkerStarted: boolean | undefined;
 }
 
-// Function to create or retrieve the connection pool.
+const sslFor = (connectionString: string) =>
+  /sslmode=require/i.test(connectionString) ||
+  /neon\.tech|supabase\.co|supabase\.com/i.test(connectionString);
+
+const makePool = (connectionString: string) => {
+  const pool = new Pool({
+    connectionString,
+    ssl: sslFor(connectionString) ? { rejectUnauthorized: false } : false,
+    max: 10,
+    connectionTimeoutMillis: 15000,
+  });
+  pool.on('error', (err) => {
+    console.error('Unexpected error on idle SQL pool client:', err);
+  });
+  return pool;
+};
+
+// Local/primary pool: prefer LOCAL_DATABASE_URL, fallback to DATABASE_URL or SQL_*.
 export const createPool = () => {
-  if (!isDatabaseConfigured()) {
-    return undefined;
-  }
+  if (!isDatabaseConfigured()) return undefined;
   if (!global._postgresPool) {
-    if (process.env.DATABASE_URL) {
-      // Standard connection string for deployments (Supabase/Neon/PostgreSQL)
-      const connectionString = process.env.DATABASE_URL;
-      const needsSsl =
-        /sslmode=require/i.test(connectionString) ||
-        /neon\.tech|supabase\.co|supabase\.com/i.test(connectionString);
-      global._postgresPool = new Pool({
-        connectionString,
-        ssl: needsSsl ? { rejectUnauthorized: false } : false,
-        max: 10,
-        connectionTimeoutMillis: 15000,
-      });
+    const localUrl = process.env.LOCAL_DATABASE_URL || process.env.DATABASE_URL;
+    if (localUrl) {
+      global._postgresPool = makePool(localUrl);
     } else {
-      // Cloud SQL Auth Proxy Object Method (must use ssl: false)
       global._postgresPool = new Pool({
         host: process.env.SQL_HOST || '127.0.0.1',
         user: process.env.SQL_USER,
@@ -37,19 +44,31 @@ export const createPool = () => {
         max: 10,
         connectionTimeoutMillis: 15000,
       });
+      global._postgresPool.on('error', (err) => {
+        console.error('Unexpected error on idle SQL pool client:', err);
+      });
     }
-
-    // Prevent unhandled pool-level errors from crashing the application
-    global._postgresPool.on('error', (err) => {
-      console.error('Unexpected error on idle SQL pool client:', err);
-    });
   }
   return global._postgresPool;
 };
 
-// Create or retrieve the pool instance.
-const pool = createPool();
+export const createRemotePool = () => {
+  const remoteUrl = process.env.NEON_DATABASE_URL || process.env.REMOTE_DATABASE_URL || process.env.SYNC_DATABASE_URL;
+  if (!remoteUrl) return undefined;
+  if (!global._remotePostgresPool) {
+    global._remotePostgresPool = makePool(remoteUrl);
+  }
+  return global._remotePostgresPool;
+};
 
-// Initialize Drizzle with the pool and schema when configured.
+const pool = createPool();
+const remotePool = createRemotePool();
+
+// Primary DB used by the app (local/offline-capable when LOCAL_DATABASE_URL is local)
 export const db = pool ? drizzle(pool, { schema }) : (null as any);
-export { isDatabaseConfigured };
+// Remote DB (Neon/cloud) for synchronization
+export const remoteDb = remotePool ? drizzle(remotePool, { schema }) : (null as any);
+
+export const isRemoteDatabaseConfigured = () => Boolean(remotePool && remoteDb);
+export const isSyncEnabled = () => (process.env.SYNC_ENABLED || '').toLowerCase() !== 'false' && isRemoteDatabaseConfigured();
+export { isDatabaseConfigured, schema };

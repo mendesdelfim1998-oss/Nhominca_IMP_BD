@@ -198,3 +198,37 @@ export const atracacoes = pgTable('atracacoes', {
   manifestoCarga: jsonb('manifesto_carga').notNull().default({}),
   createdAt: timestamp('created_at').defaultNow(),
 });
+
+// Fila de sincronização local -> remoto (Neon)
+export const syncOutbox = pgTable('sync_outbox', {
+  id: serial('id').primaryKey(),
+  entity: text('entity').notNull(),
+  entityId: text('entity_id').notNull(),
+  operation: text('operation').notNull(), // upsert | delete
+  payload: jsonb('payload').notNull().default({}),
+  status: text('status').notNull().default('pending'), // pending | synced | failed
+  attempts: integer('attempts').notNull().default(0),
+  lastError: text('last_error'),
+  createdAt: timestamp('created_at').defaultNow(),
+  syncedAt: timestamp('synced_at'),
+}, (table) => ({
+  statusIdx: index('idx_sync_outbox_status').on(table.status),
+  entityIdx: index('idx_sync_outbox_entity').on(table.entity),
+}));
+
+// Lixeira / dados apagados com retenção para recuperação
+export const deletedData = pgTable('deleted_data', {
+  id: serial('id').primaryKey(),
+  trashUid: text('trash_uid').notNull().unique(),
+  entity: text('entity').notNull(), // e.g. faturas, recibos, users
+  entityId: text('entity_id').notNull(),
+  label: text('label'),
+  payload: jsonb('payload').notNull().default({}),
+  deletedBy: text('deleted_by'),
+  deletedAt: timestamp('deleted_at').defaultNow(),
+  expiresAt: timestamp('expires_at').notNull(),
+  restoredAt: timestamp('restored_at'),
+}, (table) => ({
+  entityIdx: index('idx_deleted_data_entity').on(table.entity),
+  expiresIdx: index('idx_deleted_data_expires').on(table.expiresAt),
+}));

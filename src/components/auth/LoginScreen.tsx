@@ -69,48 +69,11 @@ export function LoginScreen({
   onUpdateUserSecurity
 }: LoginScreenProps) {
   const { language, setLanguage, tText } = useLanguage();
-  // Default to Faturação operator as shown in user's screenshot
-  const [email, setEmail] = useState('faturacao@imp.gw');
-  const [password, setPassword] = useState('faturacao123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [lockCountdown, setLockCountdown] = useState<number | null>(null);
-
-  // Defined quick credentials strictly matching the user's reference mockup
-  const credenciaisOficiais = [
-    {
-      cargo: tText('Operador de Faturação'),
-      nome: 'Sr. António Okica de Sá',
-      email: 'faturacao@imp.gw',
-      senhaPadrao: 'faturacao123',
-      badge: 'FATURACAO',
-      role: 'faturacao'
-    },
-    {
-      cargo: tText('Operador de Caixa / Tesouraria'),
-      nome: 'Dr. Álvaro Luís Da Silva',
-      email: 'caixa@imp.gw',
-      senhaPadrao: 'caixa123',
-      badge: 'CAIXA',
-      role: 'caixa'
-    },
-    {
-      cargo: tText('Presidente do Conselho (PCA / Admin)'),
-      nome: 'Dr. Gualdino Afonso Té',
-      email: 'admin@imp.gw',
-      senhaPadrao: 'admin123',
-      badge: 'ADMIN',
-      role: 'admin'
-    },
-    {
-      cargo: tText('Engenheiro de Sistemas / Desenvolvedor'),
-      nome: 'Eng. SuperAdministrador',
-      email: 'superadmin@imp.gw',
-      senhaPadrao: 'superadmin123',
-      badge: 'SUPERADMIN',
-      role: 'superadmin'
-    }
-  ];
 
   // Find target user dynamically
   const targetUser = utilizadores.find(
@@ -142,12 +105,6 @@ export function LoginScreen({
       setLockCountdown(null);
     }
   }, [targetUser?.lockUntil, targetUser?.email]);
-
-  const handleSelectQuickAccount = (quickEmail: string, quickPass: string) => {
-    setEmail(quickEmail);
-    setPassword(quickPass);
-    setErrorMessage('');
-  };
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -239,8 +196,8 @@ export function LoginScreen({
       {/* Main Split Container */}
       <div className="w-full max-w-5xl rounded-[28px] overflow-hidden shadow-2xl shadow-black/50 border border-blue-400/20 flex flex-col lg:flex-row bg-[#0B3B75]">
         
-        {/* Left Column: Institutional Info & Quick Fill Credentials */}
-        <div className="lg:w-[50%] p-8 sm:p-10 flex flex-col justify-between text-white bg-[#0B3B75]">
+        {/* Left Column: Institutional Info */}
+        <div className="lg:w-[50%] p-8 sm:p-10 flex flex-col justify-center text-white bg-[#0B3B75]">
           <div>
             {/* Header: Republic Emblem & Entity */}
             <div className="flex items-center gap-3.5">
@@ -272,43 +229,6 @@ export function LoginScreen({
               <p className="mt-3 text-xs sm:text-[13px] text-blue-100/90 leading-relaxed font-normal">
                 {tText('Ambiente Seguro • Segregação de Funções (SoD)')}
               </p>
-            </div>
-
-            {/* Quick Fill Credential Cards */}
-            <div className="mt-8">
-              <div className="text-[11px] font-bold text-blue-200/90 uppercase tracking-wider mb-3">
-                {tText('OPERADORES CREDENCIADOS (CLIQUE PARA PREENCHER):')}
-              </div>
-
-              <div className="space-y-2.5">
-                {credenciaisOficiais.map((op) => {
-                  const isSelected = email.toLowerCase() === op.email.toLowerCase();
-                  return (
-                    <button
-                      key={op.email}
-                      type="button"
-                      onClick={() => handleSelectQuickAccount(op.email, op.senhaPadrao)}
-                      className={`w-full text-left rounded-xl px-4 py-3 flex items-center justify-between transition-all duration-150 border cursor-pointer ${
-                        isSelected
-                          ? 'bg-[#062247]/90 border-blue-300 ring-2 ring-blue-400/40 shadow-lg'
-                          : 'bg-[#0a2e5c]/70 hover:bg-[#07244a] border-blue-400/25 hover:border-blue-300/60'
-                      }`}
-                    >
-                      <div className="pr-2 min-w-0">
-                        <div className="font-bold text-xs sm:text-sm text-white truncate">
-                          {op.cargo}
-                        </div>
-                        <div className="text-[11px] text-blue-200/80 truncate mt-0.5">
-                          {op.nome} <span className="opacity-60">•</span> <span className="font-mono text-blue-100">{op.email}</span>
-                        </div>
-                      </div>
-                      <span className="shrink-0 px-2.5 py-1 rounded bg-[#072652] border border-blue-400/30 text-[10px] font-bold tracking-wider text-blue-100 uppercase font-mono">
-                        {op.badge}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
             </div>
           </div>
         </div>
@@ -396,7 +316,7 @@ export function LoginScreen({
                   value={email}
                   disabled={lockCountdown !== null && lockCountdown > 0}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="ex: faturacao@imp.gw"
+                  placeholder="nome.utilizador@imp.gw"
                   required
                   className={`w-full px-4 py-3 bg-[#F8FAFC] border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all ${
                     lockCountdown ? 'opacity-50 cursor-not-allowed' : ''
@@ -415,7 +335,7 @@ export function LoginScreen({
                     value={password}
                     disabled={lockCountdown !== null && lockCountdown > 0}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
+                    placeholder="Introduza a palavra-passe"
                     required
                     className={`w-full px-4 py-3 pr-11 bg-[#F8FAFC] border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all ${
                       lockCountdown ? 'opacity-50 cursor-not-allowed' : ''

@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   Settings, Server, Save, CheckCircle2, HardDrive, Mail, Send, Plus, Lock, Cookie,
-  Shield, RefreshCw, Key, Terminal, Globe, FileJson, RotateCcw, Edit3, Download, Database, Upload, FileCheck
+  Shield, RefreshCw, Key, Terminal, Globe, FileJson, RotateCcw, Edit3, Download, Database, Upload, FileCheck, Trash2, Undo2, Cloud, Wifi, WifiOff
 } from 'lucide-react';
+import { apiGetDevDataSummary, apiClearEntityData, apiRestoreTrashItem, apiGetSyncStatus, apiRunSync } from '../../utils/api';
 import {
   ConfiguraçãoServidor, ParamentroTaxaPortuaria, Utilizador, FaturaIMP, ReciboIMP,
   CaixaMov, Embarcacao, Armador, AgenciaMaritima, Atracacao, RubricaReceita,
@@ -53,7 +54,11 @@ export function ConfiguracaoModule({
 }: ConfiguracaoModuleProps) {
   const { theme } = useTheme();
   const { language, setLanguage, translationsDict, updateTranslationsDict, resetTranslationsDict } = useLanguage();
-  const [activeTab, setActiveTab] = useState<'taxas' | 'servidor' | 'smtp' | 'cookies' | 'idiomas' | 'backup'>('taxas');
+  const [activeTab, setActiveTab] = useState<'taxas' | 'servidor' | 'smtp' | 'cookies' | 'idiomas' | 'backup' | 'dev'>('taxas');
+  const [devSummary, setDevSummary] = useState<any>(null);
+  const [devLoading, setDevLoading] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<any>(null);
+  const [devMsg, setDevMsg] = useState('');
   const [taxasState, setTaxasState] = useState(taxas);
   const [savedMsg, setSavedMsg] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -72,6 +77,21 @@ export function ConfiguracaoModule({
   useEffect(() => {
     setJsonRaw(JSON.stringify(editableDict[editLang] || editableDict.pt, null, 2));
   }, [editLang, editableDict]);
+
+  const loadDevData = async () => {
+    setDevLoading(true);
+    try {
+      const [summary, sync] = await Promise.all([apiGetDevDataSummary(), apiGetSyncStatus()]);
+      setDevSummary(summary);
+      setSyncStatus(sync);
+    } finally {
+      setDevLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'dev') loadDevData();
+  }, [activeTab]);
 
   // SuperAdmin check
   const role = (currentUser?.role || currentUser?.funcao || '').toLowerCase();
@@ -272,6 +292,21 @@ export function ConfiguracaoModule({
         >
           <Database className="w-3.5 h-3.5 text-blue-300" />
           6. Exportação & Backup JSON (SuperAdmin)
+        </button>
+
+        {/* 7. Developer area: sync + trash/restore */}
+        <button
+          onClick={() => setActiveTab('dev')}
+          className={`px-4 py-2 rounded-xl font-semibold transition-all flex items-center gap-1.5 ${
+            activeTab === 'dev'
+              ? 'bg-rose-600 text-white shadow-md shadow-rose-600/20'
+              : theme === 'dark'
+              ? 'text-rose-400 hover:text-rose-200 hover:bg-rose-950/40'
+              : 'text-rose-700 hover:text-rose-900 hover:bg-rose-50'
+          }`}
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+          7. Área de Desenvolvedor (Limpeza & Recuperação)
         </button>
       </div>
 
@@ -1241,6 +1276,146 @@ export function ConfiguracaoModule({
                 </div>
               </div>
             </div>
+          )}
+        </div>
+      ) : activeTab === 'dev' ? (
+        <div className={`p-5 rounded-2xl border space-y-6 ${theme === 'dark' ? 'bg-slate-900 border-rose-900/40' : 'bg-white border-rose-200 shadow-sm'}`}>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 border-slate-200 dark:border-slate-800">
+            <div>
+              <h3 className={`text-base font-bold tracking-tight flex items-center gap-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                <Shield className="w-5 h-5 text-rose-500" />
+                Área de Desenvolvedor: Base de Dados, Limpeza e Recuperação
+              </h3>
+              <p className="text-xs text-slate-400">
+                {syncStatus?.mode === 'direct_neon'
+                  ? 'Ligação direta ao Neon ativa. Os dados são gravados diretamente na base Neon. Limpezas movem dados para recuperação por 60 dias.'
+                  : 'Modo local/offline com sincronização para Neon (quando disponível). Limpezas movem dados para recuperação por 60 dias.'}
+              </p>
+            </div>
+            <button onClick={loadDevData} disabled={devLoading} className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center gap-2 disabled:opacity-50">
+              <RefreshCw className={`w-4 h-4 ${devLoading ? 'animate-spin' : ''}`} /> Atualizar
+            </button>
+          </div>
+
+          {devMsg && <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-semibold">{devMsg}</div>}
+
+          {!isSuperAdmin ? (
+            <div className="p-8 text-center rounded-2xl bg-slate-950 border border-rose-500/30 text-rose-300 space-y-3">
+              <Lock className="w-10 h-10 text-rose-500 mx-auto" />
+              <h4 className="font-bold text-sm uppercase tracking-wider">Acesso Restrito ao SuperAdmin</h4>
+              <p className="text-xs max-w-md mx-auto text-slate-400">Apenas SuperAdmin pode limpar dados e aceder à área de recuperação.</p>
+            </div>
+          ) : (
+            <>
+              <div className={`p-4 rounded-xl border space-y-3 ${syncStatus?.healthy ? (theme === 'dark' ? 'bg-emerald-950/20 border-emerald-700/50' : 'bg-emerald-50 border-emerald-300') : !syncStatus?.dbConnected ? (theme === 'dark' ? 'bg-red-950/20 border-red-800/50' : 'bg-red-50 border-red-300') : (theme === 'dark' ? 'bg-purple-950/20 border-purple-800/50' : 'bg-purple-50 border-purple-300')}`}>
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="flex items-center gap-2 text-xs font-semibold">
+                    <Cloud className="w-4 h-4 text-blue-500" />
+                    <span>{syncStatus?.mode === 'direct_neon' ? 'Ligação à Base de Dados (Neon)' : 'Sincronização Local ↔ Neon'}</span>
+                    {(() => {
+                      const healthy = !!syncStatus?.healthy;
+                      const hasProblem = !syncStatus?.dbConnected || (!!syncStatus?.enabled && ((syncStatus?.pending ?? 0) > 0 || (syncStatus?.failed ?? 0) > 0)) || (syncStatus?.mode !== 'direct_neon' && syncStatus?.enabled && !syncStatus?.remoteConnected);
+                      if (healthy) {
+                        return <span className="text-emerald-500 flex items-center gap-1"><Wifi className="w-3.5 h-3.5"/>{syncStatus?.mode === 'direct_neon' ? 'Ligado ao Neon (100%)' : 'Sincronizado (100%)'}</span>;
+                      }
+                      if (!syncStatus?.dbConnected) {
+                        return <span className="text-red-500 flex items-center gap-1"><WifiOff className="w-3.5 h-3.5"/>Sem ligação à base de dados</span>;
+                      }
+                      if (hasProblem) {
+                        return <span className="text-purple-500 flex items-center gap-1"><WifiOff className="w-3.5 h-3.5"/>{syncStatus?.mode === 'direct_neon' ? 'Ligação com problemas' : 'Sincronização pendente/falhada'}</span>;
+                      }
+                      return <span className="text-red-500 flex items-center gap-1"><WifiOff className="w-3.5 h-3.5"/>Não sincronizado</span>;
+                    })()}
+                  </div>
+                  {syncStatus?.mode !== 'direct_neon' && (
+                    <button
+                      onClick={async () => {
+                        const r = await apiRunSync();
+                        if (r?.reason === 'sync_disabled') {
+                          setDevMsg('Sincronização desativada: a aplicação está em modo direto (Neon) e grava diretamente na base ativa.');
+                        } else if (r?.ok) {
+                          setDevMsg(`Sincronização concluída: processados ${r.processed ?? 0}, sincronizados ${r.synced ?? 0}, falhas ${r.failed ?? 0}.`);
+                        } else {
+                          setDevMsg(`Sincronização: ${JSON.stringify(r && Object.keys(r).length ? r : { ok: false, reason: 'sem_resposta' })}`);
+                        }
+                        loadDevData();
+                      }}
+                      className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold"
+                    >Sincronizar agora</button>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                  <div className="p-2 rounded-lg bg-slate-900/40 border border-slate-800"><div className="text-slate-400">Pendentes</div><div className="font-bold text-amber-400">{syncStatus?.pending ?? 0}</div></div>
+                  <div className="p-2 rounded-lg bg-slate-900/40 border border-slate-800"><div className="text-slate-400">Sincronizados</div><div className="font-bold text-emerald-400">{syncStatus?.synced ?? 0}</div></div>
+                  <div className="p-2 rounded-lg bg-slate-900/40 border border-slate-800"><div className="text-slate-400">Total fila</div><div className="font-bold text-blue-400">{syncStatus?.total ?? 0}</div></div>
+                  <div className="p-2 rounded-lg bg-slate-900/40 border border-slate-800"><div className="text-slate-400">{syncStatus?.mode === 'direct_neon' ? 'Base ativa' : 'Remoto configurado'}</div><div className="font-bold">{syncStatus?.mode === 'direct_neon' ? 'Neon (direto)' : (syncStatus?.remoteConfigured ? 'Sim' : 'Não')}</div></div>
+                </div>
+                <p className="text-[11px] text-slate-500">
+                  {syncStatus?.mode === 'direct_neon'
+                    ? 'A aplicação está ligada diretamente ao Neon. As operações de limpeza e recuperação continuam disponíveis nesta área.'
+                    : 'Os dados são gravados primeiro na base local. Quando a ligação ao Neon estiver disponível, a fila local é enviada automaticamente (e pode ser forçada aqui).'}
+                </p>
+              </div>
+
+              <div className={`p-4 rounded-xl border space-y-3 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+                <h4 className="text-sm font-bold flex items-center gap-2"><Trash2 className="w-4 h-4 text-rose-500"/>Limpeza de banco de dados por categoria</h4>
+                <p className="text-[11px] text-slate-400">Escolha uma categoria para limpar. Os dados apagados são enviados para a área de recuperação e ficam disponíveis por até 60 dias.</p>
+                {!devSummary && <div className="text-xs text-slate-500">A carregar resumo da base de dados... clique em "Atualizar" se necessário.</div>}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {Object.entries(devSummary?.entities || {}).map(([entity, count]) => (
+                    <div key={entity} className="p-3 rounded-lg border border-slate-800 bg-slate-900/30 flex items-center justify-between gap-2">
+                      <div>
+                        <div className="text-xs font-semibold">{entity}</div>
+                        <div className="text-[11px] text-slate-400">{Number(count)} registos</div>
+                      </div>
+                      <button
+                        onClick={async () => {
+                          if (!window.confirm(`Limpar "${entity}"? Os dados serão movidos para recuperação por 60 dias.`)) return;
+                          const r = await apiClearEntityData(entity, currentUser?.nome || 'SuperAdmin');
+                          setDevMsg(r?.ok ? `Limpeza "${entity}": ${r.moved || 0} registos movidos para recuperação.` : `Falha ao limpar "${entity}": ${r?.error || 'erro'}`);
+                          loadDevData();
+                        }}
+                        className="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-[11px] font-semibold"
+                      >Limpar</button>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[11px] text-amber-500">A limpeza remove os registos da tabela ativa e guarda-os na área de recuperação (lixeira) por pelo menos 60 dias.</p>
+              </div>
+
+              <div className={`p-4 rounded-xl border space-y-3 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <h4 className="text-sm font-bold flex items-center gap-2"><Undo2 className="w-4 h-4 text-emerald-500"/>Dados apagados recuperáveis (até 60 dias) — {devSummary?.trashCount ?? 0}</h4>
+                  <span className="text-[11px] text-slate-400">Mostra itens apagados que ainda podem ser restaurados</span>
+                </div>
+                <div className="max-h-96 overflow-auto space-y-2 pr-1">
+                  {(devSummary?.trash || []).length === 0 ? (
+                    <div className="text-xs text-slate-500 p-3 rounded-lg border border-dashed border-slate-700">Sem dados apagados na área de recuperação no momento.</div>
+                  ) : (devSummary.trash || []).map((item: any) => {
+                    const expiresAt = item.expiresAt ? new Date(item.expiresAt) : null;
+                    const daysLeft = expiresAt ? Math.max(0, Math.ceil((expiresAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000))) : null;
+                    return (
+                      <div key={item.trashUid || item.id} className="p-3 rounded-lg border border-slate-800 bg-slate-900/30 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="text-xs min-w-0">
+                          <div className="font-semibold truncate">{item.entity} — {item.label || item.entityId}</div>
+                          <div className="text-[11px] text-slate-400">Apagado: {item.deletedAt ? new Date(item.deletedAt).toLocaleString() : '-'} · Expira: {expiresAt ? expiresAt.toLocaleString() : '-'}{daysLeft !== null ? ` (${daysLeft} dia(s) restante(s))` : ''}</div>
+                          <div className="text-[11px] text-slate-500">Por: {item.deletedBy || '-'} · ID: {item.entityId}</div>
+                        </div>
+                        <button
+                          onClick={async () => {
+                            const r = await apiRestoreTrashItem(item.trashUid);
+                            setDevMsg(r?.ok ? `Restaurado: ${item.entity}/${item.entityId}` : `Falha ao restaurar: ${r?.error || 'erro'}`);
+                            loadDevData();
+                          }}
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-semibold shrink-0"
+                        >Recuperar</button>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="text-[11px] text-slate-500">Os dados apagados ficam disponíveis para recuperação por até 60 dias. Após esse prazo, são removidos automaticamente.</p>
+              </div>
+            </>
           )}
         </div>
       ) : null}

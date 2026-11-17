@@ -1,7 +1,10 @@
 import { db, isDatabaseConfigured } from './index.ts';
-import { users, faturas, recibos, caixaMovs, auditoriaLogs, embarcacoes, agencias, armadores, atracacoes } from './schema.ts';
-import { desc, eq } from 'drizzle-orm';
+import { users, faturas, recibos, caixaMovs, auditoriaLogs, embarcacoes, agencias, armadores, atracacoes, deletedData, syncOutbox } from './schema.ts';
+import { and, desc, eq, isNull } from 'drizzle-orm';
 import { mockUtilizadores, mockFaturasIMP, mockRecibosIMP, mockCaixaMovs, mockAuditoriaLogs, mockEmbarcacoes, mockAgencias, mockArmadores, mockAtracacoes } from '../mock/data.ts';
+import { enqueueSync } from './sync.ts';
+
+const daysFromNow = (days: number) => new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 
 // ---------------- USER QUERIES ----------------
 export async function getUsers() {
@@ -36,6 +39,7 @@ export async function upsertUser(userData: any) {
         senha: userData.senha,
         ultimoAcesso: userData.ultimoAcesso || new Date().toISOString()
       }).where(eq(users.uid, userData.id || userData.uid)).returning();
+      if (updated[0]) await enqueueSync('users', updated[0].uid, 'upsert', updated[0]);
       return updated[0];
     } else {
       const inserted = await db.insert(users).values({
@@ -54,6 +58,7 @@ export async function upsertUser(userData: any) {
         senha: userData.senha || 'imp123',
         ultimoAcesso: userData.ultimoAcesso || new Date().toISOString()
       }).returning();
+      if (inserted[0]) await enqueueSync('users', inserted[0].uid, 'upsert', inserted[0]);
       return inserted[0];
     }
   } catch (error) {
@@ -154,6 +159,7 @@ export async function insertFatura(faturaData: any) {
       anuladoPor: faturaData.anulado_por || null,
       dataAnulacao: faturaData.data_anulacao || null
     }).returning();
+    if (inserted[0]) await enqueueSync('faturas', inserted[0].faturaUid, 'upsert', inserted[0]);
     return inserted[0];
   } catch (error) {
     console.error('Error inserting fatura into PostgreSQL:', error);
@@ -183,6 +189,7 @@ export async function updateFatura(faturaUid: string, updates: any) {
       .set(fieldsToUpdate)
       .where(eq(faturas.faturaUid, faturaUid))
       .returning();
+    if (updated[0]) await enqueueSync('faturas', updated[0].faturaUid, 'upsert', updated[0]);
     return updated[0];
   } catch (error) {
     console.error('Error updating fatura in PostgreSQL:', error);
@@ -248,6 +255,7 @@ export async function insertRecibo(reciboData: any) {
       navio: reciboData.navio || '',
       observacoes: reciboData.observacoes || ''
     }).returning();
+    if (inserted[0]) await enqueueSync('recibos', inserted[0].reciboUid, 'upsert', inserted[0]);
     return inserted[0];
   } catch (error) {
     console.error('Error inserting recibo into PostgreSQL:', error);
@@ -315,6 +323,7 @@ export async function insertCaixaMov(movData: any) {
       justificativa: movData.justificativa || null,
       comprovativoAnexo: movData.comprovativoAnexo || null
     }).returning();
+    if (inserted[0]) await enqueueSync('caixa_movs', inserted[0].movUid, 'upsert', inserted[0]);
     return inserted[0];
   } catch (error) {
     console.error('Error inserting caixa mov into PostgreSQL:', error);
@@ -376,6 +385,7 @@ export async function insertAuditoriaLog(logData: any) {
       hashSha256: logData.hash_sha256,
       prevHash: logData.prev_hash
     }).returning();
+    if (inserted[0]) await enqueueSync('auditoria_logs', inserted[0].logUid, 'upsert', inserted[0]);
     return inserted[0];
   } catch (error) {
     console.error('Error inserting auditoria log into PostgreSQL:', error);
@@ -434,6 +444,7 @@ export async function insertEmbarcacao(embData: any) {
       agenciaNome: embData.agenciaNome,
       statusCertificacao: embData.statusCertificacao || 'Válida'
     }).returning();
+    if (inserted[0]) await enqueueSync('embarcacoes', inserted[0].embarcacaoUid, 'upsert', inserted[0]);
     return inserted[0];
   } catch (error) {
     console.error('Error inserting embarcacao into PostgreSQL:', error);
@@ -491,6 +502,7 @@ export async function insertAgencia(agData: any) {
       embarcacoesRepresentadas: Number(agData.embarcacoesRepresentadas || 0),
       status: agData.status || 'Ativa'
     }).returning();
+    if (inserted[0]) await enqueueSync('agencias', inserted[0].agenciaUid, 'upsert', inserted[0]);
     return inserted[0];
   } catch (error) {
     console.error('Error inserting agencia into PostgreSQL:', error);
@@ -548,6 +560,7 @@ export async function insertArmador(armData: any) {
       email: armData.email,
       frotaContada: Number(armData.frotaContada || 0)
     }).returning();
+    if (inserted[0]) await enqueueSync('armadores', inserted[0].armadorUid, 'upsert', inserted[0]);
     return inserted[0];
   } catch (error) {
     console.error('Error inserting armador into PostgreSQL:', error);
@@ -629,6 +642,7 @@ export async function insertAtracacao(atracData: any) {
       servicosSolicitados: atracData.servicosSolicitados || [],
       manifestoCarga: atracData.manifestoCarga || {}
     }).returning();
+    if (inserted[0]) await enqueueSync('atracacoes', inserted[0].atracacaoUid, 'upsert', inserted[0]);
     return inserted[0];
   } catch (error) {
     console.error('Error inserting atracacao into PostgreSQL:', error);
@@ -714,4 +728,100 @@ export async function seedDatabaseIfEmpty() {
     console.error('Error seeding database:', error);
     return { success: false, error };
   }
+}
+
+// ---------------- DEVELOPER / DATA MANAGEMENT ----------------
+const managedEntities = {
+  users: { table: users, key: users.uid, label: (r: any) => r.nome || r.email || r.uid },
+  faturas: { table: faturas, key: faturas.faturaUid, label: (r: any) => r.nFatura || r.faturaUid },
+  recibos: { table: recibos, key: recibos.reciboUid, label: (r: any) => r.nRecibo || r.reciboUid },
+  caixa_movs: { table: caixaMovs, key: caixaMovs.movUid, label: (r: any) => r.descricao || r.movUid },
+  auditoria_logs: { table: auditoriaLogs, key: auditoriaLogs.logUid, label: (r: any) => `${r.acao} ${r.itemId}` },
+  embarcacoes: { table: embarcacoes, key: embarcacoes.embarcacaoUid, label: (r: any) => r.nome || r.embarcacaoUid },
+  agencias: { table: agencias, key: agencias.agenciaUid, label: (r: any) => r.nomeComercial || r.agenciaUid },
+  armadores: { table: armadores, key: armadores.armadorUid, label: (r: any) => r.nomeRazaoSocial || r.armadorUid },
+  atracacoes: { table: atracacoes, key: atracacoes.atracacaoUid, label: (r: any) => r.codigoEscala || r.atracacaoUid },
+} as const;
+
+export async function listTrash(entity?: string) {
+  if (!isDatabaseConfigured() || !db) return [];
+  try {
+    const where = entity ? and(eq(deletedData.entity, entity), isNull(deletedData.restoredAt)) : isNull(deletedData.restoredAt);
+    const rows = await db.select().from(deletedData).where(where as any).orderBy(desc(deletedData.deletedAt));
+    return rows;
+  } catch (err) {
+    console.error('listTrash error:', err);
+    return [];
+  }
+}
+
+export async function clearEntityData(entity: string, deletedBy?: string) {
+  if (!isDatabaseConfigured() || !db) return { ok: false, error: 'database_not_configured' };
+  const cfg = (managedEntities as any)[entity];
+  if (!cfg) return { ok: false, error: 'invalid_entity' };
+  try {
+    const rows = await db.select().from(cfg.table);
+    if (rows.length === 0) return { ok: true, moved: 0, entity };
+    const expiresAt = daysFromNow(60);
+    for (const row of rows) {
+      const entityId = (row as any)[cfg.key.name] || (row as any).uid || (row as any).id || `${entity}-${Date.now()}`;
+      await db.insert(deletedData).values({
+        trashUid: `TRASH-${entity}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        entity,
+        entityId: String(entityId),
+        label: String(cfg.label(row) || entityId),
+        payload: row as any,
+        deletedBy: deletedBy || 'SuperAdmin',
+        expiresAt,
+      });
+    }
+    await db.delete(cfg.table);
+    // enqueue sync marker? remote has its own data; for now keep local clear authoritative and outbox won't auto-delete remote.
+    return { ok: true, moved: rows.length, entity, expiresAt: expiresAt.toISOString(), note: 'Dados movidos para recuperação (60 dias). A sincronização remota de remoções deve ser tratada separadamente.' };
+  } catch (err: any) {
+    console.error('clearEntityData error:', err);
+    return { ok: false, error: err?.message || 'clear_failed' };
+  }
+}
+
+export async function restoreTrashItem(trashUid: string) {
+  if (!isDatabaseConfigured() || !db) return { ok: false, error: 'database_not_configured' };
+  try {
+    const rows = await db.select().from(deletedData).where(eq(deletedData.trashUid, trashUid)).limit(1);
+    const item = rows[0];
+    if (!item) return { ok: false, error: 'not_found' };
+    if (item.restoredAt) return { ok: false, error: 'already_restored' };
+    const cfg = (managedEntities as any)[item.entity];
+    if (!cfg) return { ok: false, error: 'invalid_entity' };
+    const payload = { ...(item.payload as any) };
+    delete payload.id; // avoid serial conflicts
+    // try insert; if conflict ignore
+    try {
+      await db.insert(cfg.table).values(payload).onConflictDoNothing();
+    } catch (e) {
+      // fallback: attempt update by uid not trivial generically
+      console.warn('restore insert warning:', e);
+    }
+    await db.update(deletedData).set({ restoredAt: new Date() }).where(eq(deletedData.trashUid, trashUid));
+    const keyName = cfg.key.name;
+    const entityId = String(payload[keyName] || item.entityId);
+    await enqueueSync(item.entity, entityId, 'upsert', payload);
+    return { ok: true, entity: item.entity, entityId };
+  } catch (err: any) {
+    console.error('restoreTrashItem error:', err);
+    return { ok: false, error: err?.message || 'restore_failed' };
+  }
+}
+
+export async function getDataManagementSummary() {
+  if (!isDatabaseConfigured() || !db) return { configured: false, entities: {}, trash: [] };
+  const entities: Record<string, number> = {};
+  for (const [name, cfg] of Object.entries(managedEntities)) {
+    try {
+      const rows = await db.select().from((cfg as any).table);
+      entities[name] = rows.length;
+    } catch { entities[name] = 0; }
+  }
+  const trash = await listTrash();
+  return { configured: true, entities, trashCount: trash.length, trash };
 }
