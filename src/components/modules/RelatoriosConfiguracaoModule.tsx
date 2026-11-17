@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { BarChart3, Settings, Download, FileSpreadsheet, ShieldCheck, Database, HardDrive } from 'lucide-react';
 import { ParamentroTaxaPortuaria } from '../../types';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface RelatoriosConfiguracaoModuleProps {
   taxas: ParamentroTaxaPortuaria[];
 }
 
 export function RelatoriosConfiguracaoModule({ taxas }: RelatoriosConfiguracaoModuleProps) {
+  const { tText } = useLanguage();
   const [activeTab, setActiveTab] = useState<'relatorios' | 'configuracao'>('relatorios');
 
   return (
@@ -16,9 +18,9 @@ export function RelatoriosConfiguracaoModule({ taxas }: RelatoriosConfiguracaoMo
         <div>
           <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-blue-400" />
-            Relatórios Marítimos & Parâmetros do Sistema
+            {tText('Relatórios Marítimos & Parâmetros do Sistema')}
           </h2>
-          <p className="text-slate-400 text-xs">Estatísticas de tráfego de navios, receitas por trimestre, auditoria e configuração On-Premises</p>
+          <p className="text-slate-400 text-xs">{tText('Estatísticas de tráfego de navios, receitas por trimestre, auditoria e configuração On-Premises')}</p>
         </div>
       </div>
 
@@ -32,7 +34,7 @@ export function RelatoriosConfiguracaoModule({ taxas }: RelatoriosConfiguracaoMo
               : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
           }`}
         >
-          Relatórios & Estatísticas
+          {tText('Relatórios & Estatísticas')}
         </button>
         <button
           onClick={() => setActiveTab('configuracao')}
@@ -42,7 +44,7 @@ export function RelatoriosConfiguracaoModule({ taxas }: RelatoriosConfiguracaoMo
               : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
           }`}
         >
-          Parâmetros & Servidor On-Premises
+          {tText('Parâmetros & Servidor On-Premises')}
         </button>
       </div>
 

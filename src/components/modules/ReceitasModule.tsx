@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { TrendingUp, Download, ArrowUpRight, Plus, Trash2, Edit3, X, Check } from 'lucide-react';
 import { RubricaReceita } from '../../types';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface ReceitasModuleProps {
   rubricas: RubricaReceita[];
@@ -12,6 +13,7 @@ interface ReceitasModuleProps {
 
 export function ReceitasModule({ rubricas, onAddRubrica, onUpdateRubrica, onDeleteRubrica }: ReceitasModuleProps) {
   const { theme } = useTheme();
+  const { tText } = useLanguage();
   const [selectedCategoria, setSelectedCategoria] = useState<string>('TODAS');
   const [editingRubrica, setEditingRubrica] = useState<RubricaReceita | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,10 +38,10 @@ export function ReceitasModule({ rubricas, onAddRubrica, onUpdateRubrica, onDele
             }`}
           >
             <TrendingUp className="w-5 h-5 text-emerald-500" />
-            Receitas, Consolidação & Mapas de Arrecadação Marítima
+            {tText('Receitas, Consolidação & Mapas de Arrecadação Marítima')}
           </h2>
           <p className={theme === 'dark' ? 'text-slate-400 text-xs' : 'text-slate-500 text-xs'}>
-            Visão consolidada de receitas por rubrica orçamental, porto de origem e execução de metas financeiras do IMP
+            {tText('Visão consolidada de receitas por rubrica orçamental, porto de origem e execução de metas financeiras do IMP')}
           </p>
         </div>
         <div className="flex gap-2">
@@ -56,10 +58,10 @@ export function ReceitasModule({ rubricas, onAddRubrica, onUpdateRubrica, onDele
             }`}
           >
             <Plus className="w-4 h-4" />
-            Nova Rubrica
+            {tText('Nova Rubrica')}
           </button>
           <button
-            onClick={() => alert('Mapa de Arrecadação de Receitas exportado em PDF com sucesso!')}
+            onClick={() => alert(tText('Mapa de Arrecadação de Receitas exportado em PDF com sucesso!'))}
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold border transition-all ${
               theme === 'dark'
                 ? 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700'
@@ -67,7 +69,7 @@ export function ReceitasModule({ rubricas, onAddRubrica, onUpdateRubrica, onDele
             }`}
           >
             <Download className="w-4 h-4 text-emerald-500" />
-            Exportar Mapa Orçamental
+            {tText('Exportar Mapa Orçamental')}
           </button>
         </div>
       </div>

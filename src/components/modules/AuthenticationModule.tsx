@@ -2,6 +2,7 @@ import React, { useEffect, useState, FormEvent, ChangeEvent } from 'react';
 import { KeyRound, User, CheckCircle2, AlertCircle, History, Pencil, Camera, Clock } from 'lucide-react';
 import { LogAcessoAutenticacao, Utilizador } from '../../types';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { resizeAvatarImage } from '../../utils/imageResize';
 
 interface AuthenticationModuleProps {
@@ -14,6 +15,7 @@ interface AuthenticationModuleProps {
 
 export function AuthenticationModule({ currentUser, logs, onUpdateUser, onClearLogs }: AuthenticationModuleProps) {
   const { theme } = useTheme();
+  const { tText } = useLanguage();
   const isDark = theme === 'dark';
   const userRole = (currentUser?.role || currentUser?.funcao || '').toLowerCase();
   const isAdminOrSuper = userRole === 'admin' || userRole === 'admin_imp' || userRole === 'superadmin';
@@ -45,9 +47,9 @@ export function AuthenticationModule({ currentUser, logs, onUpdateUser, onClearL
     try {
       const resizedBase64 = await resizeAvatarImage(file, 300);
       setNewPhoto(resizedBase64);
-      setFeedback({ type: 'success', message: 'Foto carregada. Clique em "Guardar alterações" para aplicar.' });
+      setFeedback({ type: 'success', message: tText('Foto carregada. Clique em "Guardar alterações" para aplicar.') });
     } catch {
-      setFeedback({ type: 'error', message: 'Não foi possível processar a imagem selecionada.' });
+      setFeedback({ type: 'error', message: tText('Não foi possível processar a imagem selecionada.') });
     }
   };
 
@@ -58,12 +60,12 @@ export function AuthenticationModule({ currentUser, logs, onUpdateUser, onClearL
     const trimmedEmail = newEmail.trim().toLowerCase();
 
     if (editEnabled) {
-      if (!trimmedName) return setFeedback({ type: 'error', message: 'Introduza o nome.' });
-      if (!trimmedEmail || !trimmedEmail.includes('@')) return setFeedback({ type: 'error', message: 'Introduza um e-mail válido.' });
+      if (!trimmedName) return setFeedback({ type: 'error', message: tText('Introduza o nome.') });
+      if (!trimmedEmail || !trimmedEmail.includes('@')) return setFeedback({ type: 'error', message: tText('Introduza um e-mail válido.') });
     }
     if (passwordEnabled && (newPassword || confirmPassword)) {
-      if (newPassword.length < 6) return setFeedback({ type: 'error', message: 'A palavra-passe deve ter pelo menos 6 caracteres.' });
-      if (newPassword !== confirmPassword) return setFeedback({ type: 'error', message: 'As palavras-passe não coincidem.' });
+      if (newPassword.length < 6) return setFeedback({ type: 'error', message: tText('A palavra-passe deve ter pelo menos 6 caracteres.') });
+      if (newPassword !== confirmPassword) return setFeedback({ type: 'error', message: tText('As palavras-passe não coincidem.') });
     }
 
     const updated: Utilizador = {
@@ -77,7 +79,7 @@ export function AuthenticationModule({ currentUser, logs, onUpdateUser, onClearL
 
     try {
       onUpdateUser(updated);
-      setFeedback({ type: 'success', message: 'Dados atualizados com sucesso.' });
+      setFeedback({ type: 'success', message: tText('Dados atualizados com sucesso.') });
       if (editEnabled) setEditEnabled(false);
       if (passwordEnabled) {
         setPasswordEnabled(false);
@@ -85,7 +87,7 @@ export function AuthenticationModule({ currentUser, logs, onUpdateUser, onClearL
         setConfirmPassword('');
       }
     } catch {
-      setFeedback({ type: 'error', message: 'Não foi possível guardar as alterações.' });
+      setFeedback({ type: 'error', message: tText('Não foi possível guardar as alterações.') });
     }
   };
 
@@ -95,9 +97,9 @@ export function AuthenticationModule({ currentUser, logs, onUpdateUser, onClearL
         <div>
           <h2 className={`text-xl font-bold tracking-tight flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
             <KeyRound className="w-5 h-5 text-blue-500" />
-            Autenticação, Gestão de Sessão & Controlo de Acesso
+            {tText('Autenticação, Gestão de Sessão & Controlo de Acesso')}
           </h2>
-          <p className={`text-xs ${muted}`}>Gestão do perfil, sessão e segurança de acesso</p>
+          <p className={`text-xs ${muted}`}>{tText('Gestão do perfil, sessão e segurança de acesso')}</p>
         </div>
       </div>
 
@@ -116,7 +118,7 @@ export function AuthenticationModule({ currentUser, logs, onUpdateUser, onClearL
                 {newPhoto ? <img src={newPhoto} alt={currentUser.nome} className="w-full h-full object-cover" /> : <User className="w-10 h-10 text-slate-500" />}
               </div>
               <label className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer border ${isDark ? 'border-slate-700 hover:bg-slate-800 text-slate-200' : 'border-slate-300 hover:bg-slate-50 text-slate-700'}`}>
-                <Camera className="w-3.5 h-3.5" /> Foto
+                <Camera className="w-3.5 h-3.5" /> {tText('Foto')}
                 <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
               </label>
             </div>
@@ -124,11 +126,11 @@ export function AuthenticationModule({ currentUser, logs, onUpdateUser, onClearL
             <div className="flex-1 min-w-0 space-y-3">
               <div>
                 <div className="text-2xl font-bold leading-tight break-words">{currentUser.nome}</div>
-                <div className={`mt-1 text-sm font-medium ${muted}`}>{currentUser.cargo || currentUser.departamento || currentUser.funcao || 'Sem cargo definido'}</div>
+                <div className={`mt-1 text-sm font-medium ${muted}`}>{currentUser.cargo || currentUser.departamento || currentUser.funcao || tText('Sem cargo definido')}</div>
               </div>
               <div className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl border text-sm ${isDark ? 'bg-slate-950/60 border-slate-800 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-700'}`}>
                 <Clock className="w-4 h-4 text-blue-500" />
-                <span className="font-medium">Último acesso ao sistema:</span>
+                <span className="font-medium">{tText('Último acesso ao sistema')}:</span>
                 <span className="font-mono text-xs sm:text-sm">{currentUser.ultimoAcesso || '—'}</span>
               </div>
             </div>
@@ -136,7 +138,7 @@ export function AuthenticationModule({ currentUser, logs, onUpdateUser, onClearL
 
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-3">
-              <div className={`text-sm font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>Dados da conta</div>
+              <div className={`text-sm font-semibold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{tText('Dados da conta')}</div>
               <button
                 type="button"
                 onClick={() => {
@@ -148,13 +150,13 @@ export function AuthenticationModule({ currentUser, logs, onUpdateUser, onClearL
                 }}
                 className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${editEnabled ? 'bg-blue-600 text-white border-blue-600' : isDark ? 'border-slate-700 hover:bg-slate-800 text-slate-200' : 'border-slate-300 hover:bg-slate-50 text-slate-700'}`}
               >
-                <Pencil className="w-3.5 h-3.5" /> {editEnabled ? 'Alterações ativadas' : 'Ativar alterações'}
+                <Pencil className="w-3.5 h-3.5" /> {editEnabled ? tText('Alterações ativadas') : tText('Ativar alterações')}
               </button>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1.5">Nome</label>
+                <label className="block text-sm font-medium mb-1.5">{tText('Nome')}</label>
                 <input
                   type="text"
                   value={newName}
@@ -164,7 +166,7 @@ export function AuthenticationModule({ currentUser, logs, onUpdateUser, onClearL
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1.5">Email</label>
+                <label className="block text-sm font-medium mb-1.5">{tText('Email')}</label>
                 <input
                   type="email"
                   value={newEmail}
@@ -174,7 +176,7 @@ export function AuthenticationModule({ currentUser, logs, onUpdateUser, onClearL
                 />
               </div>
             </div>
-            {!editEnabled && <p className={`text-xs ${muted}`}>Nome e email estão visíveis, mas só podem ser modificados após ativar as alterações.</p>}
+            {!editEnabled && <p className={`text-xs ${muted}`}>{tText('Nome e email estão visíveis, mas só podem ser modificados após ativar as alterações.')}</p>}
           </div>
 
           <div className="space-y-3">
@@ -185,22 +187,22 @@ export function AuthenticationModule({ currentUser, logs, onUpdateUser, onClearL
                 className={`w-full sm:w-auto inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold ${isDark ? 'border-slate-700 hover:bg-slate-800 text-slate-200' : 'border-slate-300 hover:bg-slate-50 text-slate-700'}`}
               >
                 <KeyRound className="w-4 h-4 text-amber-500" />
-                <span>Password</span>
+                <span>{tText('Palavra-passe')}</span>
               </button>
             ) : (
               <div className={`rounded-xl border p-4 space-y-3 ${isDark ? 'border-slate-800 bg-slate-950/40' : 'border-slate-200 bg-slate-50'}`}>
                 <div className="flex items-center justify-between gap-3">
-                  <div className="inline-flex items-center gap-2 text-sm font-semibold"><KeyRound className="w-4 h-4 text-amber-500" /> Alterar palavra-passe</div>
-                  <button type="button" onClick={() => { setPasswordEnabled(false); setNewPassword(''); setConfirmPassword(''); }} className={`text-xs ${muted}`}>Cancelar</button>
+                  <div className="inline-flex items-center gap-2 text-sm font-semibold"><KeyRound className="w-4 h-4 text-amber-500" /> {tText('Alterar palavra-passe')}</div>
+                  <button type="button" onClick={() => { setPasswordEnabled(false); setNewPassword(''); setConfirmPassword(''); }} className={`text-xs ${muted}`}>{tText('Cancelar')}</button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-medium mb-1.5">Nova palavra-passe</label>
-                    <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Mínimo 6 caracteres" className={`w-full rounded-xl px-3.5 py-2.5 text-sm border outline-none focus:ring-4 ${inputBase}`} />
+                    <label className="block text-sm font-medium mb-1.5">{tText('Nova palavra-passe')}</label>
+                    <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder={tText('Mínimo 6 caracteres')} className={`w-full rounded-xl px-3.5 py-2.5 text-sm border outline-none focus:ring-4 ${inputBase}`} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1.5">Confirmar palavra-passe</label>
-                    <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repita a palavra-passe" className={`w-full rounded-xl px-3.5 py-2.5 text-sm border outline-none focus:ring-4 ${inputBase}`} />
+                    <label className="block text-sm font-medium mb-1.5">{tText('Confirmar palavra-passe')}</label>
+                    <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder={tText('Repita a palavra-passe')} className={`w-full rounded-xl px-3.5 py-2.5 text-sm border outline-none focus:ring-4 ${inputBase}`} />
                   </div>
                 </div>
               </div>
@@ -209,7 +211,7 @@ export function AuthenticationModule({ currentUser, logs, onUpdateUser, onClearL
 
           <div className="pt-1 flex justify-end">
             <button type="submit" className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold">
-              Guardar alterações
+              {tText('Guardar alterações')}
             </button>
           </div>
         </form>
@@ -220,18 +222,18 @@ export function AuthenticationModule({ currentUser, logs, onUpdateUser, onClearL
           <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
             <h3 className={`font-bold text-sm flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
               <History className="w-4 h-4 text-amber-500" />
-              Registos de Acesso & Auditoria (Audit Trail)
+              {tText('Registos de Acesso & Auditoria (Audit Trail)')}
             </h3>
             {onClearLogs && (
               <button type="button" onClick={onClearLogs} className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 transition-all border border-rose-500/30">
-                Limpar Registos
+                {tText('Limpar Registos')}
               </button>
             )}
           </div>
 
           <div className="space-y-3 text-xs max-h-[360px] overflow-y-auto pr-1">
             {logs.length === 0 ? (
-              <div className="text-center py-6 text-slate-400 text-xs italic">Nenhum registo encontrado.</div>
+              <div className="text-center py-6 text-slate-400 text-xs italic">{tText('Nenhum registo encontrado.')}</div>
             ) : (
               logs.map((log) => (
                 <div key={log.id} className={`p-3 rounded-xl border space-y-1 ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>

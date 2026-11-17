@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Wallet, Receipt, Plus, CheckCircle, FileText, Download, DollarSign, Calendar, Building } from 'lucide-react';
 import { Factura, ParamentroTaxaPortuaria, TransacaoTesouraria } from '../../types';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface FacturacaoTesourariaModuleProps {
   facturas: Factura[];
@@ -11,6 +12,7 @@ interface FacturacaoTesourariaModuleProps {
 }
 
 export function FacturacaoTesourariaModule({ facturas, taxas, transacoes, onAddFactura, onPagarFactura }: FacturacaoTesourariaModuleProps) {
+  const { tText } = useLanguage();
   const [activeSubTab, setActiveSubTab] = useState<'facturacao' | 'tesouraria' | 'tarifas'>('facturacao');
   const [selectedFacturaModal, setSelectedFacturaModal] = useState<Factura | null>(null);
 
@@ -25,9 +27,9 @@ export function FacturacaoTesourariaModule({ facturas, taxas, transacoes, onAddF
         <div>
           <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
             <Wallet className="w-5 h-5 text-emerald-400" />
-            Facturação, Tesouraria & Arrecadação de Receitas
+            {tText('Facturação, Tesouraria & Arrecadação de Receitas')}
           </h2>
-          <p className="text-slate-400 text-xs">Cálculo de tarifas portuárias, liquidação de facturas e conciliação de caixa da Tesouraria do IMP</p>
+          <p className="text-slate-400 text-xs">{tText('Cálculo de tarifas portuárias, liquidação de facturas e conciliação de caixa da Tesouraria do IMP')}</p>
         </div>
       </div>
 
@@ -41,7 +43,7 @@ export function FacturacaoTesourariaModule({ facturas, taxas, transacoes, onAddF
               : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
           }`}
         >
-          Facturas de Serviços Portuários ({facturas.length})
+          {tText('Facturas de Serviços Portuários')} ({facturas.length})
         </button>
         <button
           onClick={() => setActiveSubTab('tesouraria')}
@@ -51,7 +53,7 @@ export function FacturacaoTesourariaModule({ facturas, taxas, transacoes, onAddF
               : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
           }`}
         >
-          Caixa & Lançamentos Tesouraria ({transacoes.length})
+          {tText('Caixa & Lançamentos Tesouraria')} ({transacoes.length})
         </button>
         <button
           onClick={() => setActiveSubTab('tarifas')}
@@ -61,22 +63,22 @@ export function FacturacaoTesourariaModule({ facturas, taxas, transacoes, onAddF
               : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
           }`}
         >
-          Tabela Oficial de Taxas & Tarifas
+          {tText('Tabela Oficial de Taxas & Tarifas')}
         </button>
       </div>
 
       {/* Overview Financial Metrics Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-          <span className="text-slate-400 text-xs font-mono block">TOTAL FACTURADO</span>
+          <span className="text-slate-400 text-xs font-mono block">{tText('TOTAL FACTURADO')}</span>
           <div className="text-xl font-bold text-white mt-1">{totalFacturadoXOF.toLocaleString()} XOF</div>
         </div>
         <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-          <span className="text-slate-400 text-xs font-mono block">ARRECADADO (PAGO)</span>
+          <span className="text-slate-400 text-xs font-mono block">{tText('ARRECADADO (PAGO)')}</span>
           <div className="text-xl font-bold text-emerald-400 mt-1">{totalRecebidoXOF.toLocaleString()} XOF</div>
         </div>
         <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-          <span className="text-slate-400 text-xs font-mono block">PENDENTE EM COBRANÇA</span>
+          <span className="text-slate-400 text-xs font-mono block">{tText('PENDENTE EM COBRANÇA')}</span>
           <div className="text-xl font-bold text-amber-400 mt-1">{totalPendenteXOF.toLocaleString()} XOF</div>
         </div>
       </div>

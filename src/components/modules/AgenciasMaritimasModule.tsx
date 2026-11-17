@@ -65,10 +65,10 @@ export function AgenciasMaritimasModule({ agencias, onAddAgencia, faturas = [], 
             }`}
           >
             <Building2 className="w-5 h-5 text-blue-500" />
-            Agências Marítimas & Consignatários de Navegação
+            {tText('Agências Marítimas & Consignatários de Navegação')}
           </h2>
           <p className={theme === 'dark' ? 'text-slate-400 text-xs' : 'text-slate-500 text-xs'}>
-            Licenciamento e registo de agências de agenciamento em portos guineenses
+            {tText('Licenciamento e registo de agências de agenciamento em portos guineenses')}
           </p>
         </div>
         <button
@@ -76,7 +76,7 @@ export function AgenciasMaritimasModule({ agencias, onAddAgencia, faturas = [], 
           className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold transition-colors shadow-lg shadow-blue-600/20"
         >
           <Plus className="w-4 h-4" />
-          Registar Agência
+          {tText('Registar Agência')}
         </button>
       </div>
 
@@ -88,7 +88,7 @@ export function AgenciasMaritimasModule({ agencias, onAddAgencia, faturas = [], 
         <Search className="w-4 h-4 text-slate-400" />
         <input
           type="text"
-          placeholder="Pesquisar por nome comercial, NIF ou responsável legal..."
+          placeholder={tText('Pesquisar por nome comercial, NIF ou responsável legal...')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className={`bg-transparent text-xs focus:outline-none w-full ${
@@ -145,25 +145,25 @@ export function AgenciasMaritimasModule({ agencias, onAddAgencia, faturas = [], 
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">RESPONSÁVEL:</span>
+                <span className="text-slate-500">{tText('RESPONSÁVEL')}:</span>
                 <span className={`font-sans font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                   {agencia.responsavelLegal}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">TELEFONE:</span>
+                <span className="text-slate-500">{tText('TELEFONE')}:</span>
                 <span className="flex items-center gap-1">
                   <Phone className="w-3 h-3 text-slate-400"/> {agencia.telefone}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">EMAIL:</span>
+                <span className="text-slate-500">{tText('EMAIL')}:</span>
                 <span className="flex items-center gap-1">
                   <Mail className="w-3 h-3 text-slate-400"/> {agencia.email}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">ENDEREÇO:</span>
+                <span className="text-slate-500">{tText('ENDEREÇO')}:</span>
                 <span className="flex items-center gap-1 text-[11px] text-slate-500">
                   <MapPin className="w-3 h-3 text-slate-400"/> {agencia.endereco}
                 </span>
@@ -176,8 +176,8 @@ export function AgenciasMaritimasModule({ agencias, onAddAgencia, faturas = [], 
               }`}
             >
               <div className="flex items-center gap-1.5">
-                <span className={theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}>Representadas:</span>
-                <span className="font-bold font-mono text-blue-500">{agencia.embarcacoesRepresentadas} Navios</span>
+                <span className={theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}>{tText('Representadas')}:</span>
+                <span className="font-bold font-mono text-blue-500">{agencia.embarcacoesRepresentadas} {tText('Navios')}</span>
               </div>
               <button
                 type="button"
@@ -211,11 +211,11 @@ export function AgenciasMaritimasModule({ agencias, onAddAgencia, faturas = [], 
             }`}
           >
             <h3 className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-              Registar Nova Agência Marítima
+              {tText('Registar Nova Agência Marítima')}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-3 text-xs">
               <div>
-                <label className="block text-slate-500 mb-1">Nome Comercial / Razão Social</label>
+                <label className="block text-slate-500 mb-1">{tText('Nome Comercial / Razão Social')}</label>
                 <input
                   type="text"
                   required
@@ -224,7 +224,7 @@ export function AgenciasMaritimasModule({ agencias, onAddAgencia, faturas = [], 
                   className={`w-full rounded-xl px-3 py-2 border focus:outline-none focus:border-blue-500 ${
                     theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
-                  placeholder="Ex: Agência Marítima Geba Lda"
+                  placeholder={tText('Ex: Agência Marítima Geba Lda')}
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -242,7 +242,7 @@ export function AgenciasMaritimasModule({ agencias, onAddAgencia, faturas = [], 
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-500 mb-1">Licença de Actividade IMP</label>
+                  <label className="block text-slate-500 mb-1">{tText('Licença de Actividade IMP')}</label>
                   <input
                     type="text"
                     required
@@ -256,7 +256,7 @@ export function AgenciasMaritimasModule({ agencias, onAddAgencia, faturas = [], 
                 </div>
               </div>
               <div>
-                <label className="block text-slate-500 mb-1">Responsável Legal</label>
+                <label className="block text-slate-500 mb-1">{tText('Responsável Legal')}</label>
                 <input
                   type="text"
                   required
@@ -265,12 +265,12 @@ export function AgenciasMaritimasModule({ agencias, onAddAgencia, faturas = [], 
                   className={`w-full rounded-xl px-3 py-2 border focus:outline-none focus:border-blue-500 ${
                     theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
-                  placeholder="Nome do Director de Operações"
+                  placeholder={tText('Nome do Director de Operações')}
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-500 mb-1">Telefone Oficial</label>
+                  <label className="block text-slate-500 mb-1">{tText('Telefone Oficial')}</label>
                   <input
                     type="text"
                     required
@@ -283,7 +283,7 @@ export function AgenciasMaritimasModule({ agencias, onAddAgencia, faturas = [], 
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-500 mb-1">Email de Contacto</label>
+                  <label className="block text-slate-500 mb-1">{tText('Email de Contacto')}</label>
                   <input
                     type="email"
                     required
@@ -297,7 +297,7 @@ export function AgenciasMaritimasModule({ agencias, onAddAgencia, faturas = [], 
                 </div>
               </div>
               <div>
-                <label className="block text-slate-500 mb-1">Endereço Físico</label>
+                <label className="block text-slate-500 mb-1">{tText('Endereço Físico')}</label>
                 <input
                   type="text"
                   required
@@ -306,7 +306,7 @@ export function AgenciasMaritimasModule({ agencias, onAddAgencia, faturas = [], 
                   className={`w-full rounded-xl px-3 py-2 border focus:outline-none focus:border-blue-500 ${
                     theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
-                  placeholder="Av. Amílcar Cabral, Bissau"
+                  placeholder={tText('Av. Amílcar Cabral, Bissau')}
                 />
               </div>
               <div className={`flex justify-end gap-3 pt-3 border-t ${theme === 'dark' ? 'border-slate-800' : 'border-slate-200'}`}>
@@ -317,13 +317,13 @@ export function AgenciasMaritimasModule({ agencias, onAddAgencia, faturas = [], 
                     theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                   }`}
                 >
-                  Cancelar
+                  {tText('Cancelar')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20"
                 >
-                  Guardar Agência
+                  {tText('Guardar Agência')}
                 </button>
               </div>
             </form>

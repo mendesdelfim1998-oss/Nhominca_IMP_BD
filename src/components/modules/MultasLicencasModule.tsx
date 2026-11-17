@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ShieldAlert, FileText, AlertTriangle, CheckCircle, Scale } from 'lucide-react';
 import { LicencaNavegacao, MultaInfracao } from '../../types';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface MultasLicencasModuleProps {
   multas: MultaInfracao[];
@@ -8,6 +9,7 @@ interface MultasLicencasModuleProps {
 }
 
 export function MultasLicencasModule({ multas, licencas }: MultasLicencasModuleProps) {
+  const { tText } = useLanguage();
   const [activeSubTab, setActiveSubTab] = useState<'multas' | 'licencas'>('multas');
 
   return (
@@ -17,9 +19,9 @@ export function MultasLicencasModule({ multas, licencas }: MultasLicencasModuleP
         <div>
           <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
             <ShieldAlert className="w-5 h-5 text-rose-400" />
-            Infrações Marítimas, Multas & Licenciamento
+            {tText('Infrações Marítimas, Multas & Licenciamento')}
           </h2>
-          <p className="text-slate-400 text-xs">Autos de notícia, aplicação do Código Marítimo de Bissau e licenças de navegação</p>
+          <p className="text-slate-400 text-xs">{tText('Autos de notícia, aplicação do Código Marítimo de Bissau e licenças de navegação')}</p>
         </div>
       </div>
 
@@ -33,7 +35,7 @@ export function MultasLicencasModule({ multas, licencas }: MultasLicencasModuleP
               : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
           }`}
         >
-          Autos de Infração & Multas ({multas.length})
+          {tText('Autos de Infração & Multas')} ({multas.length})
         </button>
         <button
           onClick={() => setActiveSubTab('licencas')}
@@ -43,7 +45,7 @@ export function MultasLicencasModule({ multas, licencas }: MultasLicencasModuleP
               : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
           }`}
         >
-          Licenças de Navegação & Actividade ({licencas.length})
+          {tText('Licenças de Navegação & Actividade')} ({licencas.length})
         </button>
       </div>
 
@@ -66,18 +68,18 @@ export function MultasLicencasModule({ multas, licencas }: MultasLicencasModuleP
                 <div className="text-right">
                   <div className="text-lg font-bold text-rose-400 font-mono">{m.valorMultaXOF.toLocaleString()} XOF</div>
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                    {m.statusMulta}
+                    {tText(m.statusMulta)}
                   </span>
                 </div>
               </div>
 
               <p className="text-xs text-slate-300 bg-slate-950 p-3 rounded-xl border border-slate-800">
-                <span className="text-slate-500 font-semibold block mb-0.5">Descrição da Infracção:</span>
+                <span className="text-slate-500 font-semibold block mb-0.5">{tText('Descrição da Infracção')}:</span>
                 {m.descricaoInfracao}
               </p>
 
               <div className="text-[11px] text-slate-500 font-mono">
-                Data da Ocorrência: {m.dataOcorrencia}
+                {tText('Data da Ocorrência')}: {m.dataOcorrencia}
               </div>
             </div>
           ))}
@@ -104,17 +106,17 @@ export function MultasLicencasModule({ multas, licencas }: MultasLicencasModuleP
                       : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                   }`}
                 >
-                  {lic.status}
+                  {tText(lic.status)}
                 </span>
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                 <div>
-                  <span className="text-slate-500 block text-[10px]">CONCESSÃO</span>
+                  <span className="text-slate-500 block text-[10px]">{tText('CONCESSÃO')}</span>
                   <span className="text-slate-200">{lic.dataConcessao}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block text-[10px]">VALIDADE</span>
+                  <span className="text-slate-500 block text-[10px]">{tText('VALIDADE')}</span>
                   <span className="text-emerald-400">{lic.dataValidade}</span>
                 </div>
               </div>

@@ -53,7 +53,7 @@ export function ConfiguracaoModule({
   auditoriaLogs = []
 }: ConfiguracaoModuleProps) {
   const { theme } = useTheme();
-  const { language, setLanguage, translationsDict, updateTranslationsDict, resetTranslationsDict } = useLanguage();
+  const { language, setLanguage, tText, translationsDict, updateTranslationsDict, resetTranslationsDict } = useLanguage();
   const [activeTab, setActiveTab] = useState<'taxas' | 'servidor' | 'smtp' | 'cookies' | 'idiomas' | 'backup' | 'dev'>('taxas');
   const [devSummary, setDevSummary] = useState<any>(null);
   const [devLoading, setDevLoading] = useState(false);
@@ -1358,9 +1358,9 @@ export function ConfiguracaoModule({
               </div>
 
               <div className={`p-4 rounded-xl border space-y-3 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
-                <h4 className="text-sm font-bold flex items-center gap-2"><Trash2 className="w-4 h-4 text-rose-500"/>Limpeza de banco de dados por categoria</h4>
-                <p className="text-[11px] text-slate-400">Escolha uma categoria para limpar. Os dados apagados são enviados para a área de recuperação e ficam disponíveis por até 60 dias.</p>
-                {!devSummary && <div className="text-xs text-slate-500">A carregar resumo da base de dados... clique em "Atualizar" se necessário.</div>}
+                <h4 className="text-sm font-bold flex items-center gap-2"><Trash2 className="w-4 h-4 text-rose-500"/>{tText('Limpeza de banco de dados por categoria')}</h4>
+                <p className="text-[11px] text-slate-400">{tText('Escolha uma categoria para limpar. Os dados apagados são enviados para a área de recuperação e ficam disponíveis por até 60 dias.')}</p>
+                {!devSummary && <div className="text-xs text-slate-500">{tText('A carregar resumo da base de dados... clique em "Atualizar" se necessário.')}</div>}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                   {Object.entries(devSummary?.entities || {}).map(([entity, count]) => (
                     <div key={entity} className="p-3 rounded-lg border border-slate-800 bg-slate-900/30 flex items-center justify-between gap-2">
@@ -1385,12 +1385,12 @@ export function ConfiguracaoModule({
 
               <div className={`p-4 rounded-xl border space-y-3 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
                 <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <h4 className="text-sm font-bold flex items-center gap-2"><Undo2 className="w-4 h-4 text-emerald-500"/>Dados apagados recuperáveis (até 60 dias) — {devSummary?.trashCount ?? 0}</h4>
-                  <span className="text-[11px] text-slate-400">Mostra itens apagados que ainda podem ser restaurados</span>
+                  <h4 className="text-sm font-bold flex items-center gap-2"><Undo2 className="w-4 h-4 text-emerald-500"/>{tText('Dados apagados recuperáveis (até 60 dias)')} — {devSummary?.trashCount ?? 0}</h4>
+                  <span className="text-[11px] text-slate-400">{tText('Mostra itens apagados que ainda podem ser restaurados')}</span>
                 </div>
                 <div className="max-h-96 overflow-auto space-y-2 pr-1">
                   {(devSummary?.trash || []).length === 0 ? (
-                    <div className="text-xs text-slate-500 p-3 rounded-lg border border-dashed border-slate-700">Sem dados apagados na área de recuperação no momento.</div>
+                    <div className="text-xs text-slate-500 p-3 rounded-lg border border-dashed border-slate-700">{tText('Sem dados apagados na área de recuperação no momento.')}</div>
                   ) : (devSummary.trash || []).map((item: any) => {
                     const expiresAt = item.expiresAt ? new Date(item.expiresAt) : null;
                     const daysLeft = expiresAt ? Math.max(0, Math.ceil((expiresAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000))) : null;
@@ -1413,7 +1413,7 @@ export function ConfiguracaoModule({
                     );
                   })}
                 </div>
-                <p className="text-[11px] text-slate-500">Os dados apagados ficam disponíveis para recuperação por até 60 dias. Após esse prazo, são removidos automaticamente.</p>
+                <p className="text-[11px] text-slate-500">{tText('Os dados apagados ficam disponíveis para recuperação por até 60 dias. Após esse prazo, são removidos automaticamente.')}</p>
               </div>
             </>
           )}

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { BarChart3, Download, FileSpreadsheet, Ship, TrendingUp, DollarSign, Filter, Calendar } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { Atracacao, CaixaMov, FaturaIMP, Inspeccao } from '../../types';
 
 interface RelatoriosModuleProps {
@@ -35,6 +36,7 @@ export function RelatoriosModule({
   inspecoes = []
 }: RelatoriosModuleProps) {
   const { theme } = useTheme();
+  const { tText } = useLanguage();
   const [reportType, setReportType] = useState<'trafego' | 'financeiro' | 'inspeccoes' | 'fluxo_caixa'>('trafego');
   const [downloading, setDownloading] = useState(false);
 
@@ -256,10 +258,10 @@ export function RelatoriosModule({
         <div>
           <h2 className={`text-xl font-bold tracking-tight flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
             <BarChart3 className="w-5 h-5 text-blue-500" />
-            Relatórios Marítimos, Estatísticas & Execução Financeira
+            {tText('Relatórios Marítimos, Estatísticas & Execução Financeira')}
           </h2>
           <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-            Geração de mapas oficiais de tráfego de navios, arrecadação de taxas e fluxo de caixa para o Ministério dos Transportes
+            {tText('Geração de mapas oficiais de tráfego de navios, arrecadação de taxas e fluxo de caixa para o Ministério dos Transportes')}
           </p>
         </div>
       </div>
@@ -310,10 +312,10 @@ export function RelatoriosModule({
           </div>
           <div className="flex items-center gap-3 shrink-0">
             <button onClick={() => handleDownload('pdf')} disabled={downloading} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-lg shadow-blue-600/20 disabled:opacity-60">
-              <Download className="w-4 h-4" /> Exportar PDF
+              <Download className="w-4 h-4" /> {tText('Exportar PDF')}
             </button>
             <button onClick={() => handleDownload('csv')} disabled={downloading} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-lg shadow-emerald-600/20 disabled:opacity-60">
-              <FileSpreadsheet className="w-4 h-4" /> Exportar CSV
+              <FileSpreadsheet className="w-4 h-4" /> {tText('Exportar CSV')}
             </button>
           </div>
         </div>

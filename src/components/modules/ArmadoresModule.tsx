@@ -59,10 +59,10 @@ export function ArmadoresModule({ armadores, onAddArmador, faturas = [], recibos
             }`}
           >
             <Briefcase className="w-5 h-5 text-blue-500" />
-            Armadores & Operadores de Frotas Marítimas
+            {tText('Armadores & Operadores de Frotas Marítimas')}
           </h2>
           <p className={theme === 'dark' ? 'text-slate-400 text-xs' : 'text-slate-500 text-xs'}>
-            Proprietários de navios, companhias de transporte e armadores nacionais e internacionais
+            {tText('Proprietários de navios, companhias de transporte e armadores nacionais e internacionais')}
           </p>
         </div>
         <button
@@ -70,7 +70,7 @@ export function ArmadoresModule({ armadores, onAddArmador, faturas = [], recibos
           className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold transition-colors shadow-lg shadow-blue-600/20"
         >
           <Plus className="w-4 h-4" />
-          Registar Armador
+          {tText('Registar Armador')}
         </button>
       </div>
 
@@ -82,7 +82,7 @@ export function ArmadoresModule({ armadores, onAddArmador, faturas = [], recibos
         <Search className="w-4 h-4 text-slate-400" />
         <input
           type="text"
-          placeholder="Pesquisar por razão social do armador ou país de origem..."
+          placeholder={tText('Pesquisar por razão social do armador ou país de origem...')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className={`bg-transparent text-xs focus:outline-none w-full ${
@@ -123,7 +123,7 @@ export function ArmadoresModule({ armadores, onAddArmador, faturas = [], recibos
                     : 'bg-purple-500/10 text-purple-600 border-purple-500/20'
                 }`}
               >
-                {armador.tipoEntidade}
+                {tText(armador.tipoEntidade)}
               </span>
             </div>
 
@@ -135,19 +135,19 @@ export function ArmadoresModule({ armadores, onAddArmador, faturas = [], recibos
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">PAÍS DE ORIGEM:</span>
+                <span className="text-slate-500">{tText('PAÍS DE ORIGEM')}:</span>
                 <span className={`font-sans flex items-center gap-1 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                   <Flag className="w-3 h-3 text-amber-500"/> {armador.paisOrigem}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">CONTACTO:</span>
+                <span className="text-slate-500">{tText('CONTACTO')}:</span>
                 <span className="flex items-center gap-1">
                   <Phone className="w-3 h-3 text-slate-400"/> {armador.contactoOficial}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">EMAIL:</span>
+                <span className="text-slate-500">{tText('EMAIL')}:</span>
                 <span className="flex items-center gap-1">
                   <Mail className="w-3 h-3 text-slate-400"/> {armador.email}
                 </span>
@@ -160,7 +160,7 @@ export function ArmadoresModule({ armadores, onAddArmador, faturas = [], recibos
               }`}
             >
               <span className={`flex items-center gap-1.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                <Ship className="w-4 h-4 text-blue-500"/> Frota: <strong className="font-mono text-emerald-500">{armador.frotaContada}</strong>
+                <Ship className="w-4 h-4 text-blue-500"/> {tText('Frota')}: <strong className="font-mono text-emerald-500">{armador.frotaContada}</strong>
               </span>
               <button
                 type="button"
@@ -193,11 +193,11 @@ export function ArmadoresModule({ armadores, onAddArmador, faturas = [], recibos
             }`}
           >
             <h3 className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-              Registar Novo Armador
+              {tText('Registar Novo Armador')}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-3 text-xs">
               <div>
-                <label className="block text-slate-500 mb-1">Razão Social / Empresa Armadora</label>
+                <label className="block text-slate-500 mb-1">{tText('Razão Social / Empresa Armadora')}</label>
                 <input
                   type="text"
                   required
@@ -206,12 +206,12 @@ export function ArmadoresModule({ armadores, onAddArmador, faturas = [], recibos
                   className={`w-full rounded-xl px-3 py-2 border focus:outline-none focus:border-blue-500 ${
                     theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
-                  placeholder="Ex: Maersk Line West Africa"
+                  placeholder={tText('Ex: Maersk Line West Africa')}
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-500 mb-1">País de Origem</label>
+                  <label className="block text-slate-500 mb-1">{tText('País de Origem')}</label>
                   <input
                     type="text"
                     required
@@ -220,11 +220,11 @@ export function ArmadoresModule({ armadores, onAddArmador, faturas = [], recibos
                     className={`w-full rounded-xl px-3 py-2 border focus:outline-none focus:border-blue-500 ${
                       theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                     }`}
-                    placeholder="Ex: Guiné-Bissau / França"
+                    placeholder={tText('Ex: Guiné-Bissau / França')}
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-500 mb-1">Tipo de Entidade</label>
+                  <label className="block text-slate-500 mb-1">{tText('Tipo de Entidade')}</label>
                   <select
                     value={formData.tipoEntidade}
                     onChange={e => setFormData({ ...formData, tipoEntidade: e.target.value as any })}
@@ -232,14 +232,14 @@ export function ArmadoresModule({ armadores, onAddArmador, faturas = [], recibos
                       theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-slate-50 border-slate-200 text-slate-900'
                     }`}
                   >
-                    <option value="Nacional">Nacional (Guiné-Bissau)</option>
-                    <option value="Estrangeiro">Estrangeiro</option>
+                    <option value="Nacional">{tText('Nacional (Guiné-Bissau)')}</option>
+                    <option value="Estrangeiro">{tText('Estrangeiro')}</option>
                   </select>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-500 mb-1">Contacto Telefónico</label>
+                  <label className="block text-slate-500 mb-1">{tText('Contacto Telefónico')}</label>
                   <input
                     type="text"
                     required
@@ -252,7 +252,7 @@ export function ArmadoresModule({ armadores, onAddArmador, faturas = [], recibos
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-500 mb-1">Email Oficial</label>
+                  <label className="block text-slate-500 mb-1">{tText('Email Oficial')}</label>
                   <input
                     type="email"
                     required
@@ -266,7 +266,7 @@ export function ArmadoresModule({ armadores, onAddArmador, faturas = [], recibos
                 </div>
               </div>
               <div>
-                <label className="block text-slate-500 mb-1">Número Inicial de Embarcações na Frota</label>
+                <label className="block text-slate-500 mb-1">{tText('Número Inicial de Embarcações na Frota')}</label>
                 <input
                   type="number"
                   min="1"
@@ -286,13 +286,13 @@ export function ArmadoresModule({ armadores, onAddArmador, faturas = [], recibos
                     theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                   }`}
                 >
-                  Cancelar
+                  {tText('Cancelar')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20"
                 >
-                  Guardar Armador
+                  {tText('Guardar Armador')}
                 </button>
               </div>
             </form>

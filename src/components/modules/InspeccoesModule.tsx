@@ -2,6 +2,7 @@ import { useState, FormEvent } from 'react';
 import { ClipboardCheck, Plus, Search, CheckCircle2, XCircle } from 'lucide-react';
 import { Inspeccao } from '../../types';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface InspeccoesModuleProps {
   inspeccoes: Inspeccao[];
@@ -10,6 +11,7 @@ interface InspeccoesModuleProps {
 
 export function InspeccoesModule({ inspeccoes, onAddInspeccao }: InspeccoesModuleProps) {
   const { theme } = useTheme();
+  const { tText } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -49,10 +51,10 @@ export function InspeccoesModule({ inspeccoes, onAddInspeccao }: InspeccoesModul
             }`}
           >
             <ClipboardCheck className="w-5 h-5 text-blue-500" />
-            Inspecções Marítimas & Port State Control (PSC)
+            {tText('Inspecções Marítimas & Port State Control (PSC)')}
           </h2>
           <p className={theme === 'dark' ? 'text-slate-400 text-xs' : 'text-slate-500 text-xs'}>
-            Vistorias técnicas de segurança, prevenção de poluição MARPOL e retenção preventiva de navios
+            {tText('Vistorias técnicas de segurança, prevenção de poluição MARPOL e retenção preventiva de navios')}
           </p>
         </div>
         <button
@@ -60,7 +62,7 @@ export function InspeccoesModule({ inspeccoes, onAddInspeccao }: InspeccoesModul
           className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold transition-colors shadow-lg shadow-blue-600/20"
         >
           <Plus className="w-4 h-4" />
-          Registar Nova Vistoria
+          {tText('Registar Nova Vistoria')}
         </button>
       </div>
 
@@ -72,7 +74,7 @@ export function InspeccoesModule({ inspeccoes, onAddInspeccao }: InspeccoesModul
         <Search className="w-4 h-4 text-slate-400" />
         <input
           type="text"
-          placeholder="Pesquisar por código de inspecção, navio ou inspector..."
+          placeholder={tText('Pesquisar por código de inspecção, navio ou inspector...')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className={`bg-transparent text-xs focus:outline-none w-full ${

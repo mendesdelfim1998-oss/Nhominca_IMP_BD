@@ -2,6 +2,7 @@ import { useState, FormEvent } from 'react';
 import { Anchor, Plus, Clock, RefreshCw } from 'lucide-react';
 import { Atracacao, Embarcacao, PortoTerminal } from '../../types';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const getComputerCurrentDateTime = () => {
   const d = new Date();
@@ -33,6 +34,7 @@ interface AtracacoesModuleProps {
 
 export function AtracacoesModule({ atracacoes, embarcacoes, portos, onAddAtracacao, onUpdateStatus }: AtracacoesModuleProps) {
   const { theme } = useTheme();
+  const { tText } = useLanguage();
   const [showModal, setShowModal] = useState(false);
   const [selectedEmbId, setSelectedEmbId] = useState(embarcacoes[0]?.id || '');
   const [selectedPortoId, setSelectedPortoId] = useState(portos[0]?.id || '');
@@ -90,10 +92,10 @@ export function AtracacoesModule({ atracacoes, embarcacoes, portos, onAddAtracac
             }`}
           >
             <Anchor className="w-5 h-5 text-blue-500" />
-            Gestão de Escalas, Atracações & Pilotagem
+            {tText('Gestão de Escalas, Atracações & Pilotagem')}
           </h2>
           <p className={theme === 'dark' ? 'text-slate-400 text-xs' : 'text-slate-500 text-xs'}>
-            Controle de manifesto de carga, entrada/saída de navios e alocação de cais
+            {tText('Controle de manifesto de carga, entrada/saída de navios e alocação de cais')}
           </p>
         </div>
 
@@ -102,7 +104,7 @@ export function AtracacoesModule({ atracacoes, embarcacoes, portos, onAddAtracac
           className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold flex items-center gap-2 transition-colors shadow-lg shadow-blue-600/20"
         >
           <Plus className="w-4 h-4" />
-          Anunciar Nova Chegada (ETA)
+          {tText('Anunciar Nova Chegada (ETA)')}
         </button>
       </div>
 
@@ -163,30 +165,30 @@ export function AtracacoesModule({ atracacoes, embarcacoes, portos, onAddAtracac
               }`}
             >
               <div>
-                <span className="text-slate-500 text-[10px] block uppercase">Posto / Cais Alocado</span>
+                <span className="text-slate-500 text-[10px] block uppercase">{tText('Posto / Cais Alocado')}</span>
                 <span className={`font-semibold ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>
                   {atr.caisDesignado}
                 </span>
               </div>
               <div>
-                <span className="text-slate-500 text-[10px] block uppercase">Carga & Movimentação</span>
+                <span className="text-slate-500 text-[10px] block uppercase">{tText('Carga & Movimentação')}</span>
                 <span className={`font-semibold ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>
-                  {atr.manifestoCarga.quantidadeToneladas.toLocaleString()} Ton ({atr.manifestoCarga.operacao})
+                  {atr.manifestoCarga.quantidadeToneladas.toLocaleString()} {tText('Ton')} ({atr.manifestoCarga.operacao})
                 </span>
               </div>
               <div>
-                <span className="text-slate-500 text-[10px] block uppercase">ETA (Chegada)</span>
+                <span className="text-slate-500 text-[10px] block uppercase">{tText('ETA (Chegada)')}</span>
                 <span className="text-emerald-500 font-bold">{atr.dataChegadaPrevista}</span>
               </div>
               <div>
-                <span className="text-slate-500 text-[10px] block uppercase">ETD (Saída)</span>
+                <span className="text-slate-500 text-[10px] block uppercase">{tText('ETD (Saída)')}</span>
                 <span className="text-rose-500 font-bold">{atr.dataSaidaPrevista}</span>
               </div>
             </div>
 
             {/* Services badges */}
             <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
-              <span className="text-slate-500 font-medium mr-1">Serviços:</span>
+              <span className="text-slate-500 font-medium mr-1">{tText('Serviços')}:</span>
               {atr.servicosSolicitados.map((srv, idx) => (
                 <span
                   key={idx}
@@ -207,14 +209,14 @@ export function AtracacoesModule({ atracacoes, embarcacoes, portos, onAddAtracac
                 theme === 'dark' ? 'border-slate-800/80' : 'border-slate-100'
               }`}
             >
-              <span className="text-slate-500">Alterar Estado Operacional:</span>
+              <span className="text-slate-500">{tText('Alterar Estado Operacional')}:</span>
               <div className="flex items-center gap-1.5">
                 {atr.status === 'Anunciada' && (
                   <button
                     onClick={() => onUpdateStatus(atr.id, 'Em Operação')}
                     className="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors"
                   >
-                    Confirmar Atracação
+                    {tText('Confirmar Atracação')}
                   </button>
                 )}
                 {atr.status === 'Em Operação' && (
@@ -222,11 +224,11 @@ export function AtracacoesModule({ atracacoes, embarcacoes, portos, onAddAtracac
                     onClick={() => onUpdateStatus(atr.id, 'Desatracada')}
                     className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium transition-colors"
                   >
-                    Registar Desatracação (Saída)
+                    {tText('Registar Desatracação (Saída)')}
                   </button>
                 )}
                 {atr.status === 'Desatracada' && (
-                  <span className="text-emerald-500 font-mono text-[11px] font-bold">Escala Concluída</span>
+                  <span className="text-emerald-500 font-mono text-[11px] font-bold">{tText('Escala Concluída')}</span>
                 )}
               </div>
             </div>
@@ -244,12 +246,12 @@ export function AtracacoesModule({ atracacoes, embarcacoes, portos, onAddAtracac
           >
             <h3 className={`text-lg font-bold flex items-center gap-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
               <Anchor className="w-5 h-5 text-blue-500" />
-              Registar Anúncio de Chegada (ETA)
+              {tText('Registar Anúncio de Chegada (ETA)')}
             </h3>
 
             <form onSubmit={handleCreateAtracacao} className="space-y-4 text-xs">
               <div>
-                <label className="block text-slate-500 mb-1 font-medium">Selecionar Embarcação</label>
+                <label className="block text-slate-500 mb-1 font-medium">{tText('Selecionar Embarcação')}</label>
                 <select
                   value={selectedEmbId}
                   onChange={(e) => setSelectedEmbId(e.target.value)}
@@ -258,14 +260,14 @@ export function AtracacoesModule({ atracacoes, embarcacoes, portos, onAddAtracac
                   }`}
                 >
                   {embarcacoes.map(e => (
-                    <option key={e.id} value={e.id}>{e.nome} ({e.numeroIMO}) - Agência: {e.agenciaNome}</option>
+                    <option key={e.id} value={e.id}>{e.nome} ({e.numeroIMO}) - {tText('Agência')}: {e.agenciaNome}</option>
                   ))}
                 </select>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-500 mb-1 font-medium">Porto de Destino</label>
+                  <label className="block text-slate-500 mb-1 font-medium">{tText('Porto de Destino')}</label>
                   <select
                     value={selectedPortoId}
                     onChange={(e) => setSelectedPortoId(e.target.value)}
@@ -279,7 +281,7 @@ export function AtracacoesModule({ atracacoes, embarcacoes, portos, onAddAtracac
                   </select>
                 </div>
                 <div>
-                  <label className="block text-slate-500 mb-1 font-medium">Cais Designado</label>
+                  <label className="block text-slate-500 mb-1 font-medium">{tText('Cais Designado')}</label>
                   <input
                     type="text"
                     value={caisInput}
@@ -295,16 +297,16 @@ export function AtracacoesModule({ atracacoes, embarcacoes, portos, onAddAtracac
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="text-slate-500 font-medium text-xs">
-                      Data/Hora ETA (Chegada)
+                      {tText('Data/Hora ETA (Chegada)')}
                     </label>
                     <button
                       type="button"
                       onClick={() => setEtaInput(getComputerCurrentDateTime())}
                       className="text-[10px] text-blue-600 dark:text-blue-400 font-bold flex items-center gap-1 hover:underline cursor-pointer"
-                      title="Sincronizar com a data e hora atual do computador"
+                      title={tText('Sincronizar com a data e hora atual do computador')}
                     >
                       <Clock className="w-3 h-3 text-blue-500" />
-                      Agora (Computador)
+                      {tText('Agora (Computador)')}
                     </button>
                   </div>
                   <input
@@ -318,19 +320,19 @@ export function AtracacoesModule({ atracacoes, embarcacoes, portos, onAddAtracac
                   />
                   <div className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 font-mono font-medium">
                     <Clock className="w-2.5 h-2.5" />
-                    Data atual do computador: {etaInput}
+                    {tText('Data atual do computador')}: {etaInput}
                   </div>
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="text-slate-500 font-medium text-xs">
-                      Data/Hora ETD (Saída)
+                      {tText('Data/Hora ETD (Saída)')}
                     </label>
                     <button
                       type="button"
                       onClick={() => setEtdInput(getComputerFutureDateTime(48))}
                       className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold flex items-center gap-1 hover:underline cursor-pointer"
-                      title="Calcular previsão de 48h a partir do computador"
+                      title={tText('Calcular previsão de 48h a partir do computador')}
                     >
                       +48h
                     </button>
@@ -345,14 +347,14 @@ export function AtracacoesModule({ atracacoes, embarcacoes, portos, onAddAtracac
                     }`}
                   />
                   <span className="text-[10px] text-slate-400 font-mono block mt-1">
-                    Previsão de desatracação
+                    {tText('Previsão de desatracação')}
                   </span>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-500 mb-1 font-medium">Descrição Carga</label>
+                  <label className="block text-slate-500 mb-1 font-medium">{tText('Descrição Carga')}</label>
                   <input
                     type="text"
                     value={cargaInput}
@@ -363,7 +365,7 @@ export function AtracacoesModule({ atracacoes, embarcacoes, portos, onAddAtracac
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-500 mb-1 font-medium">Volume (Toneladas)</label>
+                  <label className="block text-slate-500 mb-1 font-medium">{tText('Volume (Toneladas)')}</label>
                   <input
                     type="number"
                     value={toneladasInput}
@@ -383,13 +385,13 @@ export function AtracacoesModule({ atracacoes, embarcacoes, portos, onAddAtracac
                     theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                   }`}
                 >
-                  Cancelar
+                  {tText('Cancelar')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20"
                 >
-                  Submeter Anúncio de Escala
+                  {tText('Submeter Anúncio de Escala')}
                 </button>
               </div>
             </form>

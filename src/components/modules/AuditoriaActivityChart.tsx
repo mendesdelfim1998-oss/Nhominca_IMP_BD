@@ -16,6 +16,7 @@ import {
 import { Activity, TrendingUp, Zap, Clock, Calendar, BarChart3, ShieldCheck } from 'lucide-react';
 import { AuditoriaLog } from '../../types';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface AuditoriaActivityChartProps {
   logs: AuditoriaLog[];
@@ -26,6 +27,7 @@ type ChartStyle = 'linhas' | 'area';
 
 export function AuditoriaActivityChart({ logs }: AuditoriaActivityChartProps) {
   const { theme } = useTheme();
+  const { tText } = useLanguage();
   const [granularity, setGranularity] = useState<Granularity>('dia');
   const [chartStyle, setChartStyle] = useState<ChartStyle>('linhas');
 
@@ -169,7 +171,7 @@ export function AuditoriaActivityChart({ logs }: AuditoriaActivityChartProps) {
             {isPeak && (
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-black flex items-center gap-1 shadow-sm">
                 <Zap className="w-3 h-3 fill-current" />
-                Pico Máximo
+                {tText('Pico Máximo')}
               </span>
             )}
           </div>
@@ -178,18 +180,18 @@ export function AuditoriaActivityChart({ logs }: AuditoriaActivityChartProps) {
             <div className="flex items-center justify-between gap-6">
               <span className="text-purple-400 font-bold flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span>
-                Total de Ações:
+                {tText('Total de Ações')}:
               </span>
               <span className="font-extrabold text-sm">{total}</span>
             </div>
 
             {payload.map((entry: any, index: number) => {
               if (entry.dataKey === 'total') return null;
-              let name = 'Outras';
+              let name = tText('Outras');
               let color = entry.color;
-              if (entry.dataKey === 'faturacao') name = 'Faturação & Emissão';
-              if (entry.dataKey === 'caixa') name = 'Tesouraria & Recibos';
-              if (entry.dataKey === 'seguranca') name = 'Segurança & Auditoria';
+              if (entry.dataKey === 'faturacao') name = tText('Faturação & Emissão');
+              if (entry.dataKey === 'caixa') name = tText('Tesouraria & Recibos');
+              if (entry.dataKey === 'seguranca') name = tText('Segurança & Auditoria');
 
               return (
                 <div key={`tooltip-${index}`} className="flex items-center justify-between gap-6 text-slate-400">
@@ -205,7 +207,7 @@ export function AuditoriaActivityChart({ logs }: AuditoriaActivityChartProps) {
 
           <div className="pt-1 border-t border-slate-700/30 text-[10px] text-emerald-400 flex items-center gap-1">
             <ShieldCheck className="w-3 h-3" />
-            Assinatura SHA-256 Validada
+            {tText('Assinatura SHA-256 Validada')}
           </div>
         </div>
       );
@@ -231,11 +233,11 @@ export function AuditoriaActivityChart({ logs }: AuditoriaActivityChartProps) {
                 theme === 'dark' ? 'text-white' : 'text-slate-900'
               }`}
             >
-              Frequência de Ações no Sistema ao Longo do Tempo (Análise de Picos)
+              {tText('Frequência de Ações no Sistema ao Longo do Tempo (Análise de Picos)')}
             </h3>
           </div>
           <p className="text-xs text-slate-400 mt-0.5">
-            Monitoramento de picos de atividade operacional, emissão de faturas e liquidações de tesouraria
+            {tText('Monitoramento de picos de atividade operacional, emissão de faturas e liquidações de tesouraria')}
           </p>
         </div>
 
@@ -256,7 +258,7 @@ export function AuditoriaActivityChart({ logs }: AuditoriaActivityChartProps) {
               }`}
             >
               <Calendar className="w-3.5 h-3.5" />
-              Por Dia
+              {tText('Por Dia')}
             </button>
             <button
               onClick={() => setGranularity('hora')}
@@ -267,7 +269,7 @@ export function AuditoriaActivityChart({ logs }: AuditoriaActivityChartProps) {
               }`}
             >
               <Clock className="w-3.5 h-3.5" />
-              Por Horário
+              {tText('Por Horário')}
             </button>
             <button
               onClick={() => setGranularity('cronologico')}
@@ -278,7 +280,7 @@ export function AuditoriaActivityChart({ logs }: AuditoriaActivityChartProps) {
               }`}
             >
               <Activity className="w-3.5 h-3.5" />
-              Cronologia
+              {tText('Cronologia')}
             </button>
           </div>
 
@@ -295,10 +297,10 @@ export function AuditoriaActivityChart({ logs }: AuditoriaActivityChartProps) {
                   ? 'bg-blue-600 text-white font-bold shadow-sm'
                   : 'hover:text-blue-400'
               }`}
-              title="Visualizar em Linhas Múltiplas"
+              title={tText('Visualizar em Linhas Múltiplas')}
             >
               <Activity className="w-3.5 h-3.5" />
-              Linhas
+              {tText('Linhas')}
             </button>
             <button
               onClick={() => setChartStyle('area')}
@@ -307,10 +309,10 @@ export function AuditoriaActivityChart({ logs }: AuditoriaActivityChartProps) {
                   ? 'bg-blue-600 text-white font-bold shadow-sm'
                   : 'hover:text-blue-400'
               }`}
-              title="Visualizar em Área Suave"
+              title={tText('Visualizar em Área Suave')}
             >
               <BarChart3 className="w-3.5 h-3.5" />
-              Área
+              {tText('Área')}
             </button>
           </div>
         </div>
@@ -326,14 +328,14 @@ export function AuditoriaActivityChart({ logs }: AuditoriaActivityChartProps) {
           }`}
         >
           <div className="flex items-center justify-between text-[11px] text-slate-400 mb-0.5">
-            <span>Pico Máximo Registado</span>
+            <span>{tText('Pico Máximo Registado')}</span>
             <Zap className="w-3.5 h-3.5 text-amber-500" />
           </div>
           <div className="text-lg font-bold font-mono text-amber-400">
-            {peakInfo.maxVal} ações
+            {peakInfo.maxVal} {tText('ações')}
           </div>
           <div className="text-[10px] text-slate-400 truncate">
-            No período: <span className="text-slate-200 font-mono font-medium">{peakInfo.peakLabel}</span>
+            {tText('No período')}: <span className="text-slate-200 font-mono font-medium">{peakInfo.peakLabel}</span>
           </div>
         </div>
 
@@ -345,14 +347,14 @@ export function AuditoriaActivityChart({ logs }: AuditoriaActivityChartProps) {
           }`}
         >
           <div className="flex items-center justify-between text-[11px] text-slate-400 mb-0.5">
-            <span>Média por Intervalo</span>
+            <span>{tText('Média por Intervalo')}</span>
             <TrendingUp className="w-3.5 h-3.5 text-purple-400" />
           </div>
           <div className="text-lg font-bold font-mono text-purple-400">
-            {avgPerPeriod} ações
+            {avgPerPeriod} {tText('ações')}
           </div>
           <div className="text-[10px] text-slate-400">
-            Ritmo contínuo auditado
+            {tText('Ritmo contínuo auditado')}
           </div>
         </div>
 
@@ -364,14 +366,14 @@ export function AuditoriaActivityChart({ logs }: AuditoriaActivityChartProps) {
           }`}
         >
           <div className="flex items-center justify-between text-[11px] text-slate-400 mb-0.5">
-            <span>Ações de Faturação</span>
+            <span>{tText('Ações de Faturação')}</span>
             <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
           </div>
           <div className="text-lg font-bold font-mono text-blue-400">
             {logs.filter(l => categorizeAction(l.acao) === 'faturacao').length}
           </div>
           <div className="text-[10px] text-slate-400">
-            Emissões & confirmações
+            {tText('Emissões & confirmações')}
           </div>
         </div>
 
@@ -383,14 +385,14 @@ export function AuditoriaActivityChart({ logs }: AuditoriaActivityChartProps) {
           }`}
         >
           <div className="flex items-center justify-between text-[11px] text-slate-400 mb-0.5">
-            <span>Tesouraria & Caixa</span>
+            <span>{tText('Tesouraria & Caixa')}</span>
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
           </div>
           <div className="text-lg font-bold font-mono text-emerald-400">
             {logs.filter(l => categorizeAction(l.acao) === 'caixa').length}
           </div>
           <div className="text-[10px] text-slate-400">
-            Recibos & amortizações
+            {tText('Recibos & amortizações')}
           </div>
         </div>
       </div>
@@ -431,10 +433,10 @@ export function AuditoriaActivityChart({ logs }: AuditoriaActivityChartProps) {
                 height={36}
                 wrapperStyle={{ fontSize: '11px', fontFamily: 'sans-serif' }}
                 formatter={(value) => {
-                  if (value === 'total') return <span className="font-bold text-purple-400">Total de Ações</span>;
-                  if (value === 'faturacao') return <span className="text-blue-400">Faturação</span>;
-                  if (value === 'caixa') return <span className="text-emerald-400">Tesouraria/Recibos</span>;
-                  if (value === 'seguranca') return <span className="text-amber-400">Governação/Admin</span>;
+                  if (value === 'total') return <span className="font-bold text-purple-400">{tText('Total de Ações')}</span>;
+                  if (value === 'faturacao') return <span className="text-blue-400">{tText('Faturação')}</span>;
+                  if (value === 'caixa') return <span className="text-emerald-400">{tText('Tesouraria/Recibos')}</span>;
+                  if (value === 'seguranca') return <span className="text-amber-400">{tText('Governação/Admin')}</span>;
                   return value;
                 }}
               />
@@ -447,7 +449,7 @@ export function AuditoriaActivityChart({ logs }: AuditoriaActivityChartProps) {
                   strokeDasharray="4 4"
                   strokeWidth={1.5}
                   label={{
-                    value: `Pico Máximo (${peakInfo.maxVal})`,
+                    value: `${tText('Pico Máximo')} (${peakInfo.maxVal})`,
                     fill: '#F59E0B',
                     fontSize: 10,
                     position: 'insideTopRight'
@@ -540,8 +542,8 @@ export function AuditoriaActivityChart({ logs }: AuditoriaActivityChartProps) {
                 height={36}
                 wrapperStyle={{ fontSize: '11px' }}
                 formatter={(value) => {
-                  if (value === 'total') return <span className="font-bold text-purple-400">Volume Total de Ações</span>;
-                  if (value === 'faturacao') return <span className="text-blue-400">Faturação</span>;
+                  if (value === 'total') return <span className="font-bold text-purple-400">{tText('Volume Total de Ações')}</span>;
+                  if (value === 'faturacao') return <span className="text-blue-400">{tText('Faturação')}</span>;
                   return value;
                 }}
               />
@@ -551,7 +553,7 @@ export function AuditoriaActivityChart({ logs }: AuditoriaActivityChartProps) {
                   stroke="#F59E0B"
                   strokeDasharray="4 4"
                   label={{
-                    value: `Pico: ${peakInfo.maxVal}`,
+                    value: `${tText('Pico')}: ${peakInfo.maxVal}`,
                     fill: '#F59E0B',
                     fontSize: 10,
                     position: 'insideTopRight'

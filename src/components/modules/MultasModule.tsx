@@ -2,6 +2,7 @@ import { useState, FormEvent } from 'react';
 import { ShieldAlert, Plus, Search } from 'lucide-react';
 import { MultaInfracao } from '../../types';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface MultasModuleProps {
   multas: MultaInfracao[];
@@ -10,6 +11,7 @@ interface MultasModuleProps {
 
 export function MultasModule({ multas, onAddMulta }: MultasModuleProps) {
   const { theme } = useTheme();
+  const { tText } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -47,10 +49,10 @@ export function MultasModule({ multas, onAddMulta }: MultasModuleProps) {
             theme === 'dark' ? 'text-white' : 'text-slate-900'
           }`}>
             <ShieldAlert className="w-5 h-5 text-rose-500" />
-            Multas, Contraordenações & Autos de Infração
+            {tText('Multas, Contraordenações & Autos de Infração')}
           </h2>
           <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-            Aplicação do Código Marítimo de Bissau, fiscalização de ilícitos e cobrança de coimas
+            {tText('Aplicação do Código Marítimo de Bissau, fiscalização de ilícitos e cobrança de coimas')}
           </p>
         </div>
         <button
@@ -58,7 +60,7 @@ export function MultasModule({ multas, onAddMulta }: MultasModuleProps) {
           className="inline-flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-semibold transition-colors shadow-lg shadow-rose-600/20"
         >
           <Plus className="w-4 h-4" />
-          Lavrar Auto de Infração
+          {tText('Lavrar Auto de Infração')}
         </button>
       </div>
 
@@ -70,7 +72,7 @@ export function MultasModule({ multas, onAddMulta }: MultasModuleProps) {
         <Search className="w-4 h-4 text-slate-400" />
         <input
           type="text"
-          placeholder="Pesquisar por auto de infração, navio ou artigo violado..."
+          placeholder={tText('Pesquisar por auto de infração, navio ou artigo violado...')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className={`bg-transparent text-xs focus:outline-none w-full ${
@@ -106,7 +108,7 @@ export function MultasModule({ multas, onAddMulta }: MultasModuleProps) {
                   ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
                   : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
               }`}>
-                {m.statusMulta}
+                {tText(m.statusMulta)}
               </span>
             </div>
 
@@ -116,13 +118,13 @@ export function MultasModule({ multas, onAddMulta }: MultasModuleProps) {
                 : 'bg-slate-50 border-slate-200 text-slate-700'
             }`}>
               <div className="flex justify-between">
-                <span className={theme === 'dark' ? 'text-slate-500' : 'text-slate-500'}>DATA DA OCORRÊNCIA:</span>
+                <span className={theme === 'dark' ? 'text-slate-500' : 'text-slate-500'}>{tText('DATA DA OCORRÊNCIA')}:</span>
                 <span>{m.dataOcorrencia}</span>
               </div>
               <div className={`flex justify-between border-t pt-1 ${
                 theme === 'dark' ? 'border-slate-800' : 'border-slate-200'
               }`}>
-                <span className={theme === 'dark' ? 'text-slate-500' : 'text-slate-500'}>VALOR DA COIMA:</span>
+                <span className={theme === 'dark' ? 'text-slate-500' : 'text-slate-500'}>{tText('VALOR DA COIMA')}:</span>
                 <span className="text-rose-500 font-bold text-sm">{m.valorMultaXOF.toLocaleString('pt-PT')} XOF</span>
               </div>
             </div>
@@ -130,7 +132,7 @@ export function MultasModule({ multas, onAddMulta }: MultasModuleProps) {
             <div className={`pt-2 border-t text-xs ${theme === 'dark' ? 'border-slate-800' : 'border-slate-100'}`}>
               <span className={`block text-[10px] uppercase font-mono font-semibold mb-1 ${
                 theme === 'dark' ? 'text-slate-500' : 'text-slate-500'
-              }`}>Descrição da Infração:</span>
+              }`}>{tText('Descrição da Infração')}:</span>
               <p className={`p-2.5 rounded-lg border leading-relaxed ${
                 theme === 'dark'
                   ? 'text-slate-300 bg-slate-950/60 border-slate-800/80'
@@ -147,12 +149,12 @@ export function MultasModule({ multas, onAddMulta }: MultasModuleProps) {
             theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
             <h3 className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-              Lavrar Auto de Infração Marítima
+              {tText('Lavrar Auto de Infração Marítima')}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-3 text-xs">
               <div>
                 <label className={`block mb-1 font-semibold ${theme === 'dark' ? 'text-slate-400' : 'text-slate-700'}`}>
-                  Embarcação ou Entidade Infratora
+                  {tText('Embarcação ou Entidade Infratora')}
                 </label>
                 <input
                   type="text"
@@ -164,12 +166,12 @@ export function MultasModule({ multas, onAddMulta }: MultasModuleProps) {
                       ? 'bg-slate-950 border-slate-800 text-white'
                       : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
-                  placeholder="Ex: Pesqueiro Bijagós nº 4"
+                  placeholder={tText('Ex: Pesqueiro Bijagós nº 4')}
                 />
               </div>
               <div>
                 <label className={`block mb-1 font-semibold ${theme === 'dark' ? 'text-slate-400' : 'text-slate-700'}`}>
-                  Artigo Violado do Código Marítimo
+                  {tText('Artigo Violado do Código Marítimo')}
                 </label>
                 <input
                   type="text"
@@ -185,7 +187,7 @@ export function MultasModule({ multas, onAddMulta }: MultasModuleProps) {
               </div>
               <div>
                 <label className={`block mb-1 font-semibold ${theme === 'dark' ? 'text-slate-400' : 'text-slate-700'}`}>
-                  Valor da Multa (XOF)
+                  {tText('Valor da Multa (XOF)')}
                 </label>
                 <input
                   type="number"
@@ -201,7 +203,7 @@ export function MultasModule({ multas, onAddMulta }: MultasModuleProps) {
               </div>
               <div>
                 <label className={`block mb-1 font-semibold ${theme === 'dark' ? 'text-slate-400' : 'text-slate-700'}`}>
-                  Descrição Circunstanciada do Ilícito
+                  {tText('Descrição Circunstanciada do Ilícito')}
                 </label>
                 <textarea
                   required
@@ -213,7 +215,7 @@ export function MultasModule({ multas, onAddMulta }: MultasModuleProps) {
                       ? 'bg-slate-950 border-slate-800 text-white'
                       : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
-                  placeholder="Descrição detalhada das circunstâncias da infração detetada pelos inspectores..."
+                  placeholder={tText('Descrição detalhada das circunstâncias da infração detetada pelos inspectores...')}
                 ></textarea>
               </div>
 
@@ -227,13 +229,13 @@ export function MultasModule({ multas, onAddMulta }: MultasModuleProps) {
                       : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}
                 >
-                  Cancelar
+                  {tText('Cancelar')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl font-semibold shadow-lg shadow-rose-600/20"
                 >
-                  Registar Auto de Infração
+                  {tText('Registar Auto de Infração')}
                 </button>
               </div>
             </form>

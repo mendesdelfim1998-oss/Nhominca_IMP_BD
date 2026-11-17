@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ClipboardCheck, Award, Plus, AlertOctagon, CheckCircle2, ShieldAlert, FileCheck2 } from 'lucide-react';
 import { CertificadoMaritimo, Inspeccao } from '../../types';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface InspeccoesCertificadosModuleProps {
   inspeccoes: Inspeccao[];
@@ -9,6 +10,7 @@ interface InspeccoesCertificadosModuleProps {
 }
 
 export function InspeccoesCertificadosModule({ inspeccoes, certificados, onAddInspeccao }: InspeccoesCertificadosModuleProps) {
+  const { tText } = useLanguage();
   const [activeSubTab, setActiveSubTab] = useState<'inspeccoes' | 'certificados'>('inspeccoes');
 
   return (
@@ -18,9 +20,9 @@ export function InspeccoesCertificadosModule({ inspeccoes, certificados, onAddIn
         <div>
           <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
             <ClipboardCheck className="w-5 h-5 text-blue-400" />
-            Inspecção Marítima & Certificação de Segurança
+            {tText('Inspecção Marítima & Certificação de Segurança')}
           </h2>
-          <p className="text-slate-400 text-xs">Vistorias técnicas, controlo de navegação (Port State Control) e emissão de certificados marítimos</p>
+          <p className="text-slate-400 text-xs">{tText('Vistorias técnicas, controlo de navegação (Port State Control) e emissão de certificados marítimos')}</p>
         </div>
       </div>
 
@@ -34,7 +36,7 @@ export function InspeccoesCertificadosModule({ inspeccoes, certificados, onAddIn
               : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
           }`}
         >
-          Relatórios de Vitoria & Inspecção ({inspeccoes.length})
+          {tText('Relatórios de Vitoria & Inspecção')} ({inspeccoes.length})
         </button>
         <button
           onClick={() => setActiveSubTab('certificados')}
@@ -44,7 +46,7 @@ export function InspeccoesCertificadosModule({ inspeccoes, certificados, onAddIn
               : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800'
           }`}
         >
-          Certificados Emitidos ({certificados.length})
+          {tText('Certificados Emitidos')} ({certificados.length})
         </button>
       </div>
 
@@ -61,7 +63,7 @@ export function InspeccoesCertificadosModule({ inspeccoes, certificados, onAddIn
                       {insp.codigoInspeccao}
                     </span>
                   </div>
-                  <div className="text-xs text-slate-400 mt-1">Inspector Responsável: <span className="text-slate-200">{insp.inspectorNome}</span></div>
+                  <div className="text-xs text-slate-400 mt-1">{tText('Inspector Responsável')}: <span className="text-slate-200">{insp.inspectorNome}</span></div>
                 </div>
 
                 <span
@@ -73,23 +75,23 @@ export function InspeccoesCertificadosModule({ inspeccoes, certificados, onAddIn
                       : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
                   }`}
                 >
-                  {insp.resultado}
+                  {tText(insp.resultado)}
                 </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-slate-950 p-3 rounded-xl border border-slate-800/80 font-mono">
                 <div>
-                  <span className="text-slate-500 text-[10px] block uppercase">Tipo de Vistoria</span>
-                  <span className="text-slate-200">{insp.tipoVistoria}</span>
+                  <span className="text-slate-500 text-[10px] block uppercase">{tText('Tipo de Vistoria')}</span>
+                  <span className="text-slate-200">{tText(insp.tipoVistoria)}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 text-[10px] block uppercase">Data da Vistoria</span>
+                  <span className="text-slate-500 text-[10px] block uppercase">{tText('Data da Vistoria')}</span>
                   <span className="text-slate-200">{insp.dataInspeccao}</span>
                 </div>
               </div>
 
               <div className="text-xs text-slate-300 bg-slate-950/40 p-3 rounded-xl border border-slate-800/60">
-                <span className="text-slate-500 font-semibold block mb-1">Observações do Inspector:</span>
+                <span className="text-slate-500 font-semibold block mb-1">{tText('Observações do Inspector')}:</span>
                 <p>{insp.observacoes}</p>
               </div>
             </div>
@@ -105,29 +107,29 @@ export function InspeccoesCertificadosModule({ inspeccoes, certificados, onAddIn
               <div className="flex items-start justify-between border-b border-slate-800 pb-3">
                 <div>
                   <span className="text-[10px] uppercase font-mono bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20">
-                    Certificado de {cert.tipoCertificado}
+                    {tText('Certificado de')} {tText(cert.tipoCertificado)}
                   </span>
                   <h3 className="font-bold text-white text-base mt-2">{cert.embarcacaoNome}</h3>
                   <div className="text-xs text-slate-400 font-mono mt-0.5">Nº: {cert.numeroCertificado}</div>
                 </div>
                 <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  {cert.status}
+                  {tText(cert.status)}
                 </span>
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                 <div>
-                  <span className="text-slate-500 block text-[10px]">DATA DE EMISSÃO</span>
+                  <span className="text-slate-500 block text-[10px]">{tText('DATA DE EMISSÃO')}</span>
                   <span className="text-slate-200">{cert.dataEmissao}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block text-[10px]">VALIDADE ATÉ</span>
+                  <span className="text-slate-500 block text-[10px]">{tText('VALIDADE ATÉ')}</span>
                   <span className="text-emerald-400">{cert.dataExpiracao}</span>
                 </div>
               </div>
 
               <div className="pt-2 text-[11px] text-slate-500 border-t border-slate-800/80">
-                Emitido por: <span className="text-slate-300">{cert.emitoPor}</span>
+                {tText('Emitido por')}: <span className="text-slate-300">{cert.emitoPor}</span>
               </div>
             </div>
           ))}

@@ -2,6 +2,7 @@ import { useState, FormEvent } from 'react';
 import { FileCheck2, Plus, Search, Printer, X, ShieldCheck, Award, Building2 } from 'lucide-react';
 import { LicencaNavegacao, IMP_INSTITUTIONAL } from '../../types';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { GuineBissauCoatOfArms } from '../common/OfficialEmblems';
 import { DualA4Document } from '../common/DualA4Document';
 
@@ -14,6 +15,7 @@ type EmissionType = 'licenca' | 'cedula' | 'dominio';
 
 export function LicencasModule({ licencas, onAddLicenca }: LicencasModuleProps) {
   const { theme } = useTheme();
+  const { tText } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -75,10 +77,10 @@ export function LicencasModule({ licencas, onAddLicenca }: LicencasModuleProps) 
   };
 
   const getEmissionTitle = () => {
-    if (activeEmissionType === 'licenca') return 'EMISSÃO DE LICENÇA (Duplo A4)';
-    if (activeEmissionType === 'cedula') return 'EMISSÃO DE CÉDULA MARÍTIMA (Duplo A4)';
-    if (activeEmissionType === 'dominio') return 'EMISSÃO DE DOMÍNIO PÚBLICO (Duplo A4)';
-    return 'Emissão Oficial';
+    if (activeEmissionType === 'licenca') return tText('EMISSÃO DE LICENÇA (Duplo A4)');
+    if (activeEmissionType === 'cedula') return tText('EMISSÃO DE CÉDULA MARÍTIMA (Duplo A4)');
+    if (activeEmissionType === 'dominio') return tText('EMISSÃO DE DOMÍNIO PÚBLICO (Duplo A4)');
+    return tText('Emissão Oficial');
   };
 
   return (
@@ -89,10 +91,10 @@ export function LicencasModule({ licencas, onAddLicenca }: LicencasModuleProps) 
             theme === 'dark' ? 'text-white' : 'text-slate-900'
           }`}>
             <FileCheck2 className="w-5 h-5 text-blue-500" />
-            Licenças de Navegação, Cédulas & Domínio Público
+            {tText('Licenças de Navegação, Cédulas & Domínio Público')}
           </h2>
           <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-            Emissão de licenças, cédulas marítimas e concessões de domínio público em formato duplo (com linha de corte)
+            {tText('Emissão de licenças, cédulas marítimas e concessões de domínio público em formato duplo (com linha de corte)')}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -101,21 +103,21 @@ export function LicencasModule({ licencas, onAddLicenca }: LicencasModuleProps) 
             className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-blue-600/20"
           >
             <Award className="w-4 h-4" />
-            EMISSÃO DE LICENÇA
+            {tText('EMISSÃO DE LICENÇA')}
           </button>
           <button
             onClick={() => handleOpenEmission('cedula')}
             className="px-3 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-purple-600/20"
           >
             <ShieldCheck className="w-4 h-4" />
-            EMISSÃO DE CÉDULA MARÍTIMA
+            {tText('EMISSÃO DE CÉDULA MARÍTIMA')}
           </button>
           <button
             onClick={() => handleOpenEmission('dominio')}
             className="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-emerald-600/20"
           >
             <Building2 className="w-4 h-4" />
-            DOMÍNIO PÚBLICO
+            {tText('DOMÍNIO PÚBLICO')}
           </button>
         </div>
       </div>
@@ -128,7 +130,7 @@ export function LicencasModule({ licencas, onAddLicenca }: LicencasModuleProps) 
         <Search className="w-4 h-4 text-slate-400" />
         <input
           type="text"
-          placeholder="Pesquisar por número da licença ou empresa titular..."
+          placeholder={tText('Pesquisar por número da licença ou empresa titular...')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className={`bg-transparent text-xs focus:outline-none w-full ${
@@ -157,14 +159,14 @@ export function LicencasModule({ licencas, onAddLicenca }: LicencasModuleProps) 
                 }`}>{lic.titular}</h3>
                 <p className={`text-xs font-semibold mt-0.5 ${
                   theme === 'dark' ? 'text-slate-300' : 'text-slate-600'
-                }`}>Actividade: {lic.tipoActividade}</p>
+                }`}>{tText('Actividade')}: {lic.tipoActividade}</p>
               </div>
               <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
                 lic.status === 'Válida'
                   ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
                   : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
               }`}>
-                {lic.status}
+                {tText(lic.status)}
               </span>
             </div>
 
@@ -174,11 +176,11 @@ export function LicencasModule({ licencas, onAddLicenca }: LicencasModuleProps) 
                 : 'bg-slate-50 border-slate-200 text-slate-700'
             }`}>
               <div className="flex justify-between">
-                <span className={theme === 'dark' ? 'text-slate-500' : 'text-slate-500'}>DATA CONCESSÃO:</span>
+                <span className={theme === 'dark' ? 'text-slate-500' : 'text-slate-500'}>{tText('DATA CONCESSÃO')}:</span>
                 <span className={theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}>{lic.dataConcessao}</span>
               </div>
               <div className="flex justify-between">
-                <span className={theme === 'dark' ? 'text-slate-500' : 'text-slate-500'}>DATA VALIDADE:</span>
+                <span className={theme === 'dark' ? 'text-slate-500' : 'text-slate-500'}>{tText('DATA VALIDADE')}:</span>
                 <span className="text-blue-500 font-bold">{lic.dataValidade}</span>
               </div>
             </div>
@@ -193,12 +195,12 @@ export function LicencasModule({ licencas, onAddLicenca }: LicencasModuleProps) 
             theme === 'dark' ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
             <h3 className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-              Emitir Licença de Navegação
+              {tText('Emitir Licença de Navegação')}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-3 text-xs">
               <div>
                 <label className={`block mb-1 font-semibold ${theme === 'dark' ? 'text-slate-400' : 'text-slate-700'}`}>
-                  Empresa / Titular Requerente
+                  {tText('Empresa / Titular Requerente')}
                 </label>
                 <input
                   type="text"
@@ -210,12 +212,12 @@ export function LicencasModule({ licencas, onAddLicenca }: LicencasModuleProps) 
                       ? 'bg-slate-950 border-slate-800 text-white'
                       : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
-                  placeholder="Ex: Companhia Fluvial das Bijagós"
+                  placeholder={tText('Ex: Companhia Fluvial das Bijagós')}
                 />
               </div>
               <div>
                 <label className={`block mb-1 font-semibold ${theme === 'dark' ? 'text-slate-400' : 'text-slate-700'}`}>
-                  Tipo de Actividade Marítima
+                  {tText('Tipo de Actividade Marítima')}
                 </label>
                 <select
                   value={formData.tipoActividade}
@@ -226,10 +228,10 @@ export function LicencasModule({ licencas, onAddLicenca }: LicencasModuleProps) 
                       : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
                 >
-                  <option value="Transporte de Passageiros">Transporte de Passageiros e Ferry</option>
-                  <option value="Pesca Comercial">Pesca Comercial Nacional</option>
-                  <option value="Tráfego Local / Cabotagem">Tráfego Local / Cabotagem Fluvial</option>
-                  <option value="Serviços Portuários">Serviços Portuários e Rebocadores</option>
+                  <option value="Transporte de Passageiros">{tText('Transporte de Passageiros e Ferry')}</option>
+                  <option value="Pesca Comercial">{tText('Pesca Comercial Nacional')}</option>
+                  <option value="Tráfego Local / Cabotagem">{tText('Tráfego Local / Cabotagem Fluvial')}</option>
+                  <option value="Serviços Portuários">{tText('Serviços Portuários e Rebocadores')}</option>
                 </select>
               </div>
 
@@ -243,13 +245,13 @@ export function LicencasModule({ licencas, onAddLicenca }: LicencasModuleProps) 
                       : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}
                 >
-                  Cancelar
+                  {tText('Cancelar')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20"
                 >
-                  Conceder Licença
+                  {tText('Conceder Licença')}
                 </button>
               </div>
             </form>
@@ -265,7 +267,7 @@ export function LicencasModule({ licencas, onAddLicenca }: LicencasModuleProps) 
             <div className="flex items-center justify-between pb-3 border-b no-print">
               <div>
                 <span className="text-[10px] font-mono text-blue-600 font-bold uppercase tracking-wider">
-                  Formato Oficial Duplo A4 (Picotado / Cortável)
+                  {tText('Formato Oficial Duplo A4 (Picotado / Cortável)')}
                 </span>
                 <h3 className="text-lg font-bold text-slate-900">{getEmissionTitle()}</h3>
               </div>
@@ -275,7 +277,7 @@ export function LicencasModule({ licencas, onAddLicenca }: LicencasModuleProps) 
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow"
                 >
                   <Printer className="w-4 h-4" />
-                  Imprimir Duplo (A4)
+                  {tText('Imprimir Duplo (A4)')}
                 </button>
                 <button
                   onClick={() => setShowEmissionPreview(false)}
@@ -289,17 +291,17 @@ export function LicencasModule({ licencas, onAddLicenca }: LicencasModuleProps) 
             {/* Formulário de Configuração Rápida (Não aparece na impressão) */}
             <div className="p-3 bg-slate-50 border rounded-xl grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs no-print">
               <div>
-                <label className="block text-slate-600 font-semibold mb-1">Nome do Titular / Requerente</label>
+                <label className="block text-slate-600 font-semibold mb-1">{tText('Nome do Titular / Requerente')}</label>
                 <input
                   type="text"
                   value={emissionForm.requerente}
                   onChange={(e) => setEmissionForm({ ...emissionForm, requerente: e.target.value })}
-                  placeholder="Ex: Gueye Maissa / Ana Lúcia"
+                  placeholder={tText('Ex: Gueye Maissa / Ana Lúcia')}
                   className="w-full px-3 py-1.5 border rounded-lg bg-white"
                 />
               </div>
               <div>
-                <label className="block text-slate-600 font-semibold mb-1">Valor (XOF / Francos Cfa)</label>
+                <label className="block text-slate-600 font-semibold mb-1">{tText('Valor (XOF / Francos Cfa)')}</label>
                 <input
                   type="text"
                   value={emissionForm.importanciaXOF}
@@ -308,7 +310,7 @@ export function LicencasModule({ licencas, onAddLicenca }: LicencasModuleProps) 
                 />
               </div>
               <div>
-                <label className="block text-slate-600 font-semibold mb-1">Referência / Banco</label>
+                <label className="block text-slate-600 font-semibold mb-1">{tText('Referência / Banco')}</label>
                 <input
                   type="text"
                   value={emissionForm.referenciaPagamento}
@@ -346,7 +348,7 @@ export function LicencasModule({ licencas, onAddLicenca }: LicencasModuleProps) 
                 onClick={() => setShowEmissionPreview(false)}
                 className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold"
               >
-                Concluir / Fechar
+                {tText('Concluir / Fechar')}
               </button>
             </div>
           </div>

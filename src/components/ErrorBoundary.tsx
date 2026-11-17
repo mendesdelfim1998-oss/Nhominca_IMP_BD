@@ -34,6 +34,25 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
   public override render() {
     if (this.state.hasError) {
+      const lang = (typeof document !== 'undefined' ? document.documentElement.lang : 'pt') || 'pt';
+      const copy = (lang === 'fr'
+        ? {
+            title: 'Erreur temporaire d’exécution',
+            desc: 'Une anomalie inattendue est survenue dans l’interface. Cliquez sur le bouton ci-dessous pour recharger le module.',
+            reload: 'Recharger l’application'
+          }
+        : lang === 'en'
+        ? {
+            title: 'Temporary runtime error',
+            desc: 'An unexpected issue occurred in the interface. Click the button below to reload the module.',
+            reload: 'Reload application'
+          }
+        : {
+            title: 'Erro Temporário de Execução',
+            desc: 'Ocorreu uma anomalia inesperada na interface. Clique no botão abaixo para recarregar o módulo.',
+            reload: 'Recarregar Aplicação'
+          });
+
       return (
         <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 text-center space-y-4 shadow-2xl">
@@ -41,10 +60,8 @@ export class ErrorBoundary extends React.Component<Props, State> {
               <AlertTriangle className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">Erro Temporário de Execução</h2>
-              <p className="text-xs text-slate-400 mt-1">
-                Ocorreu uma anomalia inesperada na interface. Clique no botão abaixo para recarregar o módulo.
-              </p>
+              <h2 className="text-lg font-bold text-white">{copy.title}</h2>
+              <p className="text-xs text-slate-400 mt-1">{copy.desc}</p>
             </div>
             {this.state.error && (
               <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-left font-mono text-[11px] text-rose-400 overflow-x-auto max-h-32">
@@ -56,7 +73,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
               className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-2 transition-colors shadow-lg shadow-blue-600/20"
             >
               <RefreshCw className="w-4 h-4" />
-              Recarregar Aplicação
+              {copy.reload}
             </button>
           </div>
         </div>

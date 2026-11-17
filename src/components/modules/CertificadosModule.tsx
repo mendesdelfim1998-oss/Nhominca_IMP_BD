@@ -2,6 +2,7 @@ import { useState, FormEvent } from 'react';
 import { Award, Plus, Search } from 'lucide-react';
 import { CertificadoMaritimo } from '../../types';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface CertificadosModuleProps {
   certificados: CertificadoMaritimo[];
@@ -10,6 +11,7 @@ interface CertificadosModuleProps {
 
 export function CertificadosModule({ certificados, onAddCertificado }: CertificadosModuleProps) {
   const { theme } = useTheme();
+  const { tText } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -50,10 +52,10 @@ export function CertificadosModule({ certificados, onAddCertificado }: Certifica
             }`}
           >
             <Award className="w-5 h-5 text-amber-500" />
-            Certificados Marítimos de Navegabilidade & Lotação
+            {tText('Certificados Marítimos de Navegabilidade & Lotação')}
           </h2>
           <p className={theme === 'dark' ? 'text-slate-400 text-xs' : 'text-slate-500 text-xs'}>
-            Emissão e controlo de caducidade de certificados estatutários de navios
+            {tText('Emissão e controlo de caducidade de certificados estatutários de navios')}
           </p>
         </div>
         <button
@@ -61,7 +63,7 @@ export function CertificadosModule({ certificados, onAddCertificado }: Certifica
           className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold transition-colors shadow-lg shadow-blue-600/20"
         >
           <Plus className="w-4 h-4" />
-          Emitir Certificado IMP
+          {tText('Emitir Certificado IMP')}
         </button>
       </div>
 
@@ -73,7 +75,7 @@ export function CertificadosModule({ certificados, onAddCertificado }: Certifica
         <Search className="w-4 h-4 text-slate-400" />
         <input
           type="text"
-          placeholder="Pesquisar por número do certificado ou nome da embarcação..."
+          placeholder={tText('Pesquisar por número do certificado ou nome da embarcação...')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className={`bg-transparent text-xs focus:outline-none w-full ${
@@ -107,7 +109,7 @@ export function CertificadosModule({ certificados, onAddCertificado }: Certifica
                   {cert.embarcacaoNome}
                 </h3>
                 <p className={`text-xs font-semibold mt-0.5 ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                  Certificado de {cert.tipoCertificado}
+                  {tText('Certificado de')} {cert.tipoCertificado}
                 </p>
               </div>
               <span
@@ -117,7 +119,7 @@ export function CertificadosModule({ certificados, onAddCertificado }: Certifica
                     : 'bg-red-500/10 text-red-600 border-red-500/20'
                 }`}
               >
-                {cert.status}
+                {tText(cert.status)}
               </span>
             </div>
 
@@ -129,15 +131,15 @@ export function CertificadosModule({ certificados, onAddCertificado }: Certifica
               }`}
             >
               <div className="flex justify-between">
-                <span className="text-slate-500">DATA DE EMISSÃO:</span>
+                <span className="text-slate-500">{tText('DATA DE EMISSÃO')}:</span>
                 <span className={theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}>{cert.dataEmissao}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">DATA DE EXPIRAÇÃO:</span>
+                <span className="text-slate-500">{tText('DATA DE EXPIRAÇÃO')}:</span>
                 <span className="text-amber-500 font-bold">{cert.dataExpiracao}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">ENTIDADE EMISSORA:</span>
+                <span className="text-slate-500">{tText('ENTIDADE EMISSORA')}:</span>
                 <span className={theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}>{cert.emitoPor}</span>
               </div>
             </div>
@@ -153,11 +155,11 @@ export function CertificadosModule({ certificados, onAddCertificado }: Certifica
             }`}
           >
             <h3 className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-              Emitir Certificado Marítimo
+              {tText('Emitir Certificado Marítimo')}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-3 text-xs">
               <div>
-                <label className="block text-slate-500 mb-1">Nome do Navio / Embarcação</label>
+                <label className="block text-slate-500 mb-1">{tText('Nome do Navio / Embarcação')}</label>
                 <input
                   type="text"
                   required
@@ -166,11 +168,11 @@ export function CertificadosModule({ certificados, onAddCertificado }: Certifica
                   className={`w-full rounded-xl px-3 py-2 border focus:outline-none focus:border-blue-500 ${
                     theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
-                  placeholder="Ex: MV Rio Geba Express"
+                  placeholder={tText('Ex: MV Rio Geba Express')}
                 />
               </div>
               <div>
-                <label className="block text-slate-500 mb-1">Tipo de Certificado</label>
+                <label className="block text-slate-500 mb-1">{tText('Tipo de Certificado')}</label>
                 <select
                   value={formData.tipoCertificado}
                   onChange={e => setFormData({ ...formData, tipoCertificado: e.target.value as any })}
@@ -178,11 +180,11 @@ export function CertificadosModule({ certificados, onAddCertificado }: Certifica
                     theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
                 >
-                  <option value="Navegabilidade">Certificado de Navegabilidade</option>
-                  <option value="Lotação Mínima">Certificado de Lotação Mínima de Segurança</option>
-                  <option value="Segurança Rádio">Certificado de Segurança Rádio</option>
-                  <option value="Prevenção de Poluição">Certificado de Prevenção de Poluição</option>
-                  <option value="Matrícula Marítima">Título de Matrícula Marítima</option>
+                  <option value="Navegabilidade">{tText('Certificado de Navegabilidade')}</option>
+                  <option value="Lotação Mínima">{tText('Certificado de Lotação Mínima de Segurança')}</option>
+                  <option value="Segurança Rádio">{tText('Certificado de Segurança Rádio')}</option>
+                  <option value="Prevenção de Poluição">{tText('Certificado de Prevenção de Poluição')}</option>
+                  <option value="Matrícula Marítima">{tText('Título de Matrícula Marítima')}</option>
                 </select>
               </div>
 
@@ -194,13 +196,13 @@ export function CertificadosModule({ certificados, onAddCertificado }: Certifica
                     theme === 'dark' ? 'bg-slate-800 text-slate-300' : 'bg-slate-100 text-slate-700'
                   }`}
                 >
-                  Cancelar
+                  {tText('Cancelar')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20"
                 >
-                  Gerar Certificado
+                  {tText('Gerar Certificado')}
                 </button>
               </div>
             </form>

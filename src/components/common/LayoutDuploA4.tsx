@@ -7,6 +7,7 @@ import {
 } from '../../utils/qrCodeVerification';
 import { DocumentVerificationModal } from './DocumentVerificationModal';
 import { ShieldCheck, Calendar } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 export interface LayoutDuploA4Props {
   title: string;
@@ -39,6 +40,7 @@ export function LayoutDuploA4({
   validityDate,
   vesselName
 }: LayoutDuploA4Props) {
+  const { tText, language } = useLanguage();
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const [showVerificationModal, setShowVerificationModal] = useState<boolean>(false);
 
@@ -48,12 +50,12 @@ export function LayoutDuploA4({
   const resolvedValidity =
     validityDate ||
     (documentType === 'licenca'
-      ? 'Válido por 1 Ano (Expirável)'
+      ? tText('Válido por 1 Ano (Expirável)')
       : documentType === 'cedula'
-      ? 'Válido por 2 Anos (Registo Marítimo)'
+      ? tText('Válido por 2 Anos (Registo Marítimo)')
       : documentType === 'saida_canoa'
-      ? 'Válido por 24 Horas (Travessia Portuária)'
-      : 'Quitação Definitiva (Sem Expiração)');
+      ? tText('Válido por 24 Horas (Travessia Portuária)')
+      : tText('Quitação Definitiva (Sem Expiração)'));
 
   const verificationData: DocumentVerificationData = {
     documentId: documentNumber || '0001',
@@ -92,8 +94,8 @@ export function LayoutDuploA4({
       {/* Top Tag for Copy Type */}
       <div className="absolute top-2 right-3 text-[9px] font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-300 z-10">
         {copyType === 'CONTRIBUINTE'
-          ? '1ª VIA — CONTRIBUINTE (Quem Paga)'
-          : '2ª VIA — IMP / ARQUIVO (Serviço)'}
+          ? tText('1ª VIA — CONTRIBUINTE (Quem Paga)')
+          : tText('2ª VIA — IMP / ARQUIVO (Serviço)')}
       </div>
 
       {/* Official Institutional Header with Forced Vertical Center Alignment */}
@@ -107,23 +109,23 @@ export function LayoutDuploA4({
         <div className="flex-1 text-center px-1 flex flex-col items-center justify-center">
           <div className="flex items-center justify-center gap-1.5 mb-0.5">
             <span className="text-[10.5px] font-black uppercase tracking-wider text-slate-900">
-              REPÚBLICA DA
+              {tText('REPÚBLICA DA')}
             </span>
             <div className="republic-emblem-container w-8 h-8 flex items-center justify-center shrink-0">
               <GuineBissauCoatOfArms className="w-7 h-7 object-contain inline-block" />
             </div>
             <span className="text-[10.5px] font-black uppercase tracking-wider text-slate-900">
-              GUINÉ-BISSAU
+              {tText('GUINÉ-BISSAU')}
             </span>
           </div>
           <p className="text-[8.5px] font-bold uppercase text-slate-700 tracking-tight">
-            MINISTÉRIO DOS TRANSPORTES, TELECOMUNICAÇÕES E ECONOMIA DIGITAL
+            {tText('MINISTÉRIO DOS TRANSPORTES, TELECOMUNICAÇÕES E ECONOMIA DIGITAL')}
           </p>
           <p className="text-[12px] font-black uppercase text-[#082B59] mt-0.5 tracking-tight">
             {IMP_INSTITUTIONAL.entity}
           </p>
           <p className="text-[8px] font-mono font-bold text-slate-500">
-            NIF: {IMP_INSTITUTIONAL.nif} • Tesouraria Central, Porto de Bissau
+            NIF: {IMP_INSTITUTIONAL.nif} • {tText('Tesouraria Central, Porto de Bissau')}
           </p>
         </div>
 
@@ -131,12 +133,12 @@ export function LayoutDuploA4({
         <div
           onClick={() => setShowVerificationModal(true)}
           className="flex flex-col items-center justify-center shrink-0 pl-2 border-l border-slate-300 cursor-pointer group"
-          title="Clique para testar verificação pública e consultar detalhes da transação"
+          title={tText('Clique para testar verificação pública e consultar detalhes da transação')}
         >
           {qrCodeUrl ? (
             <img
               src={qrCodeUrl}
-              alt="QR Code de Validação Oficial"
+              alt={tText('QR Code de Validação Oficial')}
               className="w-13 h-13 object-contain border border-slate-300 rounded p-0.5 bg-white group-hover:ring-2 group-hover:ring-blue-500 transition-all"
             />
           ) : (
@@ -145,7 +147,7 @@ export function LayoutDuploA4({
             </div>
           )}
           <span className="text-[7.5px] font-mono font-black text-blue-900 uppercase tracking-tighter mt-0.5 group-hover:underline">
-            VALIDAÇÃO IMP 🔍
+            {tText('VALIDAÇÃO IMP')} 🔍
           </span>
           <span className="text-[6.5px] font-mono text-slate-500">
             {validationCode}
@@ -160,31 +162,30 @@ export function LayoutDuploA4({
         </h3>
         <div className="flex items-center gap-1 bg-blue-50 border border-blue-200 text-blue-900 px-2 py-0.5 rounded text-[9.5px] font-mono font-bold">
           <Calendar className="w-3 h-3 text-blue-600" />
-          <span>Validade: {resolvedValidity}</span>
+          <span>{tText('Validade')}: {resolvedValidity}</span>
         </div>
       </div>
 
       {/* Narrative Description matching official IMP standard */}
       <div className="text-[11px] space-y-1 text-slate-900 leading-relaxed font-sans px-2 shrink-0">
         <p className="text-justify">
-          Eu, <strong className="underline font-bold">{treasuryOfficial}</strong>
-          , Responsável Principal da Tesouraria do IMP, recebi de{' '}
+          {tText('Eu,')} <strong className="underline font-bold">{treasuryOfficial}</strong>
+          , {tText('Responsável Principal da Tesouraria do IMP, recebi de')}{' '}
           <strong className="underline font-bold uppercase">
-            {payerName || '[Nome do Requerente / Entidade]'}
+            {payerName || tText('[Nome do Requerente / Entidade]')}
           </strong>{' '}
-          a Importância de{' '}
+          {tText('a Importância de')}{' '}
           <strong className="underline font-mono font-bold">
             {typeof amount === 'number'
-              ? amount.toLocaleString('pt-PT')
+              ? amount.toLocaleString(language === 'fr' ? 'fr-FR' : language === 'en' ? 'en-US' : 'pt-PT')
               : amount}{' '}
-            Francos Cfa
+            {tText('Francos Cfa')}
           </strong>{' '}
-          <span className="font-serif italic">({amountInWords})</span> Ref. Pag.
-          de{' '}
+          <span className="font-serif italic">({amountInWords})</span> {tText('Ref. Pag. de')}{' '}
           <span className="font-mono font-bold">
             {paymentReference} ({bank})
           </span>{' '}
-          referente a: <span className="font-bold underline">{description}</span>.
+          {tText('referente a')}: <span className="font-bold underline">{description}</span>.
         </p>
       </div>
 
@@ -192,19 +193,19 @@ export function LayoutDuploA4({
       <div className="flex items-end justify-between pt-1.5 px-2 text-xs shrink-0 mt-auto border-t border-slate-100">
         <div className="space-y-0.5">
           <div className="font-mono text-[10px] text-slate-700 font-semibold">
-            Bissau, {date}
+            {tText('Bissau')}, {date}
           </div>
           <div className="text-[8px] font-mono text-slate-500 uppercase flex items-center gap-1">
             <ShieldCheck className="w-3 h-3 text-emerald-600 inline" />
-            <span>Autenticado na Base de Dados Central do IMP</span>
+            <span>{tText('Autenticado na Base de Dados Central do IMP')}</span>
           </div>
         </div>
 
         <div className="text-center">
           <div className="text-[9px] font-bold uppercase text-slate-600 mb-2">
-            Atentamente
+            {tText('Atentamente')}
             <br />
-            O Chefe de Serviço de Tesouraria
+            {tText('O Chefe de Serviço de Tesouraria')}
           </div>
           <div className="border-t border-slate-900 pt-0.5 w-44 font-bold text-[10.5px] font-mono text-slate-900">
             {treasuryOfficial}
@@ -227,7 +228,7 @@ export function LayoutDuploA4({
         <div className="flex items-center gap-2 py-0.5 no-print-hide shrink-0 h-[22px] my-auto">
           <div className="flex-1 border-t-2 border-dashed border-rose-600"></div>
           <div className="text-[9px] font-mono font-bold text-rose-700 bg-rose-50 px-3 py-0.5 rounded-full border border-rose-300 shadow-xs uppercase tracking-wider whitespace-nowrap">
-            ✂️ LINHA DE CORTE CENTRAL (DESTACÁVEL) — QUEM PAGA LEVA A 1ª VIA / IMP FICA COM A 2ª VIA ✂️
+            {tText('✂️ LINHA DE CORTE CENTRAL (DESTACÁVEL) — QUEM PAGA LEVA A 1ª VIA / IMP FICA COM A 2ª VIA ✂️')}
           </div>
           <div className="flex-1 border-t-2 border-dashed border-rose-600"></div>
         </div>

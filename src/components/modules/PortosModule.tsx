@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Compass, MapPin, Search } from 'lucide-react';
 import { PortoTerminal } from '../../types';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface PortosModuleProps {
   portos: PortoTerminal[];
@@ -9,6 +10,7 @@ interface PortosModuleProps {
 
 export function PortosModule({ portos }: PortosModuleProps) {
   const { theme } = useTheme();
+  const { tText } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
 
   const filtered = portos.filter(p =>
@@ -27,10 +29,10 @@ export function PortosModule({ portos }: PortosModuleProps) {
             }`}
           >
             <Compass className="w-5 h-5 text-blue-500" />
-            Portos, Terminais & Zonas Marítimas da Guiné-Bissau
+            {tText('Portos, Terminais & Zonas Marítimas da Guiné-Bissau')}
           </h2>
           <p className={theme === 'dark' ? 'text-slate-400 text-xs' : 'text-slate-500 text-xs'}>
-            Infraestruturas portuárias, calados máximos, cais operacionais e regulação das águas jurisdicionais
+            {tText('Infraestruturas portuárias, calados máximos, cais operacionais e regulação das águas jurisdicionais')}
           </p>
         </div>
       </div>
@@ -43,7 +45,7 @@ export function PortosModule({ portos }: PortosModuleProps) {
         <Search className="w-4 h-4 text-slate-400" />
         <input
           type="text"
-          placeholder="Pesquisar porto por nome, código UN/LOCODE ou localização..."
+          placeholder={tText('Pesquisar porto por nome, código UN/LOCODE ou localização...')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className={`bg-transparent text-xs focus:outline-none w-full ${
@@ -89,22 +91,22 @@ export function PortosModule({ portos }: PortosModuleProps) {
               }`}
             >
               <div className="flex justify-between">
-                <span className="text-slate-500">CAIS DISPONÍVEIS:</span>
-                <span className="text-emerald-500 font-bold">{porto.numCaisDisponiveis} Postos</span>
+                <span className="text-slate-500">{tText('CAIS DISPONÍVEIS')}:</span>
+                <span className="text-emerald-500 font-bold">{porto.numCaisDisponiveis} {tText('Postos')}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">CALADO MÁXIMO:</span>
-                <span className="text-blue-500 font-bold">{porto.caladoMaximoPermitido} Metros</span>
+                <span className="text-slate-500">{tText('CALADO MÁXIMO')}:</span>
+                <span className="text-blue-500 font-bold">{porto.caladoMaximoPermitido} {tText('Metros')}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">AUTORIDADE:</span>
+                <span className="text-slate-500">{tText('AUTORIDADE')}:</span>
                 <span className={theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}>{porto.autoridadePortuaria}</span>
               </div>
             </div>
 
             <div className={`pt-2 border-t text-xs ${theme === 'dark' ? 'border-slate-800' : 'border-slate-100'}`}>
               <span className="text-slate-500 block mb-1 font-semibold text-[10px] uppercase tracking-wider">
-                Capacidade Operacional:
+                {tText('Capacidade Operacional')}:
               </span>
               <p
                 className={`p-2.5 rounded-lg border leading-relaxed ${
