@@ -73,7 +73,7 @@ export function PortosModule({ portos }: PortosModuleProps) {
                       : 'bg-blue-50 text-blue-700 border-blue-200'
                   }`}
                 >
-                  UN/LOCODE: {porto.codigoUNLOCODE}
+                  {tText('UN/LOCODE')}: {porto.codigoUNLOCODE}
                 </span>
                 <h3 className={`font-bold text-lg mt-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                   {porto.nomePorto}

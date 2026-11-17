@@ -107,6 +107,8 @@ export function FacturacaoModule({
 }: FacturacaoModuleProps) {
   const { theme } = useTheme();
   const { language, t, tText } = useLanguage();
+  const locale = language === 'fr' ? 'fr-FR' : language === 'en' ? 'en-US' : 'pt-PT';
+  const formatNumber = (value: number) => Math.round(value || 0).toLocaleString(locale);
 
   // Search & Status Tab
   const [searchTerm, setSearchTerm] = useState('');
@@ -198,7 +200,16 @@ export function FacturacaoModule({
   };
 
   const handleExportCSV = () => {
-    const headers = ['Nº Fatura', 'Data', 'Cliente', 'NIF', 'Navio', 'Valor Total (XOF)', 'Estado', 'Criado Por'];
+    const headers = [
+      tText('Nº Fatura'),
+      tText('Data'),
+      tText('Cliente'),
+      tText('NIF'),
+      tText('Navio'),
+      `${tText('Valor Total')} (XOF)`,
+      tText('Estado'),
+      tText('Criado Por')
+    ];
     const rows = filteredFaturas.map(f => [
       f.nFatura || `FAT-${f.ano}-${f.seq}`,
       f.data,
@@ -207,7 +218,7 @@ export function FacturacaoModule({
       `"${(f.navio || '').replace(/"/g, '""')}"`,
       f.total || 0,
       f.estado,
-      `"${(f.criado_por || 'Operador').replace(/"/g, '""')}"`
+      `"${(f.criado_por || tText('Operador')).replace(/"/g, '""')}"`
     ]);
 
     const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(e => e.join(';'))].join('\n');
@@ -300,7 +311,7 @@ export function FacturacaoModule({
   // Open Edit Modal (allowed only for "rascunho")
   const handleOpenEditModal = (fat: FaturaIMP) => {
     if (fat.estado !== 'rascunho') {
-      alert('Apenas faturas em estado "Rascunho" podem ser editadas pelo operador.');
+      alert(tText('Apenas faturas em estado "Rascunho" podem ser editadas pelo operador.'));
       return;
     }
     setEditingFatura(fat);
@@ -495,7 +506,7 @@ export function FacturacaoModule({
   // Anulação handler (Admin/SuperAdmin only with mandatory justification)
   const handleConfirmAnulacao = () => {
     if (!justificativaAnulacao.trim() || justificativaAnulacao.trim().length < 10) {
-      setAnulacaoError('A justificativa de anulação é obrigatória e deve ter pelo menos 10 caracteres.');
+      setAnulacaoError(tText('A justificativa de anulação é obrigatória e deve ter pelo menos 10 caracteres.'));
       return;
     }
     if (anulandoFatura) {
@@ -537,35 +548,35 @@ export function FacturacaoModule({
         return (
           <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-amber-500/10 text-amber-500 border border-amber-500/30 flex items-center gap-1 w-fit">
             <Clock className="w-3 h-3" />
-            Rascunho (Editável)
+            {tText('Rascunho (Editável)')}
           </span>
         );
       case 'confirmada':
         return (
           <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-blue-500/10 text-blue-500 border border-blue-500/30 flex items-center gap-1 w-fit">
             <CheckCircle2 className="w-3 h-3" />
-            Confirmada (Pendente Caixa)
+            {tText('Confirmada (Pendente Caixa)')}
           </span>
         );
       case 'parcial':
         return (
           <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1 w-fit">
             <Clock className="w-3 h-3" />
-            Amortização Parcial
+            {tText('Amortização Parcial')}
           </span>
         );
       case 'paga':
         return (
           <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 flex items-center gap-1 w-fit">
             <FileCheck className="w-3 h-3" />
-            Totalmente Paga
+            {tText('Totalmente Paga')}
           </span>
         );
       case 'anulada':
         return (
           <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-rose-500/10 text-rose-500 border border-rose-500/30 flex items-center gap-1 w-fit">
             <Ban className="w-3 h-3" />
-            Anulada (PCA)
+            {tText('Anulada (PCA)')}
           </span>
         );
     }
@@ -611,30 +622,30 @@ export function FacturacaoModule({
     if (diffDays < 0) {
       const absDays = Math.abs(diffDays);
       return (
-        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-rose-600 text-white animate-pulse shadow-sm" title={`Vencimento: ${dueStr}`}>
+        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-rose-600 text-white animate-pulse shadow-sm" title={`${tText('Vencimento')}: ${dueStr}`}>
           <AlertTriangle className="w-3 h-3 text-yellow-300 shrink-0" />
-          {absDays === 1 ? `ATRASADA (1 DIA)` : `ATRASADA (${absDays} DIAS)`}
+          {absDays === 1 ? tText('ATRASADA (1 DIA)') : `${tText('ATRASADA')} (${absDays} ${tText('DIAS')})`}
         </span>
       );
     } else if (diffDays === 0) {
       return (
-        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500 text-white shadow-sm" title={`Vencimento: ${dueStr}`}>
+        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500 text-white shadow-sm" title={`${tText('Vencimento')}: ${dueStr}`}>
           <Clock className="w-3 h-3 shrink-0" />
-          VENCE HOJE
+          {tText('VENCE HOJE')}
         </span>
       );
     } else if (diffDays <= 3) {
       return (
-        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300 border border-orange-300 dark:border-orange-800" title={`Vencimento: ${dueStr}`}>
+        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300 border border-orange-300 dark:border-orange-800" title={`${tText('Vencimento')}: ${dueStr}`}>
           <AlertCircle className="w-3 h-3 text-orange-600 shrink-0" />
-          {`VENCE EM ${diffDays} DIA${diffDays > 1 ? 'S' : ''}`}
+          {`${tText('VENCE EM')} ${diffDays} ${diffDays > 1 ? tText('DIAS') : tText('DIA')}`}
         </span>
       );
     } else {
       return (
-        <span className="inline-flex items-center gap-1 text-[10px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full" title={`Data de Vencimento: ${dueStr}`}>
+        <span className="inline-flex items-center gap-1 text-[10px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full" title={`${tText('Data de Vencimento')}: ${dueStr}`}>
           <Calendar className="w-3 h-3 text-slate-400 shrink-0" />
-          {`Venc.: ${dueStr}`}
+          {`${tText('Venc.')} ${dueStr}`}
         </span>
       );
     }
@@ -650,7 +661,7 @@ export function FacturacaoModule({
               {tText('MÓDULO DE FATURAÇÃO & TARIFAS')}
             </span>
             <span className="text-xs font-mono text-slate-500">
-              NIF: {IMP_INSTITUTIONAL.nif} • Moeda: {IMP_INSTITUTIONAL.currency}
+              NIF: {IMP_INSTITUTIONAL.nif} • {tText('Moeda')}: {IMP_INSTITUTIONAL.currency}
             </span>
           </div>
           <h2 className="text-xl font-bold tracking-tight mt-1 flex items-center gap-2">
@@ -667,7 +678,7 @@ export function FacturacaoModule({
             <button
               onClick={onNavigateToDashboard}
               className="inline-flex items-center gap-2 px-3.5 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-bold transition-all border border-slate-600 shadow-sm cursor-pointer"
-              title="Voltar ao Painel Principal"
+              title={tText('Voltar ao Painel Principal')}
             >
               <span>{tText('← Voltar ao Painel')}</span>
             </button>
@@ -676,7 +687,7 @@ export function FacturacaoModule({
             <button
               onClick={() => handleAutoPrintFaturaById(selectedFaturaId)}
               className="inline-flex items-center justify-center p-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-600/20 cursor-pointer active:scale-95"
-              title={`Imprimir Automaticamente a fatura ${faturas.find((f) => f.id === selectedFaturaId)?.nFatura || selectedFaturaId}`}
+              title={`${tText('Imprimir Automaticamente a fatura')} ${faturas.find((f) => f.id === selectedFaturaId)?.nFatura || selectedFaturaId}`}
             >
               <Printer className="w-5 h-5" />
             </button>
@@ -689,7 +700,7 @@ export function FacturacaoModule({
                 ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700 shadow-sm'
                 : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-300 shadow-sm'
             }`}
-            title="Exportar a lista atual de faturas em formato CSV para análise externa"
+            title={tText('Exportar a lista atual de faturas em formato CSV para análise externa')}
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-500 shrink-0" />
             <span>{tText('Exportar para CSV')}</span>
@@ -699,7 +710,7 @@ export function FacturacaoModule({
           <button
             onClick={() => setShowVisaoGeralModal(true)}
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#082B59] hover:bg-blue-900 text-white rounded-xl text-xs font-black transition-all shadow-lg shadow-blue-900/30 border border-blue-400/30 cursor-pointer active:scale-95 ring-2 ring-blue-500/20"
-            title="Abrir Painel Consolidado de Operações & Prestação de Contas (Tempo Real)"
+            title={tText('Abrir Painel Consolidado de Operações & Prestação de Contas (Tempo Real)')}
           >
             <BarChart3 className="w-4 h-4 text-cyan-300 animate-pulse shrink-0" />
             <span>{tText('Painel de Operações')}</span>
@@ -726,7 +737,7 @@ export function FacturacaoModule({
         >
           <span className="text-[10px] uppercase font-mono text-slate-400 font-semibold block">{tText('TOTAL EMITIDO / VÁLIDO')}</span>
           <div className="text-2xl font-bold font-mono text-blue-400 mt-1">
-            {totalFaturado.toLocaleString('pt-PT')} XOF
+            {totalFaturado.toLocaleString(locale)} XOF
           </div>
           <span className="text-[11px] text-slate-500 mt-1 block">{tText('Moeda Oficial Franco CFA')}</span>
         </div>
@@ -738,7 +749,7 @@ export function FacturacaoModule({
         >
           <span className="text-[10px] uppercase font-mono text-slate-400 font-semibold block">{tText('CONFIRMADAS (A AGUARDAR CAIXA)')}</span>
           <div className="text-2xl font-bold font-mono text-amber-400 mt-1">
-            {totalConfirmadoPendente.toLocaleString('pt-PT')} XOF
+            {formatNumber(totalConfirmadoPendente)} XOF
           </div>
           <span className="text-[11px] text-amber-500/80 mt-1 block">{tText('Prontas para liquidação bancária')}</span>
         </div>
@@ -750,7 +761,7 @@ export function FacturacaoModule({
         >
           <span className="text-[10px] uppercase font-mono text-slate-400 font-semibold block">{tText('TOTAL LIQUIDADO (CAIXA)')}</span>
           <div className="text-2xl font-bold font-mono text-emerald-400 mt-1">
-            {totalPago.toLocaleString('pt-PT')} XOF
+            {formatNumber(totalPago)} XOF
           </div>
           <span className="text-[11px] text-emerald-500/80 mt-1 block">{tText('Com recibos emitidos no Caixa')}</span>
         </div>
@@ -937,7 +948,7 @@ export function FacturacaoModule({
                         <span className={fat.estado === 'anulada' ? 'line-through' : ''}>{fat.nFatura}</span>
                         {fat.estado === 'anulada' && (
                           <span className="text-[9px] bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300 font-bold px-1.5 py-0.5 rounded ml-1">
-                            ANULADA
+                            {tText('ANULADA')}
                           </span>
                         )}
                       </div>
@@ -967,7 +978,7 @@ export function FacturacaoModule({
                         {fat.navio}
                       </div>
                       <span className="text-[10px] text-slate-400 font-mono">
-                        {fat.tipo} • GT: {fat.gross_tonnage?.toLocaleString('pt-PT')}
+                        {fat.tipo} • GT: {fat.gross_tonnage?.toLocaleString(locale)}
                       </span>
                     </td>
 
@@ -978,16 +989,16 @@ export function FacturacaoModule({
                           theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'
                         }`}
                       >
-                        {fat.total.toLocaleString('pt-PT')} XOF
+                        {fat.total.toLocaleString(locale)} XOF
                       </div>
                       {fat.estado === 'parcial' && (
                         <div className="text-[10px] font-mono text-amber-500 font-semibold">
-                          Pago: {(fat.saldo_pago || 0).toLocaleString('pt-PT')} | Resta: {(fat.saldo_pendente || 0).toLocaleString('pt-PT')} XOF
+                          {tText('Pago')}: {(fat.saldo_pago || 0).toLocaleString(locale)} | {tText('Resta')}: {(fat.saldo_pendente || 0).toLocaleString(locale)} XOF
                         </div>
                       )}
                       {fat.estado === 'confirmada' && (
                         <div className="text-[10px] font-mono text-slate-400">
-                          Pendente integral
+                          {tText('Pendente integral')}
                         </div>
                       )}
                     </td>
@@ -1012,7 +1023,7 @@ export function FacturacaoModule({
                             e.stopPropagation();
                             handleAutoPrintFatura(fat);
                           }}
-                          title={`Imprimir Fatura Oficial ${fat.nFatura}`}
+                          title={`${tText('Imprimir Fatura Oficial')} ${fat.nFatura}`}
                           className="p-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all text-xs font-bold flex items-center justify-center shadow-sm active:scale-95 cursor-pointer"
                         >
                           <Printer className="w-4 h-4" />
@@ -1025,7 +1036,7 @@ export function FacturacaoModule({
                             setSelectedFaturaId(fat.id);
                             setViewingFatura(fat);
                           }}
-                          title="Visualizar Detalhes e Exportar PDF"
+                          title={tText('Visualizar Detalhes e Exportar PDF')}
                           className="p-1.5 rounded-lg bg-slate-500/10 text-slate-400 hover:bg-slate-600 hover:text-white transition-all text-xs cursor-pointer"
                         >
                           <Eye className="w-3.5 h-3.5" />
@@ -1036,7 +1047,7 @@ export function FacturacaoModule({
                           <>
                             <button
                               onClick={() => handleOpenEditModal(fat)}
-                              title="Editar Fatura em Rascunho"
+                              title={tText('Editar Fatura em Rascunho')}
                               className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400 hover:bg-amber-600 hover:text-white transition-colors"
                             >
                               <Edit3 className="w-3.5 h-3.5" />
@@ -1044,11 +1055,11 @@ export function FacturacaoModule({
                             <button
                               onClick={() => {
     onConfirmFatura(fat.id);
-    if (window.confirm('Fatura validada e confirmada com sucesso!\n\nDeseja imprimir o documento oficial agora?')) {
+    if (window.confirm(tText('Fatura validada e confirmada com sucesso!\n\nDeseja imprimir o documento oficial agora?'))) {
       handlePrintFaturaById(fat.id);
     }
   }}
-                              title="Confirmar Fatura (Bloquear e enviar para Caixa)"
+                              title={tText('Confirmar Fatura (Bloquear e enviar para Caixa)')}
                               className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-600 hover:text-white transition-colors"
                             >
                               <Check className="w-3.5 h-3.5" />
@@ -1064,7 +1075,7 @@ export function FacturacaoModule({
                               setJustificativaAnulacao('');
                               setAnulacaoError('');
                             }}
-                            title="Anular Fatura (Requer Justificativa do PCA)"
+                            title={tText('Anular Fatura (Requer Justificativa do PCA)')}
                             className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-600 hover:text-white transition-colors"
                           >
                             <Ban className="w-3.5 h-3.5" />
@@ -1095,36 +1106,36 @@ export function FacturacaoModule({
             </div>
             <div>
               <h3 className="text-sm font-black uppercase tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-                <span>Faturas Anuladas • Registo no Fundo da Folha</span>
+                <span>{tText('Faturas Anuladas • Registo no Fundo da Folha')}</span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-600 text-white">
                   {faturas.filter((f) => f.estado === 'anulada').length}
                 </span>
               </h3>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Arquivo permanente e transparente de todas as faturas canceladas por despacho da administração (Segregação SoD)
+                {tText('Arquivo permanente e transparente de todas as faturas canceladas por despacho da administração (Segregação SoD)')}
               </p>
             </div>
           </div>
           <span className="text-[10px] font-mono text-rose-700 dark:text-rose-300 bg-rose-100 dark:bg-rose-900/60 px-2.5 py-1 rounded-lg font-bold">
-            Auditoria Permanente DGCI / PCA
+            {tText('Auditoria Permanente DGCI / PCA')}
           </span>
         </div>
 
         {faturas.filter((f) => f.estado === 'anulada').length === 0 ? (
           <div className="p-6 text-center text-slate-400 font-mono text-xs">
-            Nenhuma fatura portuária foi anulada no exercício corrente. Todas as faturas mantêm validade fiscal ativa.
+            {tText('Nenhuma fatura portuária foi anulada no exercício corrente. Todas as faturas mantêm validade fiscal ativa.')}
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead className="bg-rose-50/30 dark:bg-slate-950/40 text-slate-600 dark:text-slate-400 font-mono uppercase text-[10px] border-b border-rose-100 dark:border-slate-800">
                 <tr>
-                  <th className="p-3">Nº Fatura & Data</th>
-                  <th className="p-3">Cliente / Agência & Navio</th>
-                  <th className="p-3 text-right">Valor Original</th>
-                  <th className="p-3">Anulado Por & Data</th>
-                  <th className="p-3">Motivo / Justificativa Oficial</th>
-                  <th className="p-3 text-right">Ação</th>
+                  <th className="p-3">{tText('Nº Fatura & Data')}</th>
+                  <th className="p-3">{tText('Cliente / Agência & Navio')}</th>
+                  <th className="p-3 text-right">{tText('Valor Original')}</th>
+                  <th className="p-3">{tText('Anulado Por & Data')}</th>
+                  <th className="p-3">{tText('Motivo / Justificativa Oficial')}</th>
+                  <th className="p-3 text-right">{tText('Ação')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-rose-100 dark:divide-slate-800 font-sans">
@@ -1140,7 +1151,7 @@ export function FacturacaoModule({
                           {anulada.nFatura}
                         </span>
                         <span className="text-[10px] text-slate-400 font-mono">
-                          Emitida: {anulada.data}
+                          {tText('Emitida')}: {anulada.data}
                         </span>
                       </td>
                       <td className="p-3">
@@ -1153,7 +1164,7 @@ export function FacturacaoModule({
                         </div>
                       </td>
                       <td className="p-3 text-right whitespace-nowrap font-mono font-bold text-slate-700 dark:text-slate-300">
-                        {anulada.total.toLocaleString('pt-PT')} XOF
+                        {anulada.total.toLocaleString(locale)} XOF
                       </td>
                       <td className="p-3 whitespace-nowrap">
                         <div className="font-semibold text-slate-800 dark:text-slate-200">
@@ -1165,7 +1176,7 @@ export function FacturacaoModule({
                       </td>
                       <td className="p-3 max-w-xs">
                         <p className="text-[11px] text-rose-700 dark:text-rose-300 italic bg-rose-50 dark:bg-rose-950/50 p-2 rounded-lg border border-rose-200/60 dark:border-rose-900/40">
-                          "{anulada.justificativaAnulacao || 'Anulação formal homologada pela administração portuária'}"
+                          "{anulada.justificativaAnulacao || tText('Anulação formal homologada pela administração portuária')}"
                         </p>
                       </td>
                       <td className="p-3 text-right whitespace-nowrap">
@@ -1175,7 +1186,7 @@ export function FacturacaoModule({
                           className="px-2.5 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-800 dark:bg-rose-900/50 dark:hover:bg-rose-900 dark:text-rose-200 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ml-auto cursor-pointer"
                         >
                           <Eye className="w-3.5 h-3.5" />
-                          <span>Ver Fatura</span>
+                          <span>{tText('Ver Fatura')}</span>
                         </button>
                       </td>
                     </tr>
@@ -1202,9 +1213,9 @@ export function FacturacaoModule({
                 </div>
                 <div>
                   <h3 className="text-sm font-black uppercase tracking-widest">
-                    {editingFatura ? `Editor de Fatura: ${editingFatura.nFatura}` : 'Emissão de Fatura Portuária (A4 Official)'}
+                    {editingFatura ? `${tText('Editor de Fatura')}: ${editingFatura.nFatura}` : tText('Emissão de Fatura Portuária (A4 Official)')}
                   </h3>
-                  <p className="text-[10px] opacity-80 font-mono">Sistema de Gestão Marítima — IMP Guiné-Bissau</p>
+                  <p className="text-[10px] opacity-80 font-mono">{tText('Sistema de Gestão Marítima — IMP Guiné-Bissau')}</p>
                 </div>
               </div>
               <button
@@ -1224,11 +1235,11 @@ export function FacturacaoModule({
                 <div className={`p-4 rounded-xl border ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
                   <div className="flex items-center gap-2 mb-4 border-b pb-2">
                     <Ship className="w-4 h-4 text-blue-500" />
-                    <span className="text-[11px] font-black uppercase text-slate-500">Informação da Embarcação (Navio)</span>
+                    <span className="text-[11px] font-black uppercase text-slate-500">{tText('Informação da Embarcação (Navio)')}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase">Selecione o Navio:</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase">{tText('Selecione o Navio:')}</label>
                       <select
                         value={selectedEmbarcacaoId}
                         onChange={(e) => setSelectedEmbarcacaoId(e.target.value)}
@@ -1245,21 +1256,21 @@ export function FacturacaoModule({
                       </select>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase">Número IMO:</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase">{tText('Número IMO:')}</label>
                       <div className="w-full rounded-lg px-3 py-2 text-xs border font-mono bg-slate-100 dark:bg-slate-800 text-slate-500 border-dashed">
                         {selectedEmbarcacao?.numeroIMO || '---'}
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase">Tipo de Navio:</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase">{tText('Tipo de Navio:')}</label>
                       <div className="w-full rounded-lg px-3 py-2 text-xs border font-mono bg-slate-100 dark:bg-slate-800 text-slate-500 border-dashed">
                         {selectedEmbarcacao?.tipo || '---'}
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase">Arqueação Bruta (GT):</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase">{tText('Arqueação Bruta (GT):')}</label>
                       <div className="w-full rounded-lg px-3 py-2 text-xs border font-mono font-bold text-blue-600 bg-blue-50 dark:bg-blue-900/20 border-blue-200">
-                        {selectedEmbarcacao?.tonelagemBruta?.toLocaleString('pt-PT')} GT
+                        {selectedEmbarcacao?.tonelagemBruta?.toLocaleString(locale)} GT
                       </div>
                     </div>
                   </div>
@@ -1269,11 +1280,11 @@ export function FacturacaoModule({
                 <div className={`p-4 rounded-xl border ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
                   <div className="flex items-center gap-2 mb-4 border-b pb-2">
                     <Building2 className="w-4 h-4 text-emerald-500" />
-                    <span className="text-[11px] font-black uppercase text-slate-500">Agência Marítima / Facturar a:</span>
+                    <span className="text-[11px] font-black uppercase text-slate-500">{tText('Agência Marítima / Facturar a:')}</span>
                   </div>
                   <div className="grid grid-cols-1 gap-4">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase">Agente Responsável:</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase">{tText('Agente Responsável:')}</label>
                       <select
                         value={selectedAgenciaId}
                         onChange={(e) => setSelectedAgenciaId(e.target.value)}
@@ -1291,13 +1302,13 @@ export function FacturacaoModule({
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase">NIF do Cliente:</label>
+                        <label className="text-[10px] font-bold text-slate-400 uppercase">{tText('NIF do Cliente:')}</label>
                         <div className="w-full rounded-lg px-3 py-2 text-xs border font-mono bg-slate-100 dark:bg-slate-800 text-slate-500 border-dashed">
                           {selectedAgencia?.nif || '---'}
                         </div>
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase">Data de Emissão:</label>
+                        <label className="text-[10px] font-bold text-slate-400 uppercase">{tText('Data de Emissão:')}</label>
                         <input
                           type="date"
                           value={dataEmissao}
@@ -1311,7 +1322,7 @@ export function FacturacaoModule({
                       <div className="space-y-1">
                         <label className="text-[10px] font-bold text-rose-500 uppercase flex items-center gap-1">
                           <Calendar className="w-3 h-3 text-rose-500" />
-                          <span>Data Vencimento:</span>
+                          <span>{tText('Data Vencimento:')}</span>
                         </label>
                         <input
                           type="date"
@@ -1333,8 +1344,8 @@ export function FacturacaoModule({
                 {/* Desconto Comercial */}
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-400 uppercase flex items-center justify-between">
-                    <span>Desconto Comercial em Percentagem (%)</span>
-                    <span className="font-mono text-emerald-500 font-bold">-{descontoValorXOF.toLocaleString('pt-PT')} XOF</span>
+                    <span>{tText('Desconto Comercial em Percentagem (%)')}</span>
+                    <span className="font-mono text-emerald-500 font-bold">-{descontoValorXOF.toLocaleString(locale)} XOF</span>
                   </label>
                   <div className="flex items-center gap-2">
                     <input
@@ -1363,9 +1374,9 @@ export function FacturacaoModule({
                         onChange={(e) => setAplicarIVA(e.target.checked)}
                         className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
                       />
-                      <span>Incluir IVA (Imposto s/ Valor Acrescentado)</span>
+                      <span>{tText('Incluir IVA (Imposto s/ Valor Acrescentado)')}</span>
                     </label>
-                    <span className="font-mono text-blue-400 font-bold">+{valorIVAXOF.toLocaleString('pt-PT')} XOF</span>
+                    <span className="font-mono text-blue-400 font-bold">+{valorIVAXOF.toLocaleString(locale)} XOF</span>
                   </div>
                   {aplicarIVA ? (
                     <div className="flex items-center gap-2">
@@ -1385,7 +1396,7 @@ export function FacturacaoModule({
                     </div>
                   ) : (
                     <div className="text-[10px] text-slate-400 font-mono italic py-1">
-                      * Isento de IVA (Conforme legislação aplicável a serviços marítimos).
+                      {tText('* Isento de IVA (Conforme legislação aplicável a serviços marítimos).')}
                     </div>
                   )}
                 </div>
@@ -1397,10 +1408,10 @@ export function FacturacaoModule({
                   <div className="flex items-center gap-2">
                     <Calculator className="w-4 h-4 text-blue-500" />
                     <span className="text-[11px] font-black uppercase text-slate-700 dark:text-slate-200">
-                      Lançamento das Vendas / Rubricas de Facturação
+                      {tText('Lançamento das Vendas / Rubricas de Facturação')}
                     </span>
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                      Tarifário Homologado pelo Diretor
+                      {tText('Tarifário Homologado pelo Diretor')}
                     </span>
                   </div>
 
@@ -1410,10 +1421,10 @@ export function FacturacaoModule({
                         type="button"
                         onClick={() => setShowAddRubricaModal(true)}
                         className="px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/30 rounded text-[10px] font-bold flex items-center gap-1 transition-all"
-                        title="Registar Nova Rubrica Oficial no Tarifário (Privilégio do Diretor / PCA)"
+                        title={tText('Registar Nova Rubrica Oficial no Tarifário (Privilégio do Diretor / PCA)')}
                       >
                         <ShieldCheck className="w-3.5 h-3.5" />
-                        + Nova Rubrica (Direção)
+                        {tText('+ Nova Rubrica (Direção)')}
                       </button>
                     )}
                     <button
@@ -1422,7 +1433,7 @@ export function FacturacaoModule({
                       className="px-3 py-1 bg-[#082B59] hover:bg-blue-800 text-white rounded text-[10px] font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      Adicionar Nova Linha
+                      {tText('Adicionar Nova Linha')}
                     </button>
                   </div>
                 </div>
@@ -1430,10 +1441,10 @@ export function FacturacaoModule({
                 <table className="w-full text-left text-xs border-collapse">
                   <thead className={`text-[10px] font-black uppercase ${theme === 'dark' ? 'bg-[#070D18] text-slate-400' : 'bg-slate-50 text-slate-500'}`}>
                     <tr>
-                      <th className="p-3 border-r border-slate-200 dark:border-slate-800">CÓD / DESCRIÇÃO DO SERVIÇO</th>
-                      <th className="p-3 border-r border-slate-200 dark:border-slate-800 w-36 text-center">QTD</th>
-                      <th className="p-3 border-r border-slate-200 dark:border-slate-800 w-40 text-right">P. UNITÁRIO (XOF)</th>
-                      <th className="p-3 border-r border-slate-200 dark:border-slate-800 w-44 text-right">SUBTOTAL</th>
+                      <th className="p-3 border-r border-slate-200 dark:border-slate-800">{tText('CÓD / DESCRIÇÃO DO SERVIÇO')}</th>
+                      <th className="p-3 border-r border-slate-200 dark:border-slate-800 w-36 text-center">{tText('QTD')}</th>
+                      <th className="p-3 border-r border-slate-200 dark:border-slate-800 w-40 text-right">{tText('P. UNITÁRIO (XOF)')}</th>
+                      <th className="p-3 border-r border-slate-200 dark:border-slate-800 w-44 text-right">{tText('SUBTOTAL')}</th>
                       <th className="p-3 w-12 text-center">#</th>
                     </tr>
                   </thead>
@@ -1469,7 +1480,7 @@ export function FacturacaoModule({
                                     : 'bg-white border-slate-300 text-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-sm'
                                 }`}
                               >
-                                <option value="" disabled>-- Selecione Rubrica Oficial Registada pelo Diretor --</option>
+                                <option value="" disabled>{tText('-- Selecione Rubrica Oficial Registada pelo Diretor --')}</option>
                                 {Object.entries(
                                   rubricasList.reduce((acc, r) => {
                                     const cat = r.categoria || 'Serviços Portuários';
@@ -1481,12 +1492,12 @@ export function FacturacaoModule({
                                   <optgroup key={cat} label={`• ${cat.toUpperCase()}`}>
                                     {list.map((r) => (
                                       <option key={r.id || r.codigoRubrica} value={r.codigoRubrica}>
-                                        [{r.codigoRubrica}] {r.nomeRubrica} — {Math.round(r.precoUnitarioXOF || 0).toLocaleString('pt-PT')} XOF
+                                        [{r.codigoRubrica}] {r.nomeRubrica} — {Math.round(r.precoUnitarioXOF || 0).toLocaleString(locale)} XOF
                                       </option>
                                     ))}
                                   </optgroup>
                                 ))}
-                                <option value="CUSTOM">-- Outro Serviço / Descrição Personalizada --</option>
+                                <option value="CUSTOM">{tText('-- Outro Serviço / Descrição Personalizada --')}</option>
                               </select>
 
                               {/* Editable note / custom description escape hatch */}
@@ -1494,7 +1505,7 @@ export function FacturacaoModule({
                                 type="text"
                                 value={it.descricao}
                                 onChange={(e) => handleUpdateItem(idx, 'descricao', e.target.value)}
-                                placeholder="Descrição detalhada do serviço..."
+                                placeholder={tText('Descrição detalhada do serviço...')}
                                 className={`w-full bg-transparent px-2 py-0.5 text-[11px] font-mono border-b focus:border-blue-500 outline-none ${
                                   theme === 'dark' ? 'text-slate-300 border-slate-800' : 'text-slate-600 border-slate-200'
                                 }`}
@@ -1515,7 +1526,7 @@ export function FacturacaoModule({
                                     ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white'
                                     : 'bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200'
                                 }`}
-                                title="Diminuir Quantidade (-1)"
+                                title={tText('Diminuir Quantidade (-1)')}
                               >
                                 -
                               </button>
@@ -1532,7 +1543,7 @@ export function FacturacaoModule({
                                     ? 'bg-[#121E36] border-slate-700 text-white'
                                     : 'bg-white border-slate-300 text-slate-900'
                                 }`}
-                                title="Digite ou use + / - para aumentar a quantidade"
+                                title={tText('Digite ou use + / - para aumentar a quantidade')}
                               />
                               <button
                                 type="button"
@@ -1544,7 +1555,7 @@ export function FacturacaoModule({
                                     ? 'bg-blue-600/30 border-blue-500/50 text-blue-300 hover:bg-blue-600 hover:text-white'
                                     : 'bg-blue-50 border-blue-300 text-blue-700 hover:bg-blue-100'
                                 }`}
-                                title="Aumentar Quantidade (+1)"
+                                title={tText('Aumentar Quantidade (+1)')}
                               >
                                 +
                               </button>
@@ -1556,13 +1567,13 @@ export function FacturacaoModule({
                             <input
                               type="text"
                               readOnly
-                              value={it.precoUnitario.toLocaleString('pt-PT')}
+                              value={it.precoUnitario.toLocaleString(locale)}
                               className={`w-full text-right font-mono font-bold text-xs px-2.5 py-1.5 rounded-lg border outline-none cursor-not-allowed ${
                                 theme === 'dark'
                                   ? 'bg-slate-800 border-slate-700 text-blue-400'
                                   : 'bg-slate-100 border-slate-300 text-blue-600'
                               }`}
-                              title="Preço unitário fixo definido pelo tarifário oficial homologado pelo Diretor"
+                              title={tText('Preço unitário fixo definido pelo tarifário oficial homologado pelo Diretor')}
                             />
                           </td>
 
@@ -1574,7 +1585,7 @@ export function FacturacaoModule({
                                 : 'bg-slate-100/90 text-slate-800'
                             }`}
                           >
-                            {it.subtotal.toLocaleString('pt-PT')}
+                            {it.subtotal.toLocaleString(locale)}
                           </td>
 
                           {/* 5. Delete Action Button */}
@@ -1583,7 +1594,7 @@ export function FacturacaoModule({
                               type="button"
                               onClick={() => handleRemoveItem(idx)}
                               disabled={items.length <= 1}
-                              title="Remover Linha"
+                              title={tText('Remover Linha')}
                               className="p-1.5 text-slate-400 hover:text-rose-500 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -1597,10 +1608,10 @@ export function FacturacaoModule({
                   <tfoot>
                     <tr className={`border-t-2 ${theme === 'dark' ? 'bg-[#070D18] border-slate-700' : 'bg-slate-100 border-slate-300'}`}>
                       <td colSpan={3} className="p-3.5 text-right font-black text-xs uppercase tracking-wider">
-                        TOTAL FINAL DA FACTURA:
+                        {tText('TOTAL FINAL DA FACTURA:')}
                       </td>
                       <td className="p-3.5 text-right font-mono font-black text-lg text-emerald-500 whitespace-nowrap">
-                        {totalXOF.toLocaleString('pt-PT')} XOF
+                        {totalXOF.toLocaleString(locale)} XOF
                       </td>
                       <td></td>
                     </tr>
@@ -1613,8 +1624,8 @@ export function FacturacaoModule({
                 <div className="flex items-center gap-6">
                   <div className="flex items-center gap-3 bg-blue-50 dark:bg-blue-900/20 px-4 py-2.5 rounded-xl border border-blue-200 dark:border-blue-800">
                     <div className="space-y-0.5">
-                      <span className="text-[10px] font-black uppercase text-blue-600 block leading-none">Guardar como Rascunho?</span>
-                      <span className="text-[10px] text-slate-500 italic">Permite edição posterior antes de enviar ao caixa.</span>
+                      <span className="text-[10px] font-black uppercase text-blue-600 block leading-none">{tText('Guardar como Rascunho?')}</span>
+                      <span className="text-[10px] text-slate-500 italic">{tText('Permite edição posterior antes de enviar ao caixa.')}</span>
                     </div>
                     <input
                       type="checkbox"
@@ -1624,7 +1635,7 @@ export function FacturacaoModule({
                     />
                   </div>
                   <div className="text-[10px] text-slate-400 font-mono italic max-w-[200px]">
-                    * Ao confirmar sem rascunho, o documento torna-se imutável e é enviado para liquidação imediata.
+                    {tText('* Ao confirmar sem rascunho, o documento torna-se imutável e é enviado para liquidação imediata.')}
                   </div>
                 </div>
 
@@ -1636,10 +1647,10 @@ export function FacturacaoModule({
                       setEditingFatura(null);
                     }}
                     className="px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-slate-300 bg-slate-800 hover:bg-slate-700 transition-all flex items-center gap-1.5 border border-slate-700"
-                    title="Retornar à lista principal sem salvar"
+                    title={tText('Retornar à lista principal sem salvar')}
                   >
                     <ArrowLeft className="w-4 h-4 text-blue-400" />
-                    <span>Voltar</span>
+                    <span>{tText('Voltar')}</span>
                   </button>
                   <button
                     type="button"
@@ -1649,14 +1660,14 @@ export function FacturacaoModule({
                     }}
                     className="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-slate-200 transition-all active:scale-95"
                   >
-                    Cancelar
+                    {tText('Cancelar')}
                   </button>
                   <button
                     type="submit"
                     className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-xl shadow-blue-600/30 flex items-center gap-2 transition-all active:scale-95"
                   >
                     <CheckCircle2 className="w-4 h-4" />
-                    {saveAsDraft ? 'Gravar Rascunho' : 'Confirmar e Emitir'}
+                    {saveAsDraft ? tText('Gravar Rascunho') : tText('Confirmar e Emitir')}
                   </button>
                 </div>
               </div>
@@ -1678,7 +1689,7 @@ export function FacturacaoModule({
             <div className="bg-[#082B59] text-white px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3 shrink-0 no-print border-b border-blue-900/50">
               <div className="flex flex-col min-w-0">
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300">
-                  Fatura de Tarifas Portuárias (A4)
+                  {tText('Fatura de Tarifas Portuárias (A4)')}
                 </span>
                 <span className="text-sm font-mono font-bold truncate">
                   {formatFaturaDisplayNumber(viewingFatura.nFatura, viewingFatura.ano)} ({viewingFatura.nFatura})
@@ -1688,12 +1699,12 @@ export function FacturacaoModule({
               <div className="flex items-center flex-wrap gap-2">
                 {/* Interactive A4 Scale Adjustment */}
                 <div className="flex items-center gap-1.5 bg-slate-900/90 px-2.5 py-1.5 rounded-xl border border-blue-600/40 text-xs font-mono">
-                  <span className="text-[10px] text-blue-200 font-sans uppercase font-bold mr-1 hidden sm:inline">Ajuste A4:</span>
+                  <span className="text-[10px] text-blue-200 font-sans uppercase font-bold mr-1 hidden sm:inline">{tText('Ajuste A4:')}</span>
                   <button
                     type="button"
                     onClick={() => setA4Scale((s) => Math.max(0.65, Math.round((s - 0.05) * 100) / 100))}
                     className="w-6 h-6 flex items-center justify-center rounded bg-slate-800 hover:bg-slate-700 text-white font-bold cursor-pointer"
-                    title="Reduzir para ajustar na folha"
+                    title={tText('Reduzir para ajustar na folha')}
                   >
                     -
                   </button>
@@ -1702,7 +1713,7 @@ export function FacturacaoModule({
                     type="button"
                     onClick={() => setA4Scale((s) => Math.min(1.15, Math.round((s + 0.05) * 100) / 100))}
                     className="w-6 h-6 flex items-center justify-center rounded bg-slate-800 hover:bg-slate-700 text-white font-bold cursor-pointer"
-                    title="Aumentar tamanho"
+                    title={tText('Aumentar tamanho')}
                   >
                     +
                   </button>
@@ -1710,9 +1721,9 @@ export function FacturacaoModule({
                     type="button"
                     onClick={() => setA4Scale(1.0)}
                     className="px-2 py-0.5 rounded text-[10px] bg-blue-600/40 hover:bg-blue-600/70 text-blue-200 font-sans font-bold cursor-pointer ml-0.5"
-                    title="Repor proporção padrão A4 em escala real 100%"
+                    title={tText('Repor proporção padrão A4 em escala real 100%')}
                   >
-                    Auto
+                    {tText('Auto')}
                   </button>
                 </div>
 
@@ -1725,10 +1736,10 @@ export function FacturacaoModule({
                       setViewingFatura({ ...viewingFatura, estado: 'confirmada' });
                     }}
                     className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-600/30 transition-all active:scale-95 cursor-pointer"
-                    title="Validar fatura pro-forma e converter em fatura fiscal definitiva"
+                    title={tText('Validar fatura pro-forma e converter em fatura fiscal definitiva')}
                   >
                     <CheckCircle2 className="w-4 h-4 text-emerald-200" />
-                    <span>Validar & Converter para Definitiva</span>
+                    <span>{tText('Validar & Converter para Definitiva')}</span>
                   </button>
                 )}
 
@@ -1739,10 +1750,10 @@ export function FacturacaoModule({
                     setTimeout(() => window.print(), 100);
                   }}
                   className="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl text-xs flex items-center gap-1.5 shadow-lg shadow-blue-600/30 transition-all active:scale-95 cursor-pointer"
-                  title="Ativar janela de impressão do sistema apenas para o documento formatado (.printable-document)"
+                  title={tText('Ativar janela de impressão do sistema apenas para o documento formatado (.printable-document)')}
                 >
                   <Printer className="w-4 h-4" />
-                  <span>Imprimir</span>
+                  <span>{tText('Imprimir')}</span>
                 </button>
 
                 {/* Secondary: Baixar PDF */}
@@ -1753,10 +1764,10 @@ export function FacturacaoModule({
                   className={`px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer ${
                     isExportingPDF ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
-                  title="Descarregar ficheiro PDF completo em A4"
+                  title={tText('Descarregar ficheiro PDF completo em A4')}
                 >
                   {isExportingPDF ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
-                  <span>{isExportingPDF ? 'Gerando...' : 'PDF'}</span>
+                  <span>{isExportingPDF ? tText('Gerando...') : 'PDF'}</span>
                 </button>
 
                 {/* Botão de Fechar Bem Visível com X */}
@@ -1764,10 +1775,10 @@ export function FacturacaoModule({
                   type="button"
                   onClick={() => setViewingFatura(null)}
                   className="px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-rose-600/30 cursor-pointer active:scale-95 transition-all shrink-0 ml-1"
-                  title="Fechar pré-visualização (ESC)"
+                  title={tText('Fechar pré-visualização (ESC)')}
                 >
                   <X className="w-4 h-4 stroke-[2.5]" />
-                  <span>Fechar</span>
+                  <span>{tText('Fechar')}</span>
                 </button>
               </div>
             </div>
@@ -1790,15 +1801,15 @@ export function FacturacaoModule({
                     <>
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10 z-0">
                         <div className="text-6xl font-black uppercase tracking-[0.3em] text-[#8C4A00] rotate-[-30deg] border-8 border-[#8C4A00] p-8 rounded-3xl">
-                          FATURA PROFORMA
+                          {tText('FATURA PROFORMA')}
                         </div>
                       </div>
                       <div className="relative z-10 mb-6 p-4 rounded-3xl bg-[#FFF4E5] border border-[#FFE0B2] text-[#8C4A00] text-center shadow-xs">
                         <span className="text-sm font-black uppercase tracking-[0.2em] block text-[#8C4A00] mb-1">
-                          FATURA PRO-FORMA
+                          {tText('FATURA PRO-FORMA')}
                         </span>
                         <span className="text-xs font-mono text-[#8C4A00]/90 block">
-                          Documento provisório (Rascunho). Não válido como fatura fiscal definitiva até validação.
+                          {tText('Documento provisório (Rascunho). Não válido como fatura fiscal definitiva até validação.')}
                         </span>
                       </div>
                     </>
@@ -1809,17 +1820,17 @@ export function FacturacaoModule({
                     <>
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-15 z-0">
                         <div className="text-6xl font-black uppercase tracking-[0.3em] text-rose-600 rotate-[-30deg] border-8 border-dashed border-rose-600 p-8 rounded-3xl">
-                          FATURA ANULADA
+                          {tText('FATURA ANULADA')}
                         </div>
                       </div>
                       <div className="relative z-10 mb-6 p-4 rounded-2xl bg-rose-50 border-2 border-rose-300 text-rose-900 text-center space-y-1">
-                        <span className="text-xs font-black uppercase tracking-[0.2em] block text-rose-700">FATURA OFICIALMENTE ANULADA</span>
+                        <span className="text-xs font-black uppercase tracking-[0.2em] block text-rose-700">{tText('FATURA OFICIALMENTE ANULADA')}</span>
                         <span className="text-[10px] font-mono opacity-90 block">
-                          Cancelada por: <strong>{viewingFatura.anulado_por || 'PCA / Administração'}</strong> {viewingFatura.data_anulacao ? `em ${viewingFatura.data_anulacao}` : ''}
+                          {tText('Cancelada por')}: <strong>{viewingFatura.anulado_por || tText('PCA / Administração')}</strong> {viewingFatura.data_anulacao ? `${tText('em')} ${viewingFatura.data_anulacao}` : ''}
                         </span>
                         {viewingFatura.justificativaAnulacao && (
                           <span className="text-[11px] font-sans italic block text-rose-800">
-                            Despacho / Justificativa: "{viewingFatura.justificativaAnulacao}"
+                            {tText('Despacho / Justificativa')}: "{viewingFatura.justificativaAnulacao}"
                           </span>
                         )}
                       </div>
@@ -1838,29 +1849,29 @@ export function FacturacaoModule({
                       <div className="flex-1 text-center space-y-1">
                         <div className="flex items-center justify-center gap-2 sm:gap-3 my-0.5">
                           <span className="font-black text-xs sm:text-sm tracking-widest uppercase text-slate-900 leading-none">
-                            REPÚBLICA DA
+                            {tText('REPÚBLICA DA')}
                           </span>
                           <div className="republic-emblem-container inline-flex items-center justify-center">
                             <GuineBissauCoatOfArms className="w-8 h-8 sm:w-10 sm:h-10 inline-block shrink-0 mx-1" />
                           </div>
                           <span className="font-black text-xs sm:text-sm tracking-widest uppercase text-slate-900 leading-none">
-                            GUINÉ-BISSAU
+                            {tText('GUINÉ-BISSAU')}
                           </span>
                         </div>
 
                         {/* Ministry */}
                         <div className="font-bold text-[9px] sm:text-[11px] tracking-wider uppercase text-slate-800 leading-tight">
-                          MINISTÉRIO DOS TRANSPORTES, TELECOMUNICAÇÕES E ECONOMIA DIGITAL
+                          {tText('MINISTÉRIO DOS TRANSPORTES, TELECOMUNICAÇÕES E ECONOMIA DIGITAL')}
                         </div>
 
                         {/* IMP Title */}
                         <div className="font-black text-xs sm:text-sm text-slate-900 uppercase leading-tight pt-0.5">
-                          INSTITUTO MARÍTIMO PORTUÁRIO DA GUINÉ-BISSAU
+                          {tText('INSTITUTO MARÍTIMO PORTUÁRIO DA GUINÉ-BISSAU')}
                         </div>
 
                         {/* Address, NIF, Tel */}
                         <div className="text-[8px] sm:text-[9px] text-slate-600 font-mono font-bold pt-0.5">
-                          AV. 3 DE AGOSTO - BISSAU | NIF: {IMP_INSTITUTIONAL.nif} | TEL: +245 95 555 28 79
+                          {tText('AV. 3 DE AGOSTO - BISSAU')} | NIF: {IMP_INSTITUTIONAL.nif} | {tText('TEL')}: +245 95 555 28 79
                         </div>
                       </div>
 
@@ -1870,10 +1881,10 @@ export function FacturacaoModule({
                           <QrCode className="w-8 h-8" />
                         </div>
                         <span className="text-[7.5px] font-mono font-black text-blue-900 mt-1 uppercase">
-                          SISTEMA IMP
+                          {tText('SISTEMA IMP')}
                         </span>
                         <span className="text-[6.5px] font-mono text-slate-500">
-                          AUT-FISCAL
+                          {tText('AUT-FISCAL')}
                         </span>
                       </div>
                     </div>
@@ -1883,15 +1894,15 @@ export function FacturacaoModule({
                   <div className="flex justify-between items-start mb-3">
                     <div className="text-left font-mono">
                       <div className="text-base sm:text-lg font-black text-slate-900">
-                        FATURA Nº {formatFaturaDisplayNumber(viewingFatura.nFatura, viewingFatura.ano)}
+                        {tText('FATURA Nº')} {formatFaturaDisplayNumber(viewingFatura.nFatura, viewingFatura.ano)}
                       </div>
                       <div className="text-[10px] sm:text-[11px] text-slate-800 font-bold uppercase mt-0.5">
-                        DATA DE EMISSÃO: {viewingFatura.data}
+                        {tText('DATA DE EMISSÃO')}: {viewingFatura.data}
                       </div>
                     </div>
                     <div className="border border-slate-700 rounded-md px-3 py-1.5 text-center min-w-[140px] bg-white">
-                      <span className="text-[8px] font-bold uppercase text-slate-500 block leading-tight">Visto</span>
-                      <span className="text-[10px] font-black text-slate-900 block leading-tight mt-0.5">O Presidente do CA</span>
+                      <span className="text-[8px] font-bold uppercase text-slate-500 block leading-tight">{tText('Visto')}</span>
+                      <span className="text-[10px] font-black text-slate-900 block leading-tight mt-0.5">{tText('O Presidente do CA')}</span>
                       <span className="text-[10px] italic font-serif text-slate-800 block mt-0.5">Dr. Gualdino Afonso Té</span>
                     </div>
                   </div>
@@ -1901,7 +1912,7 @@ export function FacturacaoModule({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-6">
                       <div className="space-y-1">
                         <div className="flex items-baseline gap-1.5">
-                          <span className="text-slate-600 font-bold uppercase shrink-0">CLIENTE / ARMADOR:</span>
+                          <span className="text-slate-600 font-bold uppercase shrink-0">{tText('CLIENTE / ARMADOR')}:</span>
                           <span className="font-black text-slate-900 uppercase truncate">{viewingFatura.cliente}</span>
                         </div>
                         <div className="flex items-baseline gap-1.5 font-mono">
@@ -1909,21 +1920,21 @@ export function FacturacaoModule({
                           <span className="font-black text-slate-900">{viewingFatura.nif}</span>
                         </div>
                         <div className="flex items-baseline gap-1.5 font-mono">
-                          <span className="text-slate-600 font-bold uppercase shrink-0">CERTIFICADO / MANIFESTO (CM):</span>
+                          <span className="text-slate-600 font-bold uppercase shrink-0">{tText('CERTIFICADO / MANIFESTO (CM)')}:</span>
                           <span className="font-black text-slate-900">CM-{viewingFatura.ano || '2026'}-001</span>
                         </div>
                       </div>
                       <div className="space-y-1">
                         <div className="flex items-baseline gap-1.5">
-                          <span className="text-slate-600 font-bold uppercase shrink-0">NAVIO:</span>
+                          <span className="text-slate-600 font-bold uppercase shrink-0">{tText('NAVIO')}:</span>
                           <span className="font-black text-slate-900 uppercase truncate">{viewingFatura.navio}</span>
                         </div>
                         <div className="flex items-baseline gap-1.5">
-                          <span className="text-slate-600 font-bold uppercase shrink-0">TIPO:</span>
+                          <span className="text-slate-600 font-bold uppercase shrink-0">{tText('TIPO')}:</span>
                           <span className="font-black text-slate-900 uppercase">{viewingFatura.tipo}</span>
                         </div>
                         <div className="flex items-baseline gap-1.5 font-mono">
-                          <span className="text-slate-600 font-bold uppercase shrink-0">DATA ENTRADA:</span>
+                          <span className="text-slate-600 font-bold uppercase shrink-0">{tText('DATA ENTRADA')}:</span>
                           <span className="font-black text-slate-900">{viewingFatura.data}</span>
                         </div>
                       </div>
@@ -1935,10 +1946,10 @@ export function FacturacaoModule({
                   <table className="w-full text-left text-[10px]">
                     <thead className="bg-[#082B59] text-white font-black uppercase">
                       <tr>
-                        <th className="p-2">Cód / Descrição</th>
-                        <th className="p-2 text-center">Qtd</th>
-                        <th className="p-2 text-right">P. Unitário (XOF)</th>
-                        <th className="p-2 text-right">Valor (XOF)</th>
+                        <th className="p-2">{tText('Cód / Descrição')}</th>
+                        <th className="p-2 text-center">{tText('Qtd')}</th>
+                        <th className="p-2 text-right">{tText('P. Unitário (XOF)')}</th>
+                        <th className="p-2 text-right">{tText('Valor (XOF)')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200 font-mono">
@@ -1946,8 +1957,8 @@ export function FacturacaoModule({
                         <tr key={i}>
                           <td className="p-2 font-sans font-bold text-slate-800">{it.descricao}</td>
                           <td className="p-2 text-center">{it.quantidade}</td>
-                          <td className="p-2 text-right">{it.precoUnitario.toLocaleString('pt-PT')}</td>
-                          <td className="p-2 text-right font-black text-slate-900">{it.subtotal.toLocaleString('pt-PT')}</td>
+                          <td className="p-2 text-right">{it.precoUnitario.toLocaleString(locale)}</td>
+                          <td className="p-2 text-right font-black text-slate-900">{it.subtotal.toLocaleString(locale)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -1957,32 +1968,32 @@ export function FacturacaoModule({
                 {/* Sub-Total, Desconto, IVA, Total Geral & Extenso */}
                 <div className="border border-slate-300 rounded-xl p-3 mb-3 space-y-1.5 text-[11px] font-mono bg-slate-50">
                   <div className="flex justify-between border-b border-slate-200 pb-1">
-                    <span className="font-bold text-slate-600 uppercase">Sub-Total Bruto:</span>
-                    <span className="font-black text-slate-900">{viewingFatura.subtotal.toLocaleString('pt-PT')} XOF</span>
+                    <span className="font-bold text-slate-600 uppercase">{tText('Sub-Total Bruto')}:</span>
+                    <span className="font-black text-slate-900">{formatNumber(viewingFatura.subtotal)} XOF</span>
                   </div>
 
                   {Boolean(viewingFatura.descontoPercentual && viewingFatura.descontoPercentual > 0) && (
                     <div className="flex justify-between border-b border-slate-200 pb-1 text-emerald-700">
-                      <span className="font-bold uppercase">Desconto Comercial ({viewingFatura.descontoPercentual}%):</span>
-                      <span className="font-black">-{viewingFatura.descontoValor?.toLocaleString('pt-PT')} XOF</span>
+                      <span className="font-bold uppercase">{tText('Desconto Comercial')} ({viewingFatura.descontoPercentual}%):</span>
+                      <span className="font-black">-{formatNumber(viewingFatura.descontoValor || 0)} XOF</span>
                     </div>
                   )}
 
                   {viewingFatura.aplicarIVA ? (
                     <div className="flex justify-between border-b border-slate-200 pb-1 text-blue-700">
-                      <span className="font-bold uppercase">Taxa - IVA ({viewingFatura.ivaPercentual || 18}%):</span>
-                      <span className="font-black">+{viewingFatura.valorIVA?.toLocaleString('pt-PT')} XOF</span>
+                      <span className="font-bold uppercase">{tText('Taxa - IVA')} ({viewingFatura.ivaPercentual || 18}%):</span>
+                      <span className="font-black">+{formatNumber(viewingFatura.valorIVA || 0)} XOF</span>
                     </div>
                   ) : (
                     <div className="flex justify-between border-b border-slate-200 pb-1 text-slate-600">
-                      <span className="font-bold uppercase">Taxa - IVA (0% Isento):</span>
+                      <span className="font-bold uppercase">{tText('Taxa - IVA (0% Isento)')}:</span>
                       <span className="font-black text-slate-900">0 XOF</span>
                     </div>
                   )}
 
                   <div className="flex justify-between pt-0.5 text-sm">
-                    <span className="font-black text-[#082B59] uppercase">Total Geral da Fatura:</span>
-                    <span className="font-black text-[#082B59] text-base">{viewingFatura.total.toLocaleString('pt-PT')} XOF</span>
+                    <span className="font-black text-[#082B59] uppercase">{tText('Total Geral da Fatura')}:</span>
+                    <span className="font-black text-[#082B59] text-base">{formatNumber(viewingFatura.total)} XOF</span>
                   </div>
                   <div className="pt-1.5 border-t border-slate-200 text-[10px] italic text-slate-700 text-center font-sans">
                     ( {valorPorExtensoXOF(viewingFatura.total)} )
@@ -1991,44 +2002,44 @@ export function FacturacaoModule({
 
                 {/* Payment Instructions matching PDF */}
                 <div className="border border-blue-200 bg-blue-50/50 rounded-xl p-2.5 mb-3 text-[10px] space-y-0.5">
-                  <span className="font-black text-[#082B59] uppercase block mb-0.5">INSTRUÇÕES DE PAGAMENTO: O pagamento pode ser efetuado por depósito ou transferência:</span>
+                  <span className="font-black text-[#082B59] uppercase block mb-0.5">{tText('INSTRUÇÕES DE PAGAMENTO: O pagamento pode ser efetuado por depósito ou transferência:')}</span>
                   <div className="font-mono text-slate-800 space-y-0.5 text-[9.5px]">
-                    <div>• <b>BANQUE ATLANTIQUE:</b> Conta Nº 20131940001</div>
-                    <div>• <b>CORIS BANK:</b> Conta Nº 001056624101</div>
+                    <div>• <b>BANQUE ATLANTIQUE:</b> {tText('Conta Nº')} 20131940001</div>
+                    <div>• <b>CORIS BANK:</b> {tText('Conta Nº')} 001056624101</div>
                   </div>
                   <div className="text-[8.5px] text-slate-600 pt-0.5">
-                    O talão de depósito deve ser entregue na Tesouraria do IMP para emissão do Recibo Oficial de Quitação. Prazo de pagamento: 7 dias.
+                    {tText('O talão de depósito deve ser entregue na Tesouraria do IMP para emissão do Recibo Oficial de Quitação. Prazo de pagamento: 7 dias.')}
                   </div>
                 </div>
 
                 {/* Signatures block matching official PDF model */}
                 <div className="grid grid-cols-4 gap-2 pt-3 border-t border-slate-300 text-center text-[9px]">
                   <div>
-                    <span className="font-bold text-slate-500 uppercase block mb-0.5">Elaborado</span>
-                    <span className="text-[8px] text-slate-600 block leading-tight mb-3">O Chefe de Serviço de Faturação</span>
+                    <span className="font-bold text-slate-500 uppercase block mb-0.5">{tText('Elaborado')}</span>
+                    <span className="text-[8px] text-slate-600 block leading-tight mb-3">{tText('O Chefe de Serviço de Faturação')}</span>
                     <div className="border-t border-slate-400 pt-1 font-mono font-bold text-slate-800">{viewingFatura.criado_por}</div>
                   </div>
                   <div>
-                    <span className="font-bold text-slate-500 uppercase block mb-0.5">Conferido</span>
-                    <span className="text-[8px] text-slate-600 block leading-tight mb-3">A Chefe de Dep. Faturação e Cobrança</span>
+                    <span className="font-bold text-slate-500 uppercase block mb-0.5">{tText('Conferido')}</span>
+                    <span className="text-[8px] text-slate-600 block leading-tight mb-3">{tText('A Chefe de Dep. Faturação e Cobrança')}</span>
                     <div className="border-t border-slate-400 pt-1 font-mono font-bold text-slate-800">Srª Ana Miriam M. Té</div>
                   </div>
                   <div>
-                    <span className="font-bold text-slate-500 uppercase block mb-0.5">Conferido</span>
-                    <span className="text-[8px] text-slate-600 block leading-tight mb-3">O Director Adm. Financeiro</span>
+                    <span className="font-bold text-slate-500 uppercase block mb-0.5">{tText('Conferido')}</span>
+                    <span className="text-[8px] text-slate-600 block leading-tight mb-3">{tText('O Director Adm. Financeiro')}</span>
                     <div className="border-t border-slate-400 pt-1 font-mono font-bold text-slate-800">Dr. M. S. Cande</div>
                   </div>
                   <div>
-                    <span className="font-bold text-slate-500 uppercase block mb-0.5">Visto</span>
-                    <span className="text-[8px] text-slate-600 block leading-tight mb-3">O Presidente do Conselho de Adm.</span>
+                    <span className="font-bold text-slate-500 uppercase block mb-0.5">{tText('Visto')}</span>
+                    <span className="text-[8px] text-slate-600 block leading-tight mb-3">{tText('O Presidente do Conselho de Adm.')}</span>
                     <div className="border-t border-slate-400 pt-1 font-mono font-bold text-slate-800">Dr. Gualdino Afonso Té</div>
                   </div>
                 </div>
 
                 {/* Footer Certificate & System */}
                 <div className="mt-3 pt-2 border-t border-slate-200 flex justify-between items-center text-[8px] font-mono text-slate-400 uppercase">
-                  <span>DGCI — Nº de certificado 00035C/2022</span>
-                  <span>Sistema Integral de Gestão Marítima (IMP)</span>
+                  <span>{tText('DGCI — Nº de certificado 00035C/2022')}</span>
+                  <span>{tText('Sistema Integral de Gestão Marítima (IMP)')}</span>
                 </div>
               </div>
             </div>
@@ -2051,14 +2062,14 @@ export function FacturacaoModule({
               </div>
               <div>
                 <h3 className={`font-bold text-base ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                  Anular Fatura Oficial
+                  {tText('Anular Fatura Oficial')}
                 </h3>
                 <span className="text-xs font-mono text-slate-400">{anulandoFatura.nFatura}</span>
               </div>
             </div>
 
             <p className={`text-xs leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-              De acordo com a auditoria criptográfica e regras de Segregação de Funções (SoD), a anulação de uma fatura oficial é irreversível e exige justificativa fundamentada pelo Diretor Geral / SuperAdmin.
+              {tText('De acordo com a auditoria criptográfica e regras de Segregação de Funções (SoD), a anulação de uma fatura oficial é irreversível e exige justificativa fundamentada pelo Diretor Geral / SuperAdmin.')}
             </p>
 
             {anulacaoError && (
@@ -2069,13 +2080,13 @@ export function FacturacaoModule({
 
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-400 block">
-                Justificativa Obrigatória de Anulação:
+                {tText('Justificativa Obrigatória de Anulação:')}
               </label>
               <textarea
                 rows={3}
                 value={justificativaAnulacao}
                 onChange={(e) => setJustificativaAnulacao(e.target.value)}
-                placeholder="Ex.: Duplicação de escala retificada pelo armador e autorizada pela Direção Geral..."
+                placeholder={tText('Ex.: Duplicação de escala retificada pelo armador e autorizada pela Direção Geral...')}
                 className={`w-full rounded-xl p-3 text-xs border focus:outline-none focus:border-rose-500 ${
                   theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                 }`}
@@ -2090,7 +2101,7 @@ export function FacturacaoModule({
                   theme === 'dark' ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
-                Voltar
+                {tText('Voltar')}
               </button>
               <button
                 type="button"
@@ -2098,7 +2109,7 @@ export function FacturacaoModule({
                 className="px-5 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-rose-600/30 flex items-center gap-1.5"
               >
                 <Ban className="w-4 h-4" />
-                Confirmar Anulação
+                {tText('Confirmar Anulação')}
               </button>
             </div>
           </div>
@@ -2117,8 +2128,8 @@ export function FacturacaoModule({
               <div className="flex items-center gap-2.5">
                 <ShieldCheck className="w-5 h-5 text-amber-400" />
                 <div>
-                  <h3 className="font-bold text-sm">Registar Nova Rubrica de Tarifário (Direção Geral)</h3>
-                  <p className="text-[10px] opacity-80 font-mono">SoD: Definição oficial de tarifas marítimo-portuárias</p>
+                  <h3 className="font-bold text-sm">{tText('Registar Nova Rubrica de Tarifário (Direção Geral)')}</h3>
+                  <p className="text-[10px] opacity-80 font-mono">{tText('SoD: Definição oficial de tarifas marítimo-portuárias')}</p>
                 </div>
               </div>
               <button
@@ -2133,11 +2144,11 @@ export function FacturacaoModule({
             <form onSubmit={handleCreateRubricaByDirector} className="p-6 space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-400 mb-1">CÓDIGO DO SERVIÇO:</label>
+                  <label className="block text-[11px] font-bold text-slate-400 mb-1">{tText('CÓDIGO DO SERVIÇO:')}</label>
                   <input
                     type="text"
                     required
-                    placeholder="Ex: PIL-04, ATR-05"
+                    placeholder={tText('Ex: PIL-04, ATR-05')}
                     value={novaRubricaForm.codigoServico}
                     onChange={(e) => setNovaRubricaForm({ ...novaRubricaForm, codigoServico: e.target.value })}
                     className={`w-full rounded-lg px-3 py-2 border font-mono font-bold outline-none ${
@@ -2146,7 +2157,7 @@ export function FacturacaoModule({
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-400 mb-1">CATEGORIA:</label>
+                  <label className="block text-[11px] font-bold text-slate-400 mb-1">{tText('CATEGORIA:')}</label>
                   <select
                     value={novaRubricaForm.categoria}
                     onChange={(e) => setNovaRubricaForm({ ...novaRubricaForm, categoria: e.target.value })}
@@ -2154,25 +2165,25 @@ export function FacturacaoModule({
                       theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-blue-500'
                     }`}
                   >
-                    <option value="Pilotagem">Pilotagem</option>
-                    <option value="Cais & Permanência">Cais & Permanência</option>
-                    <option value="Faróis e Balizamento">Faróis e Balizamento</option>
-                    <option value="Rebocadores & Manobra">Rebocadores & Manobra</option>
-                    <option value="Movimentação & Cargas">Movimentação & Cargas</option>
-                    <option value="Licenciamento">Licenciamento</option>
-                    <option value="Inspecções & Certificados">Inspecções & Certificados</option>
-                    <option value="Serviços Portuários">Serviços Portuários</option>
-                    <option value="Multas & Penalidades">Multas & Penalidades</option>
+                    <option value="Pilotagem">{tText('Pilotagem')}</option>
+                    <option value="Cais & Permanência">{tText('Cais & Permanência')}</option>
+                    <option value="Faróis e Balizamento">{tText('Faróis e Balizamento')}</option>
+                    <option value="Rebocadores & Manobra">{tText('Rebocadores & Manobra')}</option>
+                    <option value="Movimentação & Cargas">{tText('Movimentação & Cargas')}</option>
+                    <option value="Licenciamento">{tText('Licenciamento')}</option>
+                    <option value="Inspecções & Certificados">{tText('Inspecções & Certificados')}</option>
+                    <option value="Serviços Portuários">{tText('Serviços Portuários')}</option>
+                    <option value="Multas & Penalidades">{tText('Multas & Penalidades')}</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-400 mb-1">DESCRIÇÃO OFICIAL DO SERVIÇO:</label>
+                <label className="block text-[11px] font-bold text-slate-400 mb-1">{tText('DESCRIÇÃO OFICIAL DO SERVIÇO:')}</label>
                 <input
                   type="text"
                   required
-                  placeholder="Ex: Serviço Especial de Praticagem Noturna em Águas Restritas"
+                  placeholder={tText('Ex: Serviço Especial de Praticagem Noturna em Águas Restritas')}
                   value={novaRubricaForm.descricaoServico}
                   onChange={(e) => setNovaRubricaForm({ ...novaRubricaForm, descricaoServico: e.target.value })}
                   className={`w-full rounded-lg px-3 py-2 border font-bold outline-none ${
@@ -2183,7 +2194,7 @@ export function FacturacaoModule({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-400 mb-1">PREÇO UNITÁRIO (XOF):</label>
+                  <label className="block text-[11px] font-bold text-slate-400 mb-1">{tText('PREÇO UNITÁRIO (XOF):')}</label>
                   <input
                     type="number"
                     min="1"
@@ -2196,13 +2207,13 @@ export function FacturacaoModule({
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-400 mb-1">UNIDADE DE MEDIDA:</label>
+                  <label className="block text-[11px] font-bold text-slate-400 mb-1">{tText('UNIDADE DE MEDIDA:')}</label>
                   <input
                     type="text"
                     required
                     value={novaRubricaForm.unidadeMedida}
                     onChange={(e) => setNovaRubricaForm({ ...novaRubricaForm, unidadeMedida: e.target.value })}
-                    placeholder="Taxa Fixa, Por Hora, Por Dia..."
+                    placeholder={tText('Taxa Fixa, Por Hora, Por Dia...')}
                     className={`w-full rounded-lg px-3 py-2 border font-bold outline-none ${
                       theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-blue-500'
                     }`}
@@ -2216,14 +2227,14 @@ export function FacturacaoModule({
                   onClick={() => setShowAddRubricaModal(false)}
                   className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
                 >
-                  Cancelar
+                  {tText('Cancelar')}
                 </button>
                 <button
                   type="submit"
                   className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 flex items-center gap-1.5"
                 >
                   <Check className="w-4 h-4" />
-                  Registar no Tarifário
+                  {tText('Registar no Tarifário')}
                 </button>
               </div>
             </form>

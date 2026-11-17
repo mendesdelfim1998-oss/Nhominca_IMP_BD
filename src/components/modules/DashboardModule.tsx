@@ -162,8 +162,14 @@ export function DashboardModule({
   onNavigate,
   onOpenNovaFatura
 }: DashboardProps) {
-  const { t, tText } = useLanguage();
+  const { t, tText, language } = useLanguage();
   const { theme } = useTheme();
+
+  const locale = language === 'fr' ? 'fr-FR' : language === 'en' ? 'en-GB' : 'pt-PT';
+  const formatNumber = (value: number, options?: Intl.NumberFormatOptions) =>
+    new Intl.NumberFormat(locale, options).format(value);
+  const formatCompactMillions = (value: number) =>
+    (value / 1000000).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
   // Widget customizer states
   const [widgets, setWidgets] = useState<WidgetConfig[]>(() => {
@@ -282,6 +288,48 @@ export function DashboardModule({
     saveWidgets(updated);
   };
 
+  const getWidgetTitle = (id: WidgetId) => {
+    switch (id) {
+      case 'kpis':
+        return tText('Estatísticas e KPIs Operacionais Marítimos');
+      case 'financial_charts':
+        return tText('Análise Visual e Gráficos Financeiros');
+      case 'sod_workflow':
+        return tText('Ciclo de Vida e Estados SoD da Faturação');
+      case 'quick_actions':
+        return tText('Ações Rápidas de Faturação e Caixa');
+      case 'active_vessels':
+        return tText('Navios em Operação / Atracados em Bissau');
+      case 'infrastructure_status':
+        return tText('Estatuto das Infraestruturas Portuárias');
+      case 'maritime_weather':
+        return tText('Condições Marítimas & Canal do Geba');
+      default:
+        return '';
+    }
+  };
+
+  const getWidgetCategoryLabel = (id: WidgetId) => {
+    switch (id) {
+      case 'kpis':
+        return tText('Marítimo & Portuário');
+      case 'financial_charts':
+        return tText('Financeiro & Caixa');
+      case 'sod_workflow':
+        return tText('Conformidade SoD');
+      case 'quick_actions':
+        return tText('Operações');
+      case 'active_vessels':
+        return tText('Marítimo & Escalas');
+      case 'infrastructure_status':
+        return tText('Instalações');
+      case 'maritime_weather':
+        return tText('Navegação & Marés');
+      default:
+        return '';
+    }
+  };
+
   // Operational metrics
   const atracadasAgora = atracacoes.filter((a) => a.status === 'Atracada' || a.status === 'Em Operação').length;
   const embarcacoesRetidas = inspeccoes.filter((i) => i.resultado === 'Retido / Impedido').length;
@@ -330,7 +378,7 @@ export function DashboardModule({
       {saveToast && (
         <div className="fixed bottom-5 right-5 z-50 bg-emerald-600 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-3 duration-200">
           <Check className="w-4 h-4" />
-          <span>Configuração dos widgets guardada com sucesso!</span>
+          <span>{tText('Configuração dos widgets guardada com sucesso!')}</span>
         </div>
       )}
 
@@ -354,17 +402,17 @@ export function DashboardModule({
               }`}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              SESSÃO ATIVA • {userRole.toUpperCase()}
+              {tText('SESSÃO ATIVA')} • {userRole.toUpperCase()}
             </span>
             <span className={`text-xs font-medium truncate ${theme === 'dark' ? 'text-slate-400' : 'text-blue-100'}`}>
               • {userName}
             </span>
           </div>
           <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-white break-words">
-            Painel Geral & Análise Financeira Portuária
+            {tText('Painel Geral & Análise Financeira Portuária')}
           </h2>
           <p className={`text-xs sm:text-sm mt-1 leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-blue-100'}`}>
-            Monitorização em tempo real de faturamento, arrecadação em caixa, atracações e conformidade SoD
+            {tText('Monitorização em tempo real de faturamento, arrecadação em caixa, atracações e conformidade SoD')}
           </p>
         </div>
 
@@ -429,10 +477,10 @@ export function DashboardModule({
               </div>
               <div>
                 <h3 className={`font-bold text-sm ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                  Modo de Personalização do Painel Ativo
+                  {tText('Modo de Personalização do Painel Ativo')}
                 </h3>
                 <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                  Arraste os cartões usando a barra de fixação, use as setas ou ajuste o redimensionamento de 1 col, 2 col ou largura total.
+                  {tText('Arraste os cartões usando a barra de fixação, use as setas ou ajuste o redimensionamento de 1 col, 2 col ou largura total.')}
                 </p>
               </div>
             </div>
@@ -445,10 +493,10 @@ export function DashboardModule({
                     ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
                     : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300 shadow-xs'
                 }`}
-                title="Restaurar tamanho e ordem original"
+                title={tText('Restaurar tamanho e ordem original')}
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>Repor Padrão</span>
+                <span>{tText('Repor Padrão')}</span>
               </button>
 
               <button
@@ -456,7 +504,7 @@ export function DashboardModule({
                 className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white transition-all cursor-pointer shadow-xs flex items-center gap-1"
               >
                 <Check className="w-3.5 h-3.5" />
-                <span>Salvar & Fechar</span>
+                <span>{tText('Salvar & Fechar')}</span>
               </button>
             </div>
           </div>
@@ -479,7 +527,7 @@ export function DashboardModule({
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="font-mono text-[10px] font-bold text-slate-400 w-4">{idx + 1}.</span>
                   <span className="text-xs font-semibold truncate" title={widget.title}>
-                    {widget.title}
+                    {getWidgetTitle(widget.id)}
                   </span>
                 </div>
 
@@ -489,7 +537,7 @@ export function DashboardModule({
                     onClick={() => moveWidget(widget.id, 'up')}
                     disabled={idx === 0}
                     className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-30 cursor-pointer"
-                    title="Mover para Cima"
+                    title={tText('Mover para Cima')}
                   >
                     <ChevronUp className="w-3.5 h-3.5" />
                   </button>
@@ -497,7 +545,7 @@ export function DashboardModule({
                     onClick={() => moveWidget(widget.id, 'down')}
                     disabled={idx === sortedWidgets.length - 1}
                     className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-30 cursor-pointer"
-                    title="Mover para Baixo"
+                    title={tText('Mover para Baixo')}
                   >
                     <ChevronDown className="w-3.5 h-3.5" />
                   </button>
@@ -519,9 +567,9 @@ export function DashboardModule({
                         ? 'bg-emerald-600 text-white'
                         : 'bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200'
                     }`}
-                    title="Alterar largura (1 col, 2 col, ou total)"
+                    title={tText('Alterar largura (1 col, 2 col, ou total)')}
                   >
-                    {widget.width === 'full' ? 'Total' : widget.width === '2-col' ? '2/3' : '1/3'}
+                    {widget.width === 'full' ? tText('Total') : widget.width === '2-col' ? '2/3' : '1/3'}
                   </button>
 
                   {/* Toggle visibility */}
@@ -530,7 +578,7 @@ export function DashboardModule({
                     className={`p-1 rounded transition-colors cursor-pointer ${
                       widget.visible ? 'text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/40' : 'text-slate-400'
                     }`}
-                    title={widget.visible ? 'Ocultar Widget' : 'Mostrar Widget'}
+                    title={widget.visible ? tText('Ocultar Widget') : tText('Mostrar Widget')}
                   >
                     {widget.visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                   </button>
@@ -582,7 +630,7 @@ export function DashboardModule({
                     <div className="flex items-center gap-2 cursor-grab active:cursor-grabbing">
                       <GripVertical className="w-4 h-4 text-blue-500" />
                       <span className="font-bold font-mono text-[11px] uppercase tracking-wider">
-                        {widget.categoryLabel}
+                        {getWidgetCategoryLabel(widget.id)}
                       </span>
                     </div>
 
@@ -592,7 +640,7 @@ export function DashboardModule({
                         onClick={() => moveWidget(widget.id, 'up')}
                         disabled={idx === 0}
                         className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-20 cursor-pointer"
-                        title="Subir posição"
+                        title={tText('Subir posição')}
                       >
                         <ChevronUp className="w-3.5 h-3.5" />
                       </button>
@@ -600,7 +648,7 @@ export function DashboardModule({
                         onClick={() => moveWidget(widget.id, 'down')}
                         disabled={idx === sortedWidgets.length - 1}
                         className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-20 cursor-pointer"
-                        title="Descer posição"
+                        title={tText('Descer posição')}
                       >
                         <ChevronDown className="w-3.5 h-3.5" />
                       </button>
@@ -614,7 +662,7 @@ export function DashboardModule({
                               ? 'bg-blue-600 text-white shadow-xs'
                               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                           }`}
-                          title="1 Coluna (33%)"
+                          title={tText('1 Coluna (33%)')}
                         >
                           1/3
                         </button>
@@ -625,7 +673,7 @@ export function DashboardModule({
                               ? 'bg-blue-600 text-white shadow-xs'
                               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                           }`}
-                          title="2 Colunas (66%)"
+                          title={tText('2 Colunas (66%)')}
                         >
                           2/3
                         </button>
@@ -636,9 +684,9 @@ export function DashboardModule({
                               ? 'bg-blue-600 text-white shadow-xs'
                               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                           }`}
-                          title="Largura Completa (100%)"
+                          title={tText('Largura Completa (100%)')}
                         >
-                          Total
+                          {tText('Total')}
                         </button>
                       </div>
 
@@ -646,7 +694,7 @@ export function DashboardModule({
                       <button
                         onClick={() => toggleWidgetVisibility(widget.id)}
                         className="p-1 rounded text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
-                        title="Ocultar este widget"
+                        title={tText('Ocultar este widget')}
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -666,10 +714,10 @@ export function DashboardModule({
                           </div>
                           <div>
                             <h3 className={`font-extrabold text-sm sm:text-base ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                              Estatísticas Operacionais e KPIs Marítimos
+                              {tText('Estatísticas Operacionais e KPIs Marítimos')}
                             </h3>
                             <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                              Indicadores chave de tráfego, vistorias e tesouraria portuária em tempo real
+                              {tText('Indicadores chave de tráfego, vistorias e tesouraria portuária em tempo real')}
                             </p>
                           </div>
                         </div>
@@ -747,7 +795,7 @@ export function DashboardModule({
                               {totalFaturasAguardando}
                             </div>
                             <span className="text-xs text-amber-500 font-mono font-bold text-[11px]">
-                              {(saldoTotalAguardando / 1000000).toFixed(1)}M XOF
+                              {formatCompactMillions(saldoTotalAguardando)}M XOF
                             </span>
                           </div>
                           <div className={`text-[11px] truncate ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
@@ -763,7 +811,7 @@ export function DashboardModule({
                         >
                           <div className="flex items-center justify-between">
                             <span className={`text-xs font-semibold uppercase tracking-wider font-mono ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                              Faturação Total
+                              {tText('Faturação Total')}
                             </span>
                             <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                               <Wallet className="w-3.5 h-3.5" />
@@ -771,12 +819,12 @@ export function DashboardModule({
                           </div>
                           <div className="flex items-baseline justify-between">
                             <div className={`text-xl sm:text-2xl font-bold font-mono ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                              {formattedMillions}M <span className="text-xs font-normal">XOF</span>
+                              {formatCompactMillions(displayReceitaNum)}M <span className="text-xs font-normal">XOF</span>
                             </div>
                             <span className="text-xs text-emerald-500 font-semibold font-mono">2026</span>
                           </div>
                           <div className={`text-[11px] truncate ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                            Emolumentos e acostagem
+                            {tText('Emolumentos e acostagem')}
                           </div>
                         </div>
                       </div>
@@ -837,16 +885,16 @@ export function DashboardModule({
                         >
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                             <span className={`text-xs font-bold font-mono uppercase tracking-wider ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                              Evolução Mensal (2026)
+                              {tText('Evolução Mensal (2026)')}
                             </span>
                             <div className="flex items-center gap-3 text-xs font-semibold">
                               <span className="flex items-center gap-1.5">
                                 <span className="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block"></span>
-                                <span className={theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}>Faturado</span>
+                                <span className={theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}>{tText('Faturado')}</span>
                               </span>
                               <span className="flex items-center gap-1.5">
                                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
-                                <span className={theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}>Cobrado</span>
+                                <span className={theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}>{tText('Cobrado')}</span>
                               </span>
                             </div>
                           </div>
@@ -856,18 +904,18 @@ export function DashboardModule({
                             <ResponsiveContainer width="100%" height="100%">
                               <BarChart
                                 data={[
-                                  { mes: 'Maio', Faturado: 5520000, Cobrado: 4800000 },
-                                  { mes: 'Junho', Faturado: 6810000, Cobrado: 6100000 },
-                                  { mes: 'Julho', Faturado: 7400000, Cobrado: 6900000 },
-                                  { mes: 'Agosto', Faturado: 8100000, Cobrado: 7500000 },
-                                  { mes: 'Setembro', Faturado: 6950000, Cobrado: 6200000 },
-                                  { mes: 'Outubro', Faturado: 9200000, Cobrado: 8650000 }
+                                  { mes: tText('Maio'), Faturado: 5520000, Cobrado: 4800000 },
+                                  { mes: tText('Junho'), Faturado: 6810000, Cobrado: 6100000 },
+                                  { mes: tText('Julho'), Faturado: 7400000, Cobrado: 6900000 },
+                                  { mes: tText('Agosto'), Faturado: 8100000, Cobrado: 7500000 },
+                                  { mes: tText('Setembro'), Faturado: 6950000, Cobrado: 6200000 },
+                                  { mes: tText('Outubro'), Faturado: 9200000, Cobrado: 8650000 }
                                 ]}
                                 margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                               >
                                 <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#1e293b' : '#e2e8f0'} />
                                 <XAxis dataKey="mes" stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} fontSize={11} />
-                                <YAxis stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} fontSize={10} tickFormatter={(val) => `${(val / 1000000).toFixed(1)}M`} />
+                                <YAxis stroke={theme === 'dark' ? '#94a3b8' : '#64748b'} fontSize={10} tickFormatter={(val) => `${formatCompactMillions(val)}M`} />
                                 <Tooltip
                                   contentStyle={{
                                     backgroundColor: theme === 'dark' ? '#0f172a' : '#ffffff',
@@ -876,21 +924,21 @@ export function DashboardModule({
                                     fontSize: '11px',
                                     color: theme === 'dark' ? '#f8fafc' : '#0f172a'
                                   }}
-                                  formatter={(value: any) => [`${Number(value).toLocaleString('pt-PT')} XOF`, '']}
+                                  formatter={(value: any) => [`${formatNumber(Number(value))} XOF`, '']}
                                 />
                                 <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }} />
-                                <Bar dataKey="Faturado" fill="#2563eb" radius={[6, 6, 0, 0]} name="Faturado (XOF)" />
-                                <Bar dataKey="Cobrado" fill="#10b981" radius={[6, 6, 0, 0]} name="Cobrado (XOF)" />
+                                <Bar dataKey="Faturado" fill="#2563eb" radius={[6, 6, 0, 0]} name={tText('Faturado (XOF)')} />
+                                <Bar dataKey="Cobrado" fill="#10b981" radius={[6, 6, 0, 0]} name={tText('Cobrado (XOF)')} />
                               </BarChart>
                             </ResponsiveContainer>
                           </div>
 
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pt-1 text-xs font-mono font-bold">
                             <div className="text-slate-500 dark:text-slate-400">
-                              Total Faturado (6M): <span className="text-blue-600 dark:text-blue-400">43 980 000 F CFA</span>
+                              {tText('Total Faturado (6M)')}: <span className="text-blue-600 dark:text-blue-400">{formatNumber(43980000)} F CFA</span>
                             </div>
                             <div className="text-slate-500 dark:text-slate-400">
-                              Total Arrecadado (6M): <span className="text-emerald-600 dark:text-emerald-400">40 150 000 F CFA</span>
+                              {tText('Total Arrecadado (6M)')}: <span className="text-emerald-600 dark:text-emerald-400">{formatNumber(40150000)} F CFA</span>
                             </div>
                           </div>
                         </div>
@@ -903,7 +951,7 @@ export function DashboardModule({
                         >
                           <div className="flex items-center justify-between">
                             <span className={`text-xs font-bold font-mono uppercase tracking-wider ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                              Meios de Pagamento
+                              {tText('Meios de Pagamento')}
                             </span>
                             <PieChart className="w-4 h-4 text-blue-500" />
                           </div>
@@ -911,7 +959,7 @@ export function DashboardModule({
                           <div className="relative flex items-center justify-center py-2">
                             <div className="w-28 sm:w-32 h-28 sm:h-32 rounded-full border-8 border-blue-600 border-t-emerald-500 border-r-amber-500 border-b-purple-500 flex flex-col items-center justify-center shadow-inner">
                               <span className={`text-[9px] font-bold uppercase tracking-wider ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                                Eficiência
+                                {tText('Eficiência')}
                               </span>
                               <span className={`text-lg sm:text-xl font-black font-mono ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                                 81.9%
@@ -921,10 +969,10 @@ export function DashboardModule({
 
                           <div className="space-y-1.5 text-xs font-medium">
                             {[
-                              { label: 'Banque Atlantique', pct: '45%', color: 'bg-blue-600' },
-                              { label: 'Coris Bank', pct: '30%', color: 'bg-emerald-500' },
-                              { label: 'BAO - Banco África Ocidental', pct: '17%', color: 'bg-amber-500' },
-                              { label: 'Numerário / Caixa Direto', pct: '8%', color: 'bg-purple-500' }
+                              { label: tText('Banque Atlantique'), pct: '45%', color: 'bg-blue-600' },
+                              { label: tText('Coris Bank'), pct: '30%', color: 'bg-emerald-500' },
+                              { label: tText('BAO - Banco África Ocidental'), pct: '17%', color: 'bg-amber-500' },
+                              { label: tText('Numerário / Caixa Direto'), pct: '8%', color: 'bg-purple-500' }
                             ].map((item) => (
                               <div key={item.label} className="flex items-center justify-between">
                                 <div className="flex items-center gap-2 min-w-0">
@@ -950,14 +998,14 @@ export function DashboardModule({
                           }`}
                         >
                           <h4 className={`font-bold text-xs font-mono uppercase tracking-wider ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                            Top Agências por Volume Faturado e Regularização
+                            {tText('Top Agências por Volume Faturado e Regularização')}
                           </h4>
                           <div className="space-y-3">
                             {[
-                              { nome: 'HENRIMAR', val: '5 775 700 F CFA', reg: '100% regularizado', pct: 100, cor: 'bg-emerald-500' },
-                              { nome: 'AFRICARGO BISSAU', val: '3 200 000 F CFA', reg: '37.5% regularizado', pct: 37.5, cor: 'bg-blue-600' },
-                              { nome: 'DALLIAN YANG MING', val: '2 400 000 F CFA', reg: '81.2% regularizado', pct: 81.2, cor: 'bg-blue-600' },
-                              { nome: 'SATRACON SARL', val: '1 200 000 F CFA', reg: '100% regularizado', pct: 100, cor: 'bg-emerald-500' }
+                              { nome: 'HENRIMAR', val: `${formatNumber(5775700)} F CFA`, reg: tText('100% regularizado'), pct: 100, cor: 'bg-emerald-500' },
+                              { nome: 'AFRICARGO BISSAU', val: `${formatNumber(3200000)} F CFA`, reg: tText('37.5% regularizado'), pct: 37.5, cor: 'bg-blue-600' },
+                              { nome: 'DALLIAN YANG MING', val: `${formatNumber(2400000)} F CFA`, reg: tText('81.2% regularizado'), pct: 81.2, cor: 'bg-blue-600' },
+                              { nome: 'SATRACON SARL', val: `${formatNumber(1200000)} F CFA`, reg: tText('100% regularizado'), pct: 100, cor: 'bg-emerald-500' }
                             ].map((ag) => (
                               <div key={ag.nome} className="space-y-1">
                                 <div className="flex items-center justify-between text-xs">
@@ -979,30 +1027,30 @@ export function DashboardModule({
                           <div className="flex items-center justify-between">
                             <div>
                               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-blue-200">
-                                ÍNDICE GLOBAL SOD
+                                {tText('ÍNDICE GLOBAL SOD')}
                               </span>
-                              <h4 className="font-black text-base text-white mt-0.5">Arrecadação Portuária</h4>
+                              <h4 className="font-black text-base text-white mt-0.5">{tText('Arrecadação Portuária')}</h4>
                             </div>
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                              Conforme
+                              {tText('Conforme')}
                             </span>
                           </div>
 
                           <p className="text-xs text-blue-100 leading-relaxed">
-                            Faturas emitidas pela Faturação são conferidas e cobradas pelo Caixa com depósito bancário irrevogável.
+                            {tText('Faturas emitidas pela Faturação são conferidas e cobradas pelo Caixa com depósito bancário irrevogável.')}
                           </p>
 
                           <div className="grid grid-cols-3 gap-1.5 pt-2 border-t border-white/15 text-center font-mono">
                             <div className="p-1.5 rounded-lg bg-white/10">
-                              <div className="text-[9px] text-blue-200">Cobrança</div>
+                              <div className="text-[9px] text-blue-200">{tText('Cobrança')}</div>
                               <div className="font-black text-xs sm:text-sm text-emerald-300">81.9%</div>
                             </div>
                             <div className="p-1.5 rounded-lg bg-white/10">
-                              <div className="text-[9px] text-blue-200">Dívida</div>
+                              <div className="text-[9px] text-blue-200">{tText('Dívida')}</div>
                               <div className="font-black text-[11px] text-amber-300">5.4M</div>
                             </div>
                             <div className="p-1.5 rounded-lg bg-white/10">
-                              <div className="text-[9px] text-blue-200">Auditoria</div>
+                              <div className="text-[9px] text-blue-200">{tText('Auditoria')}</div>
                               <div className="font-black text-[11px] text-blue-200">100% OK</div>
                             </div>
                           </div>
@@ -1018,10 +1066,10 @@ export function DashboardModule({
                         <ShieldCheck className="w-5 h-5 text-blue-500 shrink-0" />
                         <div>
                           <h3 className={`font-bold text-sm sm:text-base ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                            Ciclo de Vida e Estados da Faturação Portuária (SoD)
+                            {tText('Ciclo de Vida e Estados da Faturação Portuária (SoD)')}
                           </h3>
                           <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                            Fluxo institucional de validação e emissão de recibos
+                            {tText('Fluxo institucional de validação e emissão de recibos')}
                           </p>
                         </div>
                       </div>
@@ -1029,41 +1077,41 @@ export function DashboardModule({
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                         <div className={`p-3.5 rounded-xl border space-y-1.5 ${theme === 'dark' ? 'bg-slate-800/50 border-slate-700/60' : 'bg-slate-50 border-slate-200'}`}>
                           <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-200 text-slate-700 uppercase">
-                            1. RASCUNHO
+                            {tText('1. RASCUNHO')}
                           </span>
-                          <div className={`font-bold text-xs ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Criada p/ Faturação</div>
+                          <div className={`font-bold text-xs ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{tText('Criada p/ Faturação')}</div>
                           <p className={`text-[11px] leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                            Editável. Marca d'água FATURA PRÓ-FORMA. Sem valor jurídico.
+                            {tText("Editável. Marca d'água FATURA PRÓ-FORMA. Sem valor jurídico.")}
                           </p>
                         </div>
 
                         <div className={`p-3.5 rounded-xl border space-y-1.5 ${theme === 'dark' ? 'bg-blue-950/30 border-blue-900/40' : 'bg-blue-50/60 border-blue-200/80'}`}>
                           <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-100 text-blue-700 uppercase">
-                            2. CONFIRMADA
+                            {tText('2. CONFIRMADA')}
                           </span>
-                          <div className={`font-bold text-xs ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Validada Oficial</div>
+                          <div className={`font-bold text-xs ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{tText('Validada Oficial')}</div>
                           <p className={`text-[11px] leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                            Imutável. Disponível para quitação no Caixa.
+                            {tText('Imutável. Disponível para quitação no Caixa.')}
                           </p>
                         </div>
 
                         <div className={`p-3.5 rounded-xl border space-y-1.5 ${theme === 'dark' ? 'bg-emerald-950/30 border-emerald-900/40' : 'bg-emerald-50/60 border-emerald-200/80'}`}>
                           <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-100 text-emerald-700 uppercase">
-                            3. LIQUIDADA
+                            {tText('3. LIQUIDADA')}
                           </span>
-                          <div className={`font-bold text-xs ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Cobrada no Caixa</div>
+                          <div className={`font-bold text-xs ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{tText('Cobrada no Caixa')}</div>
                           <p className={`text-[11px] leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                            Total pago == Fatura. Recibo de quitação emitido.
+                            {tText('Total pago == Fatura. Recibo de quitação emitido.')}
                           </p>
                         </div>
 
                         <div className={`p-3.5 rounded-xl border space-y-1.5 ${theme === 'dark' ? 'bg-rose-950/30 border-rose-900/40' : 'bg-rose-50/60 border-rose-200/80'}`}>
                           <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-100 text-rose-700 uppercase">
-                            4. ANULADA
+                            {tText('4. ANULADA')}
                           </span>
-                          <div className={`font-bold text-xs ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Exclusivo Diretor</div>
+                          <div className={`font-bold text-xs ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{tText('Exclusivo Diretor')}</div>
                           <p className={`text-[11px] leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                            Com justificativa oficial. Bloqueado se houver recibos.
+                            {tText('Com justificativa oficial. Bloqueado se houver recibos.')}
                           </p>
                         </div>
                       </div>
@@ -1075,10 +1123,10 @@ export function DashboardModule({
                     <div className="space-y-4 w-full h-full flex flex-col justify-between">
                       <div className="border-b pb-3 border-slate-200 dark:border-slate-800">
                         <h3 className={`font-bold text-sm sm:text-base ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                          Ações Rápidas ({userRole.toUpperCase()})
+                          {tText('Ações Rápidas')} ({userRole.toUpperCase()})
                         </h3>
                         <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                          Atalhos diretos para as rotinas portuárias
+                          {tText('Atalhos diretos para as rotinas portuárias')}
                         </p>
                       </div>
 
@@ -1089,7 +1137,7 @@ export function DashboardModule({
                         >
                           <span className="flex items-center gap-2">
                             <Plus className="w-4 h-4" />
-                            Emitir Nova Fatura
+                            {tText('Emitir Nova Fatura')}
                           </span>
                           <ArrowRight className="w-4 h-4" />
                         </button>
@@ -1101,7 +1149,7 @@ export function DashboardModule({
                               : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'
                           }`}
                         >
-                          <span>Consultar Faturas Portuárias</span>
+                          <span>{tText('Consultar Faturas Portuárias')}</span>
                           <ArrowRight className="w-4 h-4" />
                         </button>
                         <button
@@ -1112,13 +1160,13 @@ export function DashboardModule({
                               : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'
                           }`}
                         >
-                          <span>Registo de Atracações</span>
+                          <span>{tText('Registo de Atracações')}</span>
                           <ArrowRight className="w-4 h-4" />
                         </button>
                       </div>
 
                       <div className={`text-[11px] font-mono pt-2 border-t border-slate-200 dark:border-slate-800 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                        Segregação SoD: Emissão p/ Faturação, Quitação p/ Caixa.
+                        {tText('Segregação SoD: Emissão p/ Faturação, Quitação p/ Caixa.')}
                       </div>
                     </div>
                   )}
@@ -1129,13 +1177,13 @@ export function DashboardModule({
                       <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
                         <h3 className={`font-bold text-sm sm:text-base flex items-center gap-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                           <Ship className="w-4 h-4 text-blue-500 shrink-0" />
-                          Navios em Operação / Atracados em Bissau
+                          {tText('Navios em Operação / Atracados em Bissau')}
                         </h3>
                         <button
                           onClick={() => onNavigate('atracacoes')}
                           className="text-xs text-blue-500 hover:text-blue-600 font-medium flex items-center gap-1 cursor-pointer"
                         >
-                          Ver todas as escalas <ArrowUpRight className="w-3.5 h-3.5" />
+                          {tText('Ver todas as escalas')} <ArrowUpRight className="w-3.5 h-3.5" />
                         </button>
                       </div>
 
@@ -1165,13 +1213,13 @@ export function DashboardModule({
 
                             <div className="flex items-center gap-3 text-xs flex-wrap">
                               <div>
-                                <span className={`block text-[10px] ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>Cais:</span>
+                                <span className={`block text-[10px] ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>{tText('Cais')}:</span>
                                 <span className={`font-semibold ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>
                                   {atracacao.caisDesignado}
                                 </span>
                               </div>
                               <div>
-                                <span className={`block text-[10px] ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>ETA:</span>
+                                <span className={`block text-[10px] ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>{tText('ETA')}:</span>
                                 <span className="font-mono text-[11px] text-blue-500">
                                   {atracacao.dataChegadaPrevista}
                                 </span>
@@ -1183,7 +1231,7 @@ export function DashboardModule({
                                     : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
                                 }`}
                               >
-                                {atracacao.status}
+                                {tText(atracacao.status)}
                               </span>
                             </div>
                           </div>
@@ -1198,7 +1246,7 @@ export function DashboardModule({
                       <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
                         <h3 className={`font-bold text-sm sm:text-base flex items-center gap-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                           <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                          Infraestruturas Portuárias
+                          {tText('Infraestruturas Portuárias')}
                         </h3>
                       </div>
 
@@ -1210,14 +1258,14 @@ export function DashboardModule({
                         >
                           <div className="flex items-center justify-between">
                             <span className={`font-bold text-xs ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                              Porto Comercial de Bissau
+                              {tText('Porto Comercial de Bissau')}
                             </span>
                             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                              Operacional
+                              {tText('Operacional')}
                             </span>
                           </div>
                           <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                            Cais Principal 2/2 ocupados. Calado máx: 9.5m. Balizamento ativo.
+                            {tText('Cais Principal 2/2 ocupados. Calado máx: 9.5m. Balizamento ativo.')}
                           </p>
                           <div className="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
                             <div className="bg-emerald-500 h-full w-[85%]"></div>
@@ -1231,14 +1279,14 @@ export function DashboardModule({
                         >
                           <div className="flex items-center justify-between">
                             <span className={`font-bold text-xs ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                              Terminal Petrolífero Bandim
+                              {tText('Terminal Petrolífero Bandim')}
                             </span>
                             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-500 border border-blue-500/20">
-                              Disponível
+                              {tText('Disponível')}
                             </span>
                           </div>
                           <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                            Operações de combustível monitorizadas via código ISPS.
+                            {tText('Operações de combustível monitorizadas via código ISPS.')}
                           </p>
                         </div>
                       </div>
@@ -1253,15 +1301,15 @@ export function DashboardModule({
                           <Waves className="w-5 h-5 text-blue-500 shrink-0" />
                           <div>
                             <h3 className={`font-bold text-sm sm:text-base ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                              Condições Marítimas & Canal do Rio Geba (Estuário de Bissau)
+                              {tText('Condições Marítimas & Canal do Rio Geba (Estuário de Bissau)')}
                             </h3>
                             <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                              Dados meteorológicos e hidrométricos para auxílio à navegação e acostagem
+                              {tText('Dados meteorológicos e hidrométricos para auxílio à navegação e acostagem')}
                             </p>
                           </div>
                         </div>
                         <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-blue-500/10 text-blue-500 border border-blue-500/20 hidden sm:inline-block">
-                          Canal Aberto • ISPS Nível 1
+                          {tText('Canal Aberto • ISPS Nível 1')}
                         </span>
                       </div>
 
@@ -1269,56 +1317,56 @@ export function DashboardModule({
                         {/* Maré Alta */}
                         <div className={`p-3.5 rounded-xl border space-y-1 ${theme === 'dark' ? 'bg-slate-800/40 border-slate-700/60' : 'bg-slate-50 border-slate-200'}`}>
                           <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-500 dark:text-slate-400 font-medium">Preia-Mar (Alta)</span>
+                            <span className="text-slate-500 dark:text-slate-400 font-medium">{tText('Preia-Mar (Alta)')}</span>
                             <Waves className="w-3.5 h-3.5 text-blue-500" />
                           </div>
                           <div className={`text-lg font-bold font-mono ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                            +4.8 m <span className="text-xs text-blue-500 font-sans font-semibold">às 14:40</span>
+                            {tText('+4.8 m')} <span className="text-xs text-blue-500 font-sans font-semibold">{tText('às 14:40')}</span>
                           </div>
                           <p className={`text-[10px] ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                            Janela favorável para calados profundos
+                            {tText('Janela favorável para calados profundos')}
                           </p>
                         </div>
 
                         {/* Baixa-mar */}
                         <div className={`p-3.5 rounded-xl border space-y-1 ${theme === 'dark' ? 'bg-slate-800/40 border-slate-700/60' : 'bg-slate-50 border-slate-200'}`}>
                           <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-500 dark:text-slate-400 font-medium">Baixa-Mar</span>
+                            <span className="text-slate-500 dark:text-slate-400 font-medium">{tText('Baixa-Mar')}</span>
                             <Waves className="w-3.5 h-3.5 text-amber-500" />
                           </div>
                           <div className={`text-lg font-bold font-mono ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                            +0.9 m <span className="text-xs text-amber-500 font-sans font-semibold">às 21:05</span>
+                            {tText('+0.9 m')} <span className="text-xs text-amber-500 font-sans font-semibold">{tText('às 21:05')}</span>
                           </div>
                           <p className={`text-[10px] ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                            Atenção a bancos de areia no canal
+                            {tText('Atenção a bancos de areia no canal')}
                           </p>
                         </div>
 
                         {/* Vento */}
                         <div className={`p-3.5 rounded-xl border space-y-1 ${theme === 'dark' ? 'bg-slate-800/40 border-slate-700/60' : 'bg-slate-50 border-slate-200'}`}>
                           <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-500 dark:text-slate-400 font-medium">Vento Predominante</span>
+                            <span className="text-slate-500 dark:text-slate-400 font-medium">{tText('Vento Predominante')}</span>
                             <Wind className="w-3.5 h-3.5 text-emerald-500" />
                           </div>
                           <div className={`text-lg font-bold font-mono ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                            12 nós <span className="text-xs text-emerald-500 font-sans font-semibold">WSW</span>
+                            {tText('12 nós')} <span className="text-xs text-emerald-500 font-sans font-semibold">{tText('WSW')}</span>
                           </div>
                           <p className={`text-[10px] ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                            Mar chão / Vagas suaves (0.6m)
+                            {tText('Mar chão / Vagas suaves (0.6m)')}
                           </p>
                         </div>
 
                         {/* Visibilidade */}
                         <div className={`p-3.5 rounded-xl border space-y-1 ${theme === 'dark' ? 'bg-slate-800/40 border-slate-700/60' : 'bg-slate-50 border-slate-200'}`}>
                           <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-500 dark:text-slate-400 font-medium">Visibilidade</span>
+                            <span className="text-slate-500 dark:text-slate-400 font-medium">{tText('Visibilidade')}</span>
                             <Compass className="w-3.5 h-3.5 text-blue-500" />
                           </div>
                           <div className={`text-lg font-bold font-mono ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                            10+ km <span className="text-xs text-emerald-500 font-sans font-semibold">Ótima</span>
+                            {tText('10+ km')} <span className="text-xs text-emerald-500 font-sans font-semibold">{tText('Ótima')}</span>
                           </div>
                           <p className={`text-[10px] ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                            Sem nevoeiro / Farol de Bissau ativo
+                            {tText('Sem nevoeiro / Farol de Bissau ativo')}
                           </p>
                         </div>
                       </div>

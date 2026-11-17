@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   ShieldCheck, Hash, Lock, CheckCircle2, Search, Link2, ShieldAlert, RefreshCw, AlertTriangle,
-  Activity, Gauge, Zap, Clock, Database, Cpu, Play, Server, GitFork, ArrowRight, CornerDownRight,
-  Layers, Check, FileMinus, Receipt, FileText
+  Activity, Gauge, Zap, Database, Cpu, Play
 } from 'lucide-react';
 import { AuditoriaLog, IMP_INSTITUTIONAL } from '../../types';
 import { useTheme } from '../../context/ThemeContext';
@@ -16,7 +15,8 @@ interface AuditoriaModuleProps {
 
 export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
   const { theme } = useTheme();
-  const { tText } = useLanguage();
+  const { tText, language } = useLanguage();
+  const locale = language === 'pt' ? 'pt-PT' : language === 'fr' ? 'fr-FR' : 'en-GB';
   const [activeAuditTab, setActiveAuditTab] = useState<'blockchain' | 'deep_trace' | 'performance'>('blockchain');
   const [deepTraceFilter, setDeepTraceFilter] = useState<'todos' | 'saidas_tesouraria' | 'faturas' | 'recibos'>('todos');
   const [searchTerm, setSearchTerm] = useState('');
@@ -32,13 +32,13 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
   const [latencyMetrics, setLatencyMetrics] = useState({
     avgDbLatency: 14.8,
     avgModuleLoad: 24.2,
-    lastMeasured: 'Poucos segundos',
+    lastMeasured: tText('Poucos segundos'),
     queries: [
-      { name: 'SELECT * FROM fatura_imp', latency: 14, status: 'Excelente', rows: 42 },
-      { name: 'SELECT * FROM recibo_imp', latency: 11, status: 'Excelente', rows: 28 },
-      { name: 'SELECT * FROM caixa_mov', latency: 18, status: 'Excelente', rows: 64 },
-      { name: 'SELECT * FROM auditoria_log', latency: 15, status: 'Excelente', rows: logs.length },
-      { name: 'SELECT * FROM embarcacao', latency: 12, status: 'Excelente', rows: 19 }
+      { name: 'SELECT * FROM fatura_imp', latency: 14, status: tText('Excelente'), rows: 42 },
+      { name: 'SELECT * FROM recibo_imp', latency: 11, status: tText('Excelente'), rows: 28 },
+      { name: 'SELECT * FROM caixa_mov', latency: 18, status: tText('Excelente'), rows: 64 },
+      { name: 'SELECT * FROM auditoria_log', latency: 15, status: tText('Excelente'), rows: logs.length },
+      { name: 'SELECT * FROM embarcacao', latency: 12, status: tText('Excelente'), rows: 19 }
     ],
     modules: [
       { name: 'DashboardModule', loadTime: 18, memory: '4.2 MB' },
@@ -64,7 +64,7 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
         return {
           ...q,
           latency: newLat,
-          status: newLat < 25 ? 'Excelente' : newLat < 50 ? 'Bom' : 'Atenção'
+          status: newLat < 25 ? tText('Excelente') : newLat < 50 ? tText('Bom') : tText('Atenção')
         };
       });
 
@@ -82,7 +82,7 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
       setLatencyMetrics({
         avgDbLatency: newAvgDb,
         avgModuleLoad: newAvgMod,
-        lastMeasured: new Date().toLocaleTimeString('pt-PT'),
+        lastMeasured: new Date().toLocaleTimeString(locale),
         queries: updatedQueries,
         modules: updatedModules
       });
@@ -102,7 +102,7 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
 
   const verifyChainIntegrity = async () => {
     setIsVerifying(true);
-    setVerificationResult({ status: 'idle', message: 'Iniciando verificação matemática...' });
+    setVerificationResult({ status: 'idle', message: tText('Iniciando verificação matemática...') });
 
     try {
       for (let i = 0; i < logs.length; i++) {
@@ -113,7 +113,7 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
         if (log.prev_hash !== prevHash) {
           setVerificationResult({
             status: 'error',
-            message: `QUEBRA DE CADEIA DETECTADA: O bloco #${log.id} aponta para um hash anterior incorreto. Possível tentativa de inserção manual ou deleção de registo.`,
+            message: tText('QUEBRA DE CADEIA DETECTADA: O bloco #{id} aponta para um hash anterior incorreto. Possível tentativa de inserção manual ou deleção de registo.').replace('{id}', String(log.id)),
             corruptedIndex: i
           });
           setIsVerifying(false);
@@ -127,7 +127,7 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
         if (computedHash !== log.hash_sha256) {
           setVerificationResult({
             status: 'error',
-            message: `ADULTERAÇÃO DE DADOS DETECTADA: O conteúdo do bloco #${log.id} foi alterado após a assinatura original. O hash matemático não coincide.`,
+            message: tText('ADULTERAÇÃO DE DADOS DETECTADA: O conteúdo do bloco #{id} foi alterado após a assinatura original. O hash matemático não coincide.').replace('{id}', String(log.id)),
             corruptedIndex: i
           });
           setIsVerifying(false);
@@ -137,12 +137,12 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
 
       setVerificationResult({
         status: 'success',
-        message: 'INTEGRIDADE CONFIRMADA: Todos os blocos da cadeia de auditoria foram verificados e as assinaturas digitais são 100% autênticas.'
+        message: tText('INTEGRIDADE CONFIRMADA: Todos os blocos da cadeia de auditoria foram verificados e as assinaturas digitais são 100% autênticas.')
       });
     } catch (error) {
       setVerificationResult({
         status: 'error',
-        message: 'Erro técnico durante o processamento da cadeia criptográfica.'
+        message: tText('Erro técnico durante o processamento da cadeia criptográfica.')
       });
     } finally {
       setIsVerifying(false);
@@ -162,7 +162,7 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
                   : 'bg-purple-50 text-purple-700 border border-purple-200'
               }`}
             >
-              SuperAdmin & Governação
+              {tText('SuperAdmin & Governação')}
             </span>
             <span
               className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold flex items-center gap-1 ${
@@ -174,7 +174,7 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
               }`}
             >
               {verificationResult.status === 'error' ? <ShieldAlert className="w-3 h-3" /> : <CheckCircle2 className="w-3 h-3" />}
-              {verificationResult.status === 'error' ? 'Integridade Comprometida' : 'Cadeia Criptográfica Válida'}
+              {verificationResult.status === 'error' ? tText('Integridade Comprometida') : tText('Cadeia Criptográfica Válida')}
             </span>
           </div>
           <h2
@@ -183,10 +183,10 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
             }`}
           >
             <ShieldCheck className="w-5 h-5 text-purple-500" />
-            Auditoria Criptográfica Encadeada (SHA-256 Chained)
+            {tText('Auditoria Criptográfica Encadeada (SHA-256 Chained)')}
           </h2>
           <p className={theme === 'dark' ? 'text-xs text-slate-400' : 'text-xs text-slate-500'}>
-            Registo indelével de todas as ações financeiras e administrativas do {IMP_INSTITUTIONAL.entity}. Cada registo depende matematicamente do anterior.
+            {tText('Registo indelével de todas as ações financeiras e administrativas do {entity}. Cada registo depende matematicamente do anterior.').replace('{entity}', IMP_INSTITUTIONAL.entity)}
           </p>
         </div>
 
@@ -200,7 +200,7 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
           }`}
         >
           {isVerifying ? <RefreshCw className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
-          Verificar Cadeia de Custódia
+          {tText('Verificar Cadeia de Custódia')}
         </button>
       </div>
 
@@ -219,7 +219,7 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
             <ShieldAlert className="w-6 h-6 shrink-0" />
           )}
           <div className="space-y-1">
-            <div className="font-bold text-sm">Resultado da Verificação SHA-256</div>
+            <div className="font-bold text-sm">{tText('Resultado da Verificação SHA-256')}</div>
             <p className="text-xs leading-relaxed opacity-90">{verificationResult.message}</p>
           </div>
           <button
@@ -239,11 +239,11 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
           }`}
         >
           <div className="flex items-center justify-between text-slate-400 text-xs mb-1">
-            <span>Total de Registos Encadeados</span>
+            <span>{tText('Total de Registos Encadeados')}</span>
             <Link2 className="w-4 h-4 text-purple-500" />
           </div>
-          <div className="text-2xl font-bold font-mono text-purple-500">{logs.length} Blocos</div>
-          <p className="text-[11px] text-slate-500 mt-1">Génese: 00000000000000000000000000000000</p>
+          <div className="text-2xl font-bold font-mono text-purple-500">{logs.length.toLocaleString(locale)} {tText('Blocos')}</div>
+          <p className="text-[11px] text-slate-500 mt-1">{tText('Génese')}: 00000000000000000000000000000000</p>
         </div>
 
         <div
@@ -252,11 +252,11 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
           }`}
         >
           <div className="flex items-center justify-between text-slate-400 text-xs mb-1">
-            <span>Algoritmo de Assinatura</span>
+            <span>{tText('Algoritmo de Assinatura')}</span>
             <Hash className="w-4 h-4 text-emerald-500" />
           </div>
-          <div className="text-2xl font-bold font-mono text-emerald-500">SHA-256 Standard</div>
-          <p className="text-[11px] text-slate-500 mt-1">Conformidade com padrão bancário internacional</p>
+          <div className="text-2xl font-bold font-mono text-emerald-500">{tText('SHA-256 Standard')}</div>
+          <p className="text-[11px] text-slate-500 mt-1">{tText('Conformidade com padrão bancário internacional')}</p>
         </div>
 
         <div
@@ -265,11 +265,11 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
           }`}
         >
           <div className="flex items-center justify-between text-slate-400 text-xs mb-1">
-            <span>Estado da Integridade</span>
+            <span>{tText('Estado da Integridade')}</span>
             <Lock className="w-4 h-4 text-blue-500" />
           </div>
-          <div className="text-2xl font-bold font-mono text-blue-500">100% Inviolável</div>
-          <p className="text-[11px] text-slate-500 mt-1">Sem adulterações detectadas em banco</p>
+          <div className="text-2xl font-bold font-mono text-blue-500">{tText('100% Inviolável')}</div>
+          <p className="text-[11px] text-slate-500 mt-1">{tText('Sem adulterações detectadas em banco')}</p>
         </div>
       </div>
 
@@ -288,12 +288,12 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
             <div>
               <div className="flex items-center gap-2">
                 <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase">
-                  Módulo de Governação & UX
+                  {tText('Módulo de Governação & UX')}
                 </span>
-                <span className="text-xs font-mono text-slate-400">Última Medição: {latencyMetrics.lastMeasured}</span>
+                <span className="text-xs font-mono text-slate-400">{tText('Última Medição')}: {latencyMetrics.lastMeasured}</span>
               </div>
               <h3 className="text-base font-bold tracking-tight mt-0.5 flex items-center gap-2">
-                Monitor de Performance do Sistema & Latência DB
+                {tText('Monitor de Performance do Sistema & Latência DB')}
               </h3>
             </div>
           </div>
@@ -308,7 +308,7 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
             }`}
           >
             {isBenchmarking ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-            <span>{isBenchmarking ? 'A Medir Latência...' : 'Executar Benchmark DB'}</span>
+            <span>{isBenchmarking ? tText('A Medir Latência...') : tText('Executar Benchmark DB')}</span>
           </button>
         </div>
 
@@ -316,38 +316,38 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-mono text-xs">
           <div className={`p-3.5 rounded-xl border ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
             <div className="flex items-center justify-between text-slate-400 text-[10px] uppercase mb-1">
-              <span>Latência Média DB</span>
+              <span>{tText('Latência Média DB')}</span>
               <Database className="w-3.5 h-3.5 text-emerald-400" />
             </div>
-            <div className="text-xl font-bold text-emerald-400">{latencyMetrics.avgDbLatency} ms</div>
-            <div className="text-[10px] text-emerald-500 font-semibold mt-1">PostgreSQL Local Direct</div>
+            <div className="text-xl font-bold text-emerald-400">{latencyMetrics.avgDbLatency.toLocaleString(locale)} ms</div>
+            <div className="text-[10px] text-emerald-500 font-semibold mt-1">{tText('PostgreSQL Local Direct')}</div>
           </div>
 
           <div className={`p-3.5 rounded-xl border ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
             <div className="flex items-center justify-between text-slate-400 text-[10px] uppercase mb-1">
-              <span>Carregamento Módulos</span>
+              <span>{tText('Carregamento Módulos')}</span>
               <Zap className="w-3.5 h-3.5 text-blue-400" />
             </div>
-            <div className="text-xl font-bold text-blue-400">{latencyMetrics.avgModuleLoad} ms</div>
-            <div className="text-[10px] text-blue-500 font-semibold mt-1">Navegação em Tempo Real</div>
+            <div className="text-xl font-bold text-blue-400">{latencyMetrics.avgModuleLoad.toLocaleString(locale)} ms</div>
+            <div className="text-[10px] text-blue-500 font-semibold mt-1">{tText('Navegação em Tempo Real')}</div>
           </div>
 
           <div className={`p-3.5 rounded-xl border ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
             <div className="flex items-center justify-between text-slate-400 text-[10px] uppercase mb-1">
-              <span>Throughput Render</span>
+              <span>{tText('Throughput Render')}</span>
               <Gauge className="w-3.5 h-3.5 text-purple-400" />
             </div>
             <div className="text-xl font-bold text-purple-400">60 FPS / 100%</div>
-            <div className="text-[10px] text-purple-500 font-semibold mt-1">Sem Gargalos no DOM</div>
+            <div className="text-[10px] text-purple-500 font-semibold mt-1">{tText('Sem Gargalos no DOM')}</div>
           </div>
 
           <div className={`p-3.5 rounded-xl border ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
             <div className="flex items-center justify-between text-slate-400 text-[10px] uppercase mb-1">
-              <span>Uso Heap JS Client</span>
+              <span>{tText('Uso Heap JS Client')}</span>
               <Cpu className="w-3.5 h-3.5 text-amber-400" />
             </div>
             <div className="text-xl font-bold text-amber-400">24.5 MB</div>
-            <div className="text-[10px] text-amber-500 font-semibold mt-1">Alocação Eficiente</div>
+            <div className="text-[10px] text-amber-500 font-semibold mt-1">{tText('Alocação Eficiente')}</div>
           </div>
         </div>
 
@@ -358,9 +358,9 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
             <div className="flex items-center justify-between border-b pb-2 border-slate-800">
               <span className="font-bold text-emerald-400 flex items-center gap-1.5 uppercase text-[11px]">
                 <Database className="w-3.5 h-3.5" />
-                Latência de Consultas SQL (PostgreSQL)
+                {tText('Latência de Consultas SQL (PostgreSQL)')}
               </span>
-              <span className="text-[10px] text-slate-400">Status SQL</span>
+              <span className="text-[10px] text-slate-400">{tText('Status SQL')}</span>
             </div>
 
             <div className="space-y-2">
@@ -368,10 +368,10 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
                 <div key={q.name} className="flex items-center justify-between p-2 rounded-lg bg-slate-900/60 border border-slate-800 text-[11px]">
                   <div className="truncate pr-2">
                     <div className="font-bold text-slate-200 truncate">{q.name}</div>
-                    <div className="text-[9px] text-slate-500">{q.rows} registos devolvidos</div>
+                    <div className="text-[9px] text-slate-500">{q.rows.toLocaleString(locale)} {tText('registos devolvidos')}</div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="font-bold text-emerald-400">{q.latency} ms</span>
+                    <span className="font-bold text-emerald-400">{q.latency.toLocaleString(locale)} ms</span>
                     <span className="px-1.5 py-0.5 rounded text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase">
                       {q.status}
                     </span>
@@ -386,9 +386,9 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
             <div className="flex items-center justify-between border-b pb-2 border-slate-800">
               <span className="font-bold text-blue-400 flex items-center gap-1.5 uppercase text-[11px]">
                 <Zap className="w-3.5 h-3.5" />
-                Tempo de Carregamento de Módulos (React Lazy)
+                {tText('Tempo de Carregamento de Módulos (React Lazy)')}
               </span>
-              <span className="text-[10px] text-slate-400">Memory</span>
+              <span className="text-[10px] text-slate-400">{tText('Memória')}</span>
             </div>
 
             <div className="space-y-2">
@@ -396,10 +396,10 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
                 <div key={m.name} className="flex items-center justify-between p-2 rounded-lg bg-slate-900/60 border border-slate-800 text-[11px]">
                   <div>
                     <div className="font-bold text-slate-200">{m.name}</div>
-                    <div className="text-[9px] text-slate-500">Renderização Instantânea</div>
+                    <div className="text-[9px] text-slate-500">{tText('Renderização Instantânea')}</div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="font-bold text-blue-400">{m.loadTime} ms</span>
+                    <span className="font-bold text-blue-400">{m.loadTime.toLocaleString(locale)} ms</span>
                     <span className="px-1.5 py-0.5 rounded text-[9px] bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase">
                       {m.memory}
                     </span>
@@ -422,7 +422,7 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Pesquisar por ação, utilizador, tabela, ID de item ou hash SHA-256..."
+          placeholder={tText('Pesquisar por ação, utilizador, tabela, ID de item ou hash SHA-256...')}
           className={`bg-transparent text-xs w-full focus:outline-none ${
             theme === 'dark' ? 'text-white placeholder-slate-500' : 'text-slate-900 placeholder-slate-400'
           }`}
@@ -445,13 +445,13 @@ export function AuditoriaModule({ logs }: AuditoriaModuleProps) {
               }`}
             >
               <tr>
-                <th className="p-3.5">Timestamp & Bloco</th>
-                <th className="p-3.5">Utilizador / Operador</th>
-                <th className="p-3.5">Ação Executada</th>
-                <th className="p-3.5">Tabela & Item ID</th>
-                <th className="p-3.5">Payload Sanitizado</th>
-                <th className="p-3.5">Elo Anterior (Prev Hash)</th>
-                <th className="p-3.5">Assinatura SHA-256</th>
+                <th className="p-3.5">{tText('Timestamp & Bloco')}</th>
+                <th className="p-3.5">{tText('Utilizador / Operador')}</th>
+                <th className="p-3.5">{tText('Ação Executada')}</th>
+                <th className="p-3.5">{tText('Tabela & Item ID')}</th>
+                <th className="p-3.5">{tText('Payload Sanitizado')}</th>
+                <th className="p-3.5">{tText('Elo Anterior (Prev Hash)')}</th>
+                <th className="p-3.5">{tText('Assinatura SHA-256')}</th>
               </tr>
             </thead>
             <tbody className={`font-mono ${theme === 'dark' ? 'divide-y divide-slate-800/60' : 'divide-y divide-slate-100'}`}>

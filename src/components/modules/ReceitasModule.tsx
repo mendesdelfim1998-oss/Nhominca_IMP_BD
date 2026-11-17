@@ -83,14 +83,14 @@ export function ReceitasModule({ rubricas, onAddRubrica, onUpdateRubrica, onDele
           }`}
         >
           <span className="text-[10px] font-bold font-mono text-slate-500 uppercase tracking-wider block">
-            Arrecadação do Mês Atual
+            {tText('Arrecadação do Mês Atual')}
           </span>
           <div className="text-2xl font-bold font-mono text-emerald-500 flex items-center justify-between">
             <span>{totalMesXOF.toLocaleString('pt-PT')} XOF</span>
             <ArrowUpRight className="w-5 h-5 text-emerald-500" />
           </div>
           <p className={theme === 'dark' ? 'text-xs text-slate-400' : 'text-xs text-slate-500'}>
-            Total apurado em todas as rubricas marítimo-portuárias
+            {tText('Total apurado em todas as rubricas marítimo-portuárias')}
           </p>
         </div>
 
@@ -101,13 +101,13 @@ export function ReceitasModule({ rubricas, onAddRubrica, onUpdateRubrica, onDele
           }`}
         >
           <span className="text-[10px] font-bold font-mono text-slate-500 uppercase tracking-wider block">
-            Meta Orçamental Anual
+            {tText('Meta Orçamental Anual')}
           </span>
           <div className="text-2xl font-bold font-mono text-blue-500">
             {totalMetaXOF.toLocaleString('pt-PT')} XOF
           </div>
           <p className={theme === 'dark' ? 'text-xs text-slate-400' : 'text-xs text-slate-500'}>
-            Orçamento de estado e receitas próprias aprovadas
+            {tText('Orçamento de estado e receitas próprias aprovadas')}
           </p>
         </div>
 
@@ -118,13 +118,13 @@ export function ReceitasModule({ rubricas, onAddRubrica, onUpdateRubrica, onDele
           }`}
         >
           <span className="text-[10px] font-bold font-mono text-slate-500 uppercase tracking-wider block">
-            Taxa Média de Execução
+            {tText('Taxa Média de Execução')}
           </span>
           <div className="text-2xl font-bold font-mono text-amber-500">
-            {mediaExecucao}% Executado
+            {mediaExecucao}% {tText('Executado')}
           </div>
           <p className="text-xs text-emerald-500">
-            Desempenho acima do período homologado
+            {tText('Desempenho acima do período homologado')}
           </p>
         </div>
       </div>
@@ -136,7 +136,7 @@ export function ReceitasModule({ rubricas, onAddRubrica, onUpdateRubrica, onDele
         }`}
       >
         <span className="text-slate-500 px-3 font-semibold font-mono uppercase text-[10px] shrink-0">
-          Filtrar Categoria:
+          {tText('Filtrar Categoria')}:
         </span>
         {['TODAS', 'Serviços Portuários', 'Segurança & Faróis', 'Licenciamento', 'Penalidades & Coimas'].map((cat) => (
           <button
@@ -150,7 +150,7 @@ export function ReceitasModule({ rubricas, onAddRubrica, onUpdateRubrica, onDele
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
-            {cat}
+            {cat === 'TODAS' ? tText('Todas') : tText(cat)}
           </button>
         ))}
       </div>
@@ -185,7 +185,7 @@ export function ReceitasModule({ rubricas, onAddRubrica, onUpdateRubrica, onDele
                   {rubrica.nomeRubrica}
                 </h3>
                 <p className={`text-xs mt-0.5 font-mono ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                  Porto / Origem: {rubrica.portoOrigem}
+                  {tText('Porto / Origem')}: {rubrica.portoOrigem}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -221,7 +221,7 @@ export function ReceitasModule({ rubricas, onAddRubrica, onUpdateRubrica, onDele
             <div className="space-y-1.5">
               <div className="flex justify-between text-xs font-mono">
                 <span className={theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}>
-                  Execução Orçamental:
+                  {tText('Execução Orçamental')}:
                 </span>
                 <span className="text-emerald-500 font-bold">{rubrica.percentualExecucao}%</span>
               </div>
@@ -246,13 +246,13 @@ export function ReceitasModule({ rubricas, onAddRubrica, onUpdateRubrica, onDele
               }`}
             >
               <div>
-                <span className="text-slate-500 block text-[10px]">ARRECADADO (MÊS):</span>
+                <span className="text-slate-500 block text-[10px]">{tText('ARRECADADO (MÊS)')}:</span>
                 <span className="text-emerald-500 font-bold text-sm">
                   {rubrica.arrecadadoMesAtualXOF.toLocaleString('pt-PT')} XOF
                 </span>
               </div>
               <div>
-                <span className="text-slate-500 block text-[10px]">META ANUAL:</span>
+                <span className="text-slate-500 block text-[10px]">{tText('META ANUAL')}:</span>
                 <span className="text-blue-500 font-bold text-sm">
                   {rubrica.metaAnualXOF.toLocaleString('pt-PT')} XOF
                 </span>
@@ -265,15 +265,15 @@ export function ReceitasModule({ rubricas, onAddRubrica, onUpdateRubrica, onDele
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className={`w-full max-w-md p-6 rounded-2xl ${theme === 'dark' ? 'bg-slate-900 border border-slate-800' : 'bg-white'}`}>
-            <h3 className="text-lg font-bold mb-4">{editingRubrica ? 'Editar Rubrica' : 'Nova Rubrica'}</h3>
+            <h3 className="text-lg font-bold mb-4">{editingRubrica ? tText('Editar Rubrica') : tText('Nova Rubrica')}</h3>
             <div className="space-y-3">
-              <input type="text" placeholder="Código" value={formData.codigoRubrica || ''} onChange={e => setFormData({...formData, codigoRubrica: e.target.value})} className="w-full p-2 rounded-lg border" />
-              <input type="text" placeholder="Nome" value={formData.nomeRubrica || ''} onChange={e => setFormData({...formData, nomeRubrica: e.target.value})} className="w-full p-2 rounded-lg border" />
-              <input type="text" placeholder="Categoria" value={formData.categoria || ''} onChange={e => setFormData({...formData, categoria: e.target.value})} className="w-full p-2 rounded-lg border" />
-              <input type="text" placeholder="Porto Origem" value={formData.portoOrigem || ''} onChange={e => setFormData({...formData, portoOrigem: e.target.value})} className="w-full p-2 rounded-lg border" />
+              <input type="text" placeholder={tText('Código')} value={formData.codigoRubrica || ''} onChange={e => setFormData({...formData, codigoRubrica: e.target.value})} className="w-full p-2 rounded-lg border" />
+              <input type="text" placeholder={tText('Nome')} value={formData.nomeRubrica || ''} onChange={e => setFormData({...formData, nomeRubrica: e.target.value})} className="w-full p-2 rounded-lg border" />
+              <input type="text" placeholder={tText('Categoria')} value={formData.categoria || ''} onChange={e => setFormData({...formData, categoria: e.target.value})} className="w-full p-2 rounded-lg border" />
+              <input type="text" placeholder={tText('Porto / Origem')} value={formData.portoOrigem || ''} onChange={e => setFormData({...formData, portoOrigem: e.target.value})} className="w-full p-2 rounded-lg border" />
             </div>
             <div className="flex justify-end gap-2 mt-6">
-              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded-xl bg-slate-200 text-slate-700">Cancelar</button>
+              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded-xl bg-slate-200 text-slate-700">{tText('Cancelar')}</button>
               <button 
                 onClick={() => {
                   if (editingRubrica) {
@@ -285,7 +285,7 @@ export function ReceitasModule({ rubricas, onAddRubrica, onUpdateRubrica, onDele
                 }}
                 className="px-4 py-2 rounded-xl bg-blue-600 text-white flex items-center gap-2"
               >
-                <Check className="w-4 h-4" /> Guardar
+                <Check className="w-4 h-4" /> {tText('Guardar')}
               </button>
             </div>
           </div>

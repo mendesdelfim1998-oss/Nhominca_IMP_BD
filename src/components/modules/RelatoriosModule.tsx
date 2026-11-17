@@ -36,11 +36,12 @@ export function RelatoriosModule({
   inspecoes = []
 }: RelatoriosModuleProps) {
   const { theme } = useTheme();
-  const { tText } = useLanguage();
+  const { tText, language } = useLanguage();
   const [reportType, setReportType] = useState<'trafego' | 'financeiro' | 'inspeccoes' | 'fluxo_caixa'>('trafego');
   const [downloading, setDownloading] = useState(false);
 
   const currentYearStr = new Date().getFullYear().toString();
+  const dateLocale = language === 'pt' ? 'pt-PT' : language === 'fr' ? 'fr-FR' : 'en-US';
 
   const availableFluxoYears = useMemo(() => {
     const years = new Set<string>();
@@ -91,14 +92,14 @@ export function RelatoriosModule({
       const entradas = monthMovs.filter((mov) => mov.tipo === 'entrada').reduce((acc, mov) => acc + (mov.valor || 0), 0);
       const saidas = monthMovs.filter((mov) => mov.tipo === 'saida').reduce((acc, mov) => acc + (mov.valor || 0), 0);
       return {
-        mes: m.name,
+        mes: tText(m.name),
         entradas,
         saidas,
         saldoLiquido: entradas - saidas,
         totalMovimentos: monthMovs.length
       };
     });
-  }, [fluxoYearMovimentos]);
+  }, [fluxoYearMovimentos, tText]);
 
   const totalEntradasAno = monthlyFlowData.reduce((acc, m) => acc + m.entradas, 0);
   const totalSaidasAno = monthlyFlowData.reduce((acc, m) => acc + m.saidas, 0);
@@ -229,24 +230,24 @@ export function RelatoriosModule({
         return;
       }
       if (reportType === 'fluxo_caixa') {
-        const rows = [['Mês', 'Entradas (XOF)', 'Saídas (XOF)', 'Saldo Líquido (XOF)', 'Nº Movimentos']];
+        const rows = [[tText('Mês'), tText('Entradas (XOF)'), tText('Saídas (XOF)'), tText('Saldo Líquido (XOF)'), tText('Nº Movimentos')]];
         monthlyFlowData.forEach((r) => rows.push([`${r.mes} ${fluxoYear}`, String(r.entradas), String(r.saidas), String(r.saldoLiquido), String(r.totalMovimentos)]));
         downloadCsv(rows, `fluxo_de_caixa_mensal_${fluxoYear}.csv`);
         return;
       }
       if (reportType === 'trafego') {
-        const rows = [['Código Escala', 'Embarcação', 'Agência', 'Porto', 'Cais', 'ETA', 'ETD', 'Status', 'Toneladas', 'TEUs']];
+        const rows = [[tText('Código Escala'), tText('Embarcação'), tText('Agência'), tText('Porto'), tText('Cais'), tText('ETA'), tText('ETD'), tText('Status'), tText('Toneladas'), tText('TEUs')]];
         filteredAtracacoes.forEach((a) => rows.push([a.codigoEscala, a.embarcacaoNome, a.agenciaNome, a.portoNome, a.caisDesignado, a.dataChegadaPrevista, a.dataSaidaPrevista, a.status, String(a.manifestoCarga?.quantidadeToneladas || 0), String(a.manifestoCarga?.contentoresTEU || 0)]));
         downloadCsv(rows, `trafego_navios_${trafegoYear}.csv`);
         return;
       }
       if (reportType === 'financeiro') {
-        const rows = [['Nº Fatura', 'Data', 'Cliente', 'NIF', 'Navio', 'Tipo', 'Estado', 'Total', 'Pago', 'Pendente']];
+        const rows = [[tText('Nº Fatura'), tText('Data'), tText('Cliente'), tText('NIF'), tText('Navio'), tText('Tipo'), tText('Estado'), tText('Total'), tText('Pago'), tText('Pendente')]];
         filteredFaturas.forEach((f) => rows.push([f.nFatura, f.data, f.cliente, f.nif, f.navio, f.tipo, f.estado, String(f.total || 0), String(f.saldo_pago || 0), String(f.saldo_pendente ?? Math.max(0, (f.total || 0) - (f.saldo_pago || 0)))]));
         downloadCsv(rows, `balancete_financeiro_${finYear}.csv`);
         return;
       }
-      const rows = [['Código', 'Embarcação', 'Data', 'Inspetor', 'Tipo Vistoria', 'Resultado', 'Validade (meses)', 'Observações']];
+      const rows = [[tText('Código'), tText('Embarcação'), tText('Data'), tText('Inspetor'), tText('Tipo Vistoria'), tText('Resultado'), tText('Validade (meses)'), tText('Observações')]];
       filteredInspecoes.forEach((i) => rows.push([i.codigoInspeccao, i.embarcacaoNome, i.dataInspeccao, i.inspectorNome, i.tipoVistoria, i.resultado, String(i.validadeMeses), i.observacoes || '']));
       downloadCsv(rows, `auditoria_seguranca_psc_${inspYear}.csv`);
     }, 400);
@@ -268,10 +269,10 @@ export function RelatoriosModule({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {([
-          { id: 'trafego', icon: Ship, color: 'text-blue-500', title: 'Tráfego de Navios', sub: 'Escalas nos portos e TEUs' },
-          { id: 'financeiro', icon: TrendingUp, color: 'text-emerald-500', title: 'Arrecadação de Receitas', sub: 'Taxas portuárias e licenças' },
-          { id: 'fluxo_caixa', icon: DollarSign, color: 'text-amber-500', title: 'Fluxo de Caixa Mensal', sub: `Entradas, saídas e saldo (${selectedFluxoYearLabel})` },
-          { id: 'inspeccoes', icon: BarChart3, color: 'text-purple-500', title: 'Segurança & PSC', sub: 'Vistorias e conformidade MARPOL' }
+          { id: 'trafego', icon: Ship, color: 'text-blue-500', title: tText('Tráfego de Navios'), sub: tText('Escalas nos portos e TEUs') },
+          { id: 'financeiro', icon: TrendingUp, color: 'text-emerald-500', title: tText('Arrecadação de Receitas'), sub: tText('Taxas portuárias e licenças') },
+          { id: 'fluxo_caixa', icon: DollarSign, color: 'text-amber-500', title: tText('Fluxo de Caixa Mensal'), sub: `${tText('Entradas, saídas e saldo')} (${selectedFluxoYearLabel})` },
+          { id: 'inspeccoes', icon: BarChart3, color: 'text-purple-500', title: tText('Segurança & PSC'), sub: tText('Vistorias e conformidade MARPOL') }
         ] as const).map((item) => {
           const Icon = item.icon;
           const active = reportType === item.id;
@@ -301,13 +302,13 @@ export function RelatoriosModule({
         <div className={`flex flex-col lg:flex-row lg:items-start justify-between gap-4 border-b pb-4 ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
           <div>
             <h3 className={`text-base font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              {reportType === 'trafego' && `Relatório Detalhado de Tráfego Marítimo (${trafegoYear})`}
-              {reportType === 'financeiro' && `Balancete Financeiro & Arrecadação de Taxas IMP (${finYear})`}
-              {reportType === 'fluxo_caixa' && `Fluxo de Caixa Mensal Consolidado — Ano Fiscal ${fluxoYear}`}
-              {reportType === 'inspeccoes' && `Relatório de Auditoria de Segurança & Vistorias PSC (${inspYear})`}
+              {reportType === 'trafego' && `${tText('Relatório Detalhado de Tráfego Marítimo')} (${trafegoYear})`}
+              {reportType === 'financeiro' && `${tText('Balancete Financeiro & Arrecadação de Taxas IMP')} (${finYear})`}
+              {reportType === 'fluxo_caixa' && `${tText('Fluxo de Caixa Mensal Consolidado — Ano Fiscal')} ${fluxoYear}`}
+              {reportType === 'inspeccoes' && `${tText('Relatório de Auditoria de Segurança & Vistorias PSC')} (${inspYear})`}
             </h3>
             <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-              Período de Análise: {reportYearLabel === 'todos' ? 'Todos os anos disponíveis' : `Ano ${reportYearLabel}`} • Filtro aplicado conforme seleção abaixo
+              {tText('Período de Análise')}: {reportYearLabel === 'todos' ? tText('Todos os anos disponíveis') : `${tText('Ano')} ${reportYearLabel}`} • {tText('Filtro aplicado conforme seleção abaixo')}
             </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">
@@ -325,7 +326,7 @@ export function RelatoriosModule({
             <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
               <div className="flex items-center gap-2 mb-3">
                 <Calendar className="w-4 h-4 text-amber-500" />
-                <h4 className={`text-xs font-bold uppercase tracking-wide ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>Anos disponíveis (histórico)</h4>
+                <h4 className={`text-xs font-bold uppercase tracking-wide ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{tText('Anos disponíveis (histórico)')}</h4>
               </div>
               <div className="flex flex-wrap gap-2">
                 {availableFluxoYears.map((y) => (
@@ -345,34 +346,34 @@ export function RelatoriosModule({
                 ))}
               </div>
               <p className={`text-[11px] mt-2 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
-                Selecione um ano para visualizar o fluxo de caixa mensal consolidado (inclui anos anteriores registados no sistema).
+                {tText('Selecione um ano para visualizar o fluxo de caixa mensal consolidado (inclui anos anteriores registados no sistema).')}
               </p>
             </div>
 
             <div className={`grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono p-4 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`}>
-              <div><span className="block text-[10px] text-slate-500">TOTAL ENTRADAS ({fluxoYear}):</span><span className="font-bold text-sm text-emerald-500">{totalEntradasAno.toLocaleString('pt-PT')} XOF</span></div>
-              <div><span className="block text-[10px] text-slate-500">TOTAL SAÍDAS ({fluxoYear}):</span><span className="font-bold text-sm text-rose-500">{totalSaidasAno.toLocaleString('pt-PT')} XOF</span></div>
-              <div><span className="block text-[10px] text-slate-500">SALDO LÍQUIDO ACUMULADO:</span><span className={`font-bold text-sm ${saldoFinalAno >= 0 ? 'text-blue-500' : 'text-amber-500'}`}>{saldoFinalAno.toLocaleString('pt-PT')} XOF</span></div>
+              <div><span className="block text-[10px] text-slate-500">{tText('TOTAL ENTRADAS')} ({fluxoYear}):</span><span className="font-bold text-sm text-emerald-500">{totalEntradasAno.toLocaleString(dateLocale)} XOF</span></div>
+              <div><span className="block text-[10px] text-slate-500">{tText('TOTAL SAÍDAS')} ({fluxoYear}):</span><span className="font-bold text-sm text-rose-500">{totalSaidasAno.toLocaleString(dateLocale)} XOF</span></div>
+              <div><span className="block text-[10px] text-slate-500">{tText('SALDO LÍQUIDO ACUMULADO')}:</span><span className={`font-bold text-sm ${saldoFinalAno >= 0 ? 'text-blue-500' : 'text-amber-500'}`}>{saldoFinalAno.toLocaleString(dateLocale)} XOF</span></div>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-mono">
                 <thead>
                   <tr className={`border-b ${isDark ? 'border-slate-800 text-slate-400' : 'border-slate-200 text-slate-600'}`}>
-                    <th className="py-3 px-4">MÊS</th>
-                    <th className="py-3 px-4 text-right">ENTRADAS (XOF)</th>
-                    <th className="py-3 px-4 text-right">SAÍDAS (XOF)</th>
-                    <th className="py-3 px-4 text-right">SALDO LÍQUIDO (XOF)</th>
-                    <th className="py-3 px-4 text-center">Nº MOVIMENTOS</th>
+                    <th className="py-3 px-4">{tText('MÊS')}</th>
+                    <th className="py-3 px-4 text-right">{tText('ENTRADAS (XOF)')}</th>
+                    <th className="py-3 px-4 text-right">{tText('SAÍDAS (XOF)')}</th>
+                    <th className="py-3 px-4 text-right">{tText('SALDO LÍQUIDO (XOF)')}</th>
+                    <th className="py-3 px-4 text-center">{tText('Nº MOVIMENTOS')}</th>
                   </tr>
                 </thead>
                 <tbody className={`divide-y ${isDark ? 'divide-slate-800/60' : 'divide-slate-200'}`}>
                   {monthlyFlowData.map((row) => (
                     <tr key={row.mes} className={`hover:bg-blue-500/5 transition-colors ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                       <td className="py-3 px-4 font-bold">{row.mes} {fluxoYear}</td>
-                      <td className="py-3 px-4 text-right text-emerald-500 font-semibold">+{row.entradas.toLocaleString('pt-PT')}</td>
-                      <td className="py-3 px-4 text-right text-rose-500 font-semibold">-{row.saidas.toLocaleString('pt-PT')}</td>
-                      <td className={`py-3 px-4 text-right font-bold ${row.saldoLiquido >= 0 ? 'text-blue-500' : 'text-amber-500'}`}>{row.saldoLiquido.toLocaleString('pt-PT')}</td>
+                      <td className="py-3 px-4 text-right text-emerald-500 font-semibold">+{row.entradas.toLocaleString(dateLocale)}</td>
+                      <td className="py-3 px-4 text-right text-rose-500 font-semibold">-{row.saidas.toLocaleString(dateLocale)}</td>
+                      <td className={`py-3 px-4 text-right font-bold ${row.saldoLiquido >= 0 ? 'text-blue-500' : 'text-amber-500'}`}>{row.saldoLiquido.toLocaleString(dateLocale)}</td>
                       <td className="py-3 px-4 text-center">{row.totalMovimentos}</td>
                     </tr>
                   ))}
@@ -385,40 +386,40 @@ export function RelatoriosModule({
         {reportType === 'trafego' && (
           <div className="space-y-5">
             <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
-              <div className="flex items-center gap-2 mb-3"><Filter className="w-4 h-4 text-blue-500" /><span className={`text-xs font-bold uppercase ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>Filtros — Tráfego de Navios</span></div>
+              <div className="flex items-center gap-2 mb-3"><Filter className="w-4 h-4 text-blue-500" /><span className={`text-xs font-bold uppercase ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>{tText('Filtros — Tráfego de Navios')}</span></div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                 <select value={trafegoYear} onChange={(e) => setTrafegoYear(e.target.value)} className={`px-3 py-2 rounded-lg border text-xs ${inputCls}`}>
-                  <option value="todos">Todos os anos</option>
+                  <option value="todos">{tText('Todos os anos')}</option>
                   {trafegoYears.map((y) => <option key={y} value={y}>{y}</option>)}
                 </select>
                 <select value={trafegoMonth} onChange={(e) => setTrafegoMonth(e.target.value)} className={`px-3 py-2 rounded-lg border text-xs ${inputCls}`}>
-                  <option value="todos">Todos os meses</option>
-                  {months.map((m) => <option key={m.num} value={m.num}>{m.name}</option>)}
+                  <option value="todos">{tText('Todos os meses')}</option>
+                  {months.map((m) => <option key={m.num} value={m.num}>{tText(m.name)}</option>)}
                 </select>
                 <select value={trafegoPorto} onChange={(e) => setTrafegoPorto(e.target.value)} className={`px-3 py-2 rounded-lg border text-xs ${inputCls}`}>
-                  <option value="todos">Todos os portos</option>
+                  <option value="todos">{tText('Todos os portos')}</option>
                   {trafegoPortos.map((p) => <option key={p} value={p}>{p}</option>)}
                 </select>
                 <select value={trafegoStatus} onChange={(e) => setTrafegoStatus(e.target.value)} className={`px-3 py-2 rounded-lg border text-xs ${inputCls}`}>
-                  <option value="todos">Todos os estados</option>
+                  <option value="todos">{tText('Todos os estados')}</option>
                   {trafegoStatuses.map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
-                <input value={trafegoSearch} onChange={(e) => setTrafegoSearch(e.target.value)} placeholder="Pesquisar escala, navio, agência..." className={`px-3 py-2 rounded-lg border text-xs ${inputCls}`} />
+                <input value={trafegoSearch} onChange={(e) => setTrafegoSearch(e.target.value)} placeholder={tText('Pesquisar escala, navio, agência...')} className={`px-3 py-2 rounded-lg border text-xs ${inputCls}`} />
               </div>
             </div>
 
             <div className={`grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono p-4 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`}>
-              <div><span className="block text-[10px] text-slate-500">TOTAL ESCALAS:</span><span className={`font-bold text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>{trafegoStats.totalEscalas}</span></div>
-              <div><span className="block text-[10px] text-slate-500">CARGA MOVIMENTADA:</span><span className="text-emerald-500 font-bold text-sm">{trafegoStats.carga.toLocaleString('pt-PT')} Ton</span></div>
-              <div><span className="block text-[10px] text-slate-500">TOTAL TEUs:</span><span className="text-blue-500 font-bold text-sm">{trafegoStats.teus.toLocaleString('pt-PT')}</span></div>
-              <div><span className="block text-[10px] text-slate-500">REGISTOS FILTRADOS:</span><span className="text-amber-500 font-bold text-sm">{filteredAtracacoes.length}</span></div>
+              <div><span className="block text-[10px] text-slate-500">{tText('TOTAL ESCALAS')}:</span><span className={`font-bold text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>{trafegoStats.totalEscalas}</span></div>
+              <div><span className="block text-[10px] text-slate-500">{tText('CARGA MOVIMENTADA')}:</span><span className="text-emerald-500 font-bold text-sm">{trafegoStats.carga.toLocaleString(dateLocale)} {tText('Ton')}</span></div>
+              <div><span className="block text-[10px] text-slate-500">{tText('TOTAL TEUs')}:</span><span className="text-blue-500 font-bold text-sm">{trafegoStats.teus.toLocaleString(dateLocale)}</span></div>
+              <div><span className="block text-[10px] text-slate-500">{tText('REGISTOS FILTRADOS')}:</span><span className="text-amber-500 font-bold text-sm">{filteredAtracacoes.length}</span></div>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-mono">
                 <thead>
                   <tr className={`border-b ${isDark ? 'border-slate-800 text-slate-400' : 'border-slate-200 text-slate-600'}`}>
-                    <th className="py-3 px-3">ESCALA</th><th className="py-3 px-3">EMBARCAÇÃO</th><th className="py-3 px-3">AGÊNCIA</th><th className="py-3 px-3">PORTO / CAIS</th><th className="py-3 px-3">ETA</th><th className="py-3 px-3">STATUS</th><th className="py-3 px-3 text-right">TON</th><th className="py-3 px-3 text-right">TEUs</th>
+                    <th className="py-3 px-3">{tText('ESCALA')}</th><th className="py-3 px-3">{tText('EMBARCAÇÃO')}</th><th className="py-3 px-3">{tText('AGÊNCIA')}</th><th className="py-3 px-3">{tText('PORTO / CAIS')}</th><th className="py-3 px-3">{tText('ETA')}</th><th className="py-3 px-3">{tText('STATUS')}</th><th className="py-3 px-3 text-right">{tText('TON')}</th><th className="py-3 px-3 text-right">{tText('TEUs')}</th>
                   </tr>
                 </thead>
                 <tbody className={`divide-y ${isDark ? 'divide-slate-800/60' : 'divide-slate-200'}`}>
@@ -430,12 +431,12 @@ export function RelatoriosModule({
                       <td className="py-2.5 px-3">{a.portoNome} / {a.caisDesignado}</td>
                       <td className="py-2.5 px-3">{a.dataChegadaPrevista}</td>
                       <td className="py-2.5 px-3">{a.status}</td>
-                      <td className="py-2.5 px-3 text-right">{(a.manifestoCarga?.quantidadeToneladas || 0).toLocaleString('pt-PT')}</td>
-                      <td className="py-2.5 px-3 text-right">{(a.manifestoCarga?.contentoresTEU || 0).toLocaleString('pt-PT')}</td>
+                      <td className="py-2.5 px-3 text-right">{(a.manifestoCarga?.quantidadeToneladas || 0).toLocaleString(dateLocale)}</td>
+                      <td className="py-2.5 px-3 text-right">{(a.manifestoCarga?.contentoresTEU || 0).toLocaleString(dateLocale)}</td>
                     </tr>
                   ))}
                   {filteredAtracacoes.length === 0 && (
-                    <tr><td colSpan={8} className={`py-6 px-3 text-center ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>Sem registos para os filtros selecionados.</td></tr>
+                    <tr><td colSpan={8} className={`py-6 px-3 text-center ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>{tText('Sem registos para os filtros selecionados.')}</td></tr>
                   )}
                 </tbody>
               </table>
@@ -446,36 +447,36 @@ export function RelatoriosModule({
         {reportType === 'financeiro' && (
           <div className="space-y-5">
             <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
-              <div className="flex items-center gap-2 mb-3"><Filter className="w-4 h-4 text-emerald-500" /><span className={`text-xs font-bold uppercase ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>Filtros — Balancete Financeiro & Arrecadação</span></div>
+              <div className="flex items-center gap-2 mb-3"><Filter className="w-4 h-4 text-emerald-500" /><span className={`text-xs font-bold uppercase ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>{tText('Filtros — Balancete Financeiro & Arrecadação')}</span></div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <select value={finYear} onChange={(e) => setFinYear(e.target.value)} className={`px-3 py-2 rounded-lg border text-xs ${inputCls}`}>
-                  <option value="todos">Todos os anos</option>
+                  <option value="todos">{tText('Todos os anos')}</option>
                   {finYears.map((y) => <option key={y} value={y}>{y}</option>)}
                 </select>
                 <select value={finMonth} onChange={(e) => setFinMonth(e.target.value)} className={`px-3 py-2 rounded-lg border text-xs ${inputCls}`}>
-                  <option value="todos">Todos os meses</option>
-                  {months.map((m) => <option key={m.num} value={m.num}>{m.name}</option>)}
+                  <option value="todos">{tText('Todos os meses')}</option>
+                  {months.map((m) => <option key={m.num} value={m.num}>{tText(m.name)}</option>)}
                 </select>
                 <select value={finEstado} onChange={(e) => setFinEstado(e.target.value)} className={`px-3 py-2 rounded-lg border text-xs ${inputCls}`}>
-                  <option value="todos">Todos os estados</option>
+                  <option value="todos">{tText('Todos os estados')}</option>
                   {finEstados.map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
-                <input value={finSearch} onChange={(e) => setFinSearch(e.target.value)} placeholder="Pesquisar fatura, cliente, NIF, navio..." className={`px-3 py-2 rounded-lg border text-xs ${inputCls}`} />
+                <input value={finSearch} onChange={(e) => setFinSearch(e.target.value)} placeholder={tText('Pesquisar fatura, cliente, NIF, navio...')} className={`px-3 py-2 rounded-lg border text-xs ${inputCls}`} />
               </div>
             </div>
 
             <div className={`grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono p-4 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`}>
-              <div><span className="block text-[10px] text-slate-500">FATURAS:</span><span className="font-bold text-sm">{finStats.count}</span></div>
-              <div><span className="block text-[10px] text-slate-500">TOTAL FATURADO:</span><span className="text-blue-500 font-bold text-sm">{finStats.totalFaturado.toLocaleString('pt-PT')} XOF</span></div>
-              <div><span className="block text-[10px] text-slate-500">TOTAL ARRECADADO:</span><span className="text-emerald-500 font-bold text-sm">{finStats.totalPago.toLocaleString('pt-PT')} XOF</span></div>
-              <div><span className="block text-[10px] text-slate-500">SALDO PENDENTE:</span><span className="text-amber-500 font-bold text-sm">{finStats.totalPendente.toLocaleString('pt-PT')} XOF</span></div>
+              <div><span className="block text-[10px] text-slate-500">{tText('FATURAS')}:</span><span className="font-bold text-sm">{finStats.count}</span></div>
+              <div><span className="block text-[10px] text-slate-500">{tText('TOTAL FATURADO')}:</span><span className="text-blue-500 font-bold text-sm">{finStats.totalFaturado.toLocaleString(dateLocale)} XOF</span></div>
+              <div><span className="block text-[10px] text-slate-500">{tText('TOTAL ARRECADADO')}:</span><span className="text-emerald-500 font-bold text-sm">{finStats.totalPago.toLocaleString(dateLocale)} XOF</span></div>
+              <div><span className="block text-[10px] text-slate-500">{tText('SALDO PENDENTE')}:</span><span className="text-amber-500 font-bold text-sm">{finStats.totalPendente.toLocaleString(dateLocale)} XOF</span></div>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-mono">
                 <thead>
                   <tr className={`border-b ${isDark ? 'border-slate-800 text-slate-400' : 'border-slate-200 text-slate-600'}`}>
-                    <th className="py-3 px-3">FATURA</th><th className="py-3 px-3">DATA</th><th className="py-3 px-3">CLIENTE</th><th className="py-3 px-3">NAVIO</th><th className="py-3 px-3">ESTADO</th><th className="py-3 px-3 text-right">TOTAL</th><th className="py-3 px-3 text-right">PAGO</th><th className="py-3 px-3 text-right">PENDENTE</th>
+                    <th className="py-3 px-3">{tText('FATURA')}</th><th className="py-3 px-3">{tText('DATA')}</th><th className="py-3 px-3">{tText('CLIENTE')}</th><th className="py-3 px-3">{tText('NAVIO')}</th><th className="py-3 px-3">{tText('ESTADO')}</th><th className="py-3 px-3 text-right">{tText('TOTAL')}</th><th className="py-3 px-3 text-right">{tText('PAGO')}</th><th className="py-3 px-3 text-right">{tText('PENDENTE')}</th>
                   </tr>
                 </thead>
                 <tbody className={`divide-y ${isDark ? 'divide-slate-800/60' : 'divide-slate-200'}`}>
@@ -489,14 +490,14 @@ export function RelatoriosModule({
                         <td className="py-2.5 px-3">{f.cliente}</td>
                         <td className="py-2.5 px-3">{f.navio}</td>
                         <td className="py-2.5 px-3">{f.estado}</td>
-                        <td className="py-2.5 px-3 text-right">{(f.total || 0).toLocaleString('pt-PT')}</td>
-                        <td className="py-2.5 px-3 text-right text-emerald-500">{pago.toLocaleString('pt-PT')}</td>
-                        <td className="py-2.5 px-3 text-right text-amber-500">{pend.toLocaleString('pt-PT')}</td>
+                        <td className="py-2.5 px-3 text-right">{(f.total || 0).toLocaleString(dateLocale)}</td>
+                        <td className="py-2.5 px-3 text-right text-emerald-500">{pago.toLocaleString(dateLocale)}</td>
+                        <td className="py-2.5 px-3 text-right text-amber-500">{pend.toLocaleString(dateLocale)}</td>
                       </tr>
                     );
                   })}
                   {filteredFaturas.length === 0 && (
-                    <tr><td colSpan={8} className={`py-6 px-3 text-center ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>Sem registos para os filtros selecionados.</td></tr>
+                    <tr><td colSpan={8} className={`py-6 px-3 text-center ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>{tText('Sem registos para os filtros selecionados.')}</td></tr>
                   )}
                 </tbody>
               </table>
@@ -507,40 +508,40 @@ export function RelatoriosModule({
         {reportType === 'inspeccoes' && (
           <div className="space-y-5">
             <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
-              <div className="flex items-center gap-2 mb-3"><Filter className="w-4 h-4 text-purple-500" /><span className={`text-xs font-bold uppercase ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>Filtros — Auditoria de Segurança & Vistorias PSC</span></div>
+              <div className="flex items-center gap-2 mb-3"><Filter className="w-4 h-4 text-purple-500" /><span className={`text-xs font-bold uppercase ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>{tText('Filtros — Auditoria de Segurança & Vistorias PSC')}</span></div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                 <select value={inspYear} onChange={(e) => setInspYear(e.target.value)} className={`px-3 py-2 rounded-lg border text-xs ${inputCls}`}>
-                  <option value="todos">Todos os anos</option>
+                  <option value="todos">{tText('Todos os anos')}</option>
                   {inspYears.map((y) => <option key={y} value={y}>{y}</option>)}
                 </select>
                 <select value={inspMonth} onChange={(e) => setInspMonth(e.target.value)} className={`px-3 py-2 rounded-lg border text-xs ${inputCls}`}>
-                  <option value="todos">Todos os meses</option>
-                  {months.map((m) => <option key={m.num} value={m.num}>{m.name}</option>)}
+                  <option value="todos">{tText('Todos os meses')}</option>
+                  {months.map((m) => <option key={m.num} value={m.num}>{tText(m.name)}</option>)}
                 </select>
                 <select value={inspTipo} onChange={(e) => setInspTipo(e.target.value)} className={`px-3 py-2 rounded-lg border text-xs ${inputCls}`}>
-                  <option value="todos">Todos os tipos</option>
+                  <option value="todos">{tText('Todos os tipos')}</option>
                   {inspTipos.map((t) => <option key={t} value={t}>{t}</option>)}
                 </select>
                 <select value={inspResultado} onChange={(e) => setInspResultado(e.target.value)} className={`px-3 py-2 rounded-lg border text-xs ${inputCls}`}>
-                  <option value="todos">Todos os resultados</option>
+                  <option value="todos">{tText('Todos os resultados')}</option>
                   {inspResultados.map((r) => <option key={r} value={r}>{r}</option>)}
                 </select>
-                <input value={inspSearch} onChange={(e) => setInspSearch(e.target.value)} placeholder="Pesquisar código, navio, inspetor..." className={`px-3 py-2 rounded-lg border text-xs ${inputCls}`} />
+                <input value={inspSearch} onChange={(e) => setInspSearch(e.target.value)} placeholder={tText('Pesquisar código, navio, inspetor...')} className={`px-3 py-2 rounded-lg border text-xs ${inputCls}`} />
               </div>
             </div>
 
             <div className={`grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono p-4 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`}>
-              <div><span className="block text-[10px] text-slate-500">TOTAL VISTORIAS:</span><span className="font-bold text-sm">{inspStats.total}</span></div>
-              <div><span className="block text-[10px] text-slate-500">APROVADAS:</span><span className="text-emerald-500 font-bold text-sm">{inspStats.aprovadas}</span></div>
-              <div><span className="block text-[10px] text-slate-500">COM RECOMENDAÇÕES:</span><span className="text-amber-500 font-bold text-sm">{inspStats.recomendacoes}</span></div>
-              <div><span className="block text-[10px] text-slate-500">RETIDAS / IMPEDIDAS:</span><span className="text-rose-500 font-bold text-sm">{inspStats.retidas}</span></div>
+              <div><span className="block text-[10px] text-slate-500">{tText('TOTAL VISTORIAS')}:</span><span className="font-bold text-sm">{inspStats.total}</span></div>
+              <div><span className="block text-[10px] text-slate-500">{tText('APROVADAS')}:</span><span className="text-emerald-500 font-bold text-sm">{inspStats.aprovadas}</span></div>
+              <div><span className="block text-[10px] text-slate-500">{tText('COM RECOMENDAÇÕES')}:</span><span className="text-amber-500 font-bold text-sm">{inspStats.recomendacoes}</span></div>
+              <div><span className="block text-[10px] text-slate-500">{tText('RETIDAS / IMPEDIDAS')}:</span><span className="text-rose-500 font-bold text-sm">{inspStats.retidas}</span></div>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-mono">
                 <thead>
                   <tr className={`border-b ${isDark ? 'border-slate-800 text-slate-400' : 'border-slate-200 text-slate-600'}`}>
-                    <th className="py-3 px-3">CÓDIGO</th><th className="py-3 px-3">EMBARCAÇÃO</th><th className="py-3 px-3">DATA</th><th className="py-3 px-3">INSPETOR</th><th className="py-3 px-3">TIPO</th><th className="py-3 px-3">RESULTADO</th><th className="py-3 px-3">OBSERVAÇÕES</th>
+                    <th className="py-3 px-3">{tText('CÓDIGO')}</th><th className="py-3 px-3">{tText('EMBARCAÇÃO')}</th><th className="py-3 px-3">{tText('DATA')}</th><th className="py-3 px-3">{tText('INSPETOR')}</th><th className="py-3 px-3">{tText('TIPO')}</th><th className="py-3 px-3">{tText('RESULTADO')}</th><th className="py-3 px-3">{tText('OBSERVAÇÕES')}</th>
                   </tr>
                 </thead>
                 <tbody className={`divide-y ${isDark ? 'divide-slate-800/60' : 'divide-slate-200'}`}>
@@ -556,7 +557,7 @@ export function RelatoriosModule({
                     </tr>
                   ))}
                   {filteredInspecoes.length === 0 && (
-                    <tr><td colSpan={7} className={`py-6 px-3 text-center ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>Sem registos para os filtros selecionados.</td></tr>
+                    <tr><td colSpan={7} className={`py-6 px-3 text-center ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>{tText('Sem registos para os filtros selecionados.')}</td></tr>
                   )}
                 </tbody>
               </table>

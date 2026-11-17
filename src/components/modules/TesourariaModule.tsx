@@ -70,7 +70,8 @@ export function TesourariaModule({
   onAddMovimento
 }: TesourariaModuleProps) {
   const { theme } = useTheme();
-  const { t, tText } = useLanguage();
+  const { t, tText, language } = useLanguage();
+  const locale = language === 'pt' ? 'pt-PT' : language === 'fr' ? 'fr-FR' : 'en-GB';
 
   // Active Tab: 'liquidacao' | 'devedores' | 'recibos' | 'saidas' | 'folha'
   const [activeTab, setActiveTab] = useState<'liquidacao' | 'devedores' | 'recibos' | 'saidas' | 'folha'>('liquidacao');
@@ -296,17 +297,17 @@ export function TesourariaModule({
     // STRICT VALIDATION: OVERPAYMENT BLOCK
     if (valorPagamentoInput > saldoPendenteAtual) {
       alert(
-        `BLOQUEIO DE SEGURANÇA: O valor digitado (${valorPagamentoInput.toLocaleString(
-          'pt-PT'
-        )} XOF) é superior ao saldo pendente da fatura (${saldoPendenteAtual.toLocaleString(
-          'pt-PT'
-        )} XOF). O sistema não aceita sobrefaturação ou sobrepagamento.`
+        `${tText('BLOQUEIO DE SEGURANÇA')}: ${tText('O valor digitado')} (${valorPagamentoInput.toLocaleString(
+          locale
+        )} XOF) ${tText('é superior ao saldo pendente da fatura')} (${saldoPendenteAtual.toLocaleString(
+          locale
+        )} XOF). ${tText('O sistema não aceita sobrefaturação ou sobrepagamento.')}`
       );
       return;
     }
 
     if (valorPagamentoInput <= 0) {
-      alert('O valor a pagar deve ser superior a zero.');
+      alert(tText('O valor a pagar deve ser superior a zero.'));
       return;
     }
 
@@ -316,7 +317,7 @@ export function TesourariaModule({
       (r) => r.talao.toLowerCase() === cleanTalao.toLowerCase() && r.banco === bancoSelecionado
     );
     if (talaoJaExiste) {
-      setTalaoDuplicadoError(`O número de talão ${cleanTalao} já foi utilizado no banco ${bancoSelecionado}. Insira um comprovativo único.`);
+      setTalaoDuplicadoError(`${tText('O número de talão')} ${cleanTalao} ${tText('já foi utilizado no banco')} ${bancoSelecionado}. ${tText('Insira um comprovativo único.')}`);
       return;
     }
 
@@ -373,7 +374,7 @@ export function TesourariaModule({
       setViewingRecibo(novoRecibo);
     } catch (err) {
       console.error('Optimistic UI write error (Liquidation), forcing server re-validation:', err);
-      alert('Erro de gravação no servidor Supabase/PostgreSQL. O estado foi resincronizado com sucesso.');
+      alert(tText('Erro de gravação no servidor Supabase/PostgreSQL. O estado foi resincronizado com sucesso.'));
       window.location.reload();
     }
   };
@@ -383,22 +384,22 @@ export function TesourariaModule({
     e.preventDefault();
     if (!saidaForm.descricao.trim() || saidaForm.valor <= 0) return;
     if (!saidaForm.documentoComprovativo.trim()) {
-      alert('O número do Documento Comprovativo (Fatura de Fornecedor, Recibo ou Ordem de Saída) é obrigatório por normas de auditoria.');
+      alert(tText('O número do Documento Comprovativo (Fatura de Fornecedor, Recibo ou Ordem de Saída) é obrigatório por normas de auditoria.'));
       return;
     }
     if (!saidaForm.beneficiario.trim()) {
-      alert('Identifique a entidade ou pessoa beneficiária do pagamento.');
+      alert(tText('Identifique a entidade ou pessoa beneficiária do pagamento.'));
       return;
     }
 
     // CASH BALANCE DEFENSE: CANNOT WITHDRAW MORE THAN AVAILABLE CASH
     if (saidaForm.valor > saldoAtualEmCaixa) {
       alert(
-        `BLOQUEIO DE SEGURANÇA: Saldo em caixa insuficiente (${saldoAtualEmCaixa.toLocaleString(
-          'pt-PT'
-        )} XOF). Não é permitida a saída de ${saidaForm.valor.toLocaleString(
-          'pt-PT'
-        )} XOF sem prévio suprimento de caixa.`
+        `${tText('BLOQUEIO DE SEGURANÇA')}: ${tText('Saldo em caixa insuficiente')} (${saldoAtualEmCaixa.toLocaleString(
+          locale
+        )} XOF). ${tText('Não é permitida a saída de')} ${saidaForm.valor.toLocaleString(
+          locale
+        )} XOF ${tText('sem prévio suprimento de caixa.')}`
       );
       return;
     }
@@ -439,7 +440,7 @@ export function TesourariaModule({
       });
     } catch (err) {
       console.error('Optimistic UI write error (Cash Outflow), forcing server re-validation:', err);
-      alert('Erro de gravação da saída de caixa no Supabase. O estado foi sincronizado.');
+      alert(tText('Erro de gravação da saída de caixa no Supabase. O estado foi sincronizado.'));
       window.location.reload();
     }
   };
@@ -448,14 +449,14 @@ export function TesourariaModule({
   const handleSubmitCedula = (e: FormEvent) => {
     e.preventDefault();
     if (!cedulaForm.nomeMaritimo.trim()) {
-      alert('Por favor, informe o nome completo do marítimo.');
+      alert(tText('Por favor, informe o nome completo do marítimo.'));
       return;
     }
     const currentYear = new Date().getFullYear();
     const docNum = `CED-${currentYear}-${String(movimentos.length + 101).padStart(4, '0')}`;
     const expDate = new Date();
     expDate.setFullYear(expDate.getFullYear() + (cedulaForm.validadeAnos || 2));
-    const expDateStr = expDate.toLocaleDateString('pt-PT');
+    const expDateStr = expDate.toLocaleDateString(locale);
     const valor = Number(cedulaForm.valorTaxa) || 15000;
     const tal = cedulaForm.numeroTalao.trim() || `TAL-${cedulaForm.banco}-${Math.floor(100000 + Math.random() * 900000)}`;
 
@@ -479,7 +480,7 @@ export function TesourariaModule({
     setViewingEmissaoDoc({
       title: 'CÉDULA DE INSCRIÇÃO MARÍTIMA',
       documentNumber: docNum,
-      date: new Date().toLocaleDateString('pt-PT'),
+      date: new Date().toLocaleDateString(locale),
       payerName: `${cedulaForm.nomeMaritimo} (${cedulaForm.categoriaMaritima})`,
       amount: valor,
       amountInWords: valorPorExtensoXOF(valor),
@@ -508,14 +509,14 @@ export function TesourariaModule({
   const handleSubmitLicenca = (e: FormEvent) => {
     e.preventDefault();
     if (!licencaForm.titular.trim()) {
-      alert('Por favor, informe o nome do titular ou armador.');
+      alert(tText('Por favor, informe o nome do titular ou armador.'));
       return;
     }
     const currentYear = new Date().getFullYear();
     const docNum = `LIC-${currentYear}-${String(movimentos.length + 201).padStart(4, '0')}`;
     const expDate = new Date();
     expDate.setFullYear(expDate.getFullYear() + (licencaForm.validadeAnos || 1));
-    const expDateStr = expDate.toLocaleDateString('pt-PT');
+    const expDateStr = expDate.toLocaleDateString(locale);
     const valor = Number(licencaForm.valorTaxa) || 50000;
     const tal = licencaForm.numeroTalao.trim() || `TAL-${licencaForm.banco}-${Math.floor(100000 + Math.random() * 900000)}`;
 
@@ -539,7 +540,7 @@ export function TesourariaModule({
     setViewingEmissaoDoc({
       title: 'LICENÇA DE ACTIVIDADE MARÍTIMA',
       documentNumber: docNum,
-      date: new Date().toLocaleDateString('pt-PT'),
+      date: new Date().toLocaleDateString(locale),
       payerName: `${licencaForm.titular}${licencaForm.embarcacao ? ` (Embarcação: ${licencaForm.embarcacao})` : ''}`,
       amount: valor,
       amountInWords: valorPorExtensoXOF(valor),
@@ -568,7 +569,7 @@ export function TesourariaModule({
   const handleSubmitSaidaCanoa = (e: FormEvent) => {
     e.preventDefault();
     if (!saidaCanoaForm.nomeCanoa.trim() || !saidaCanoaForm.mestreCanoa.trim()) {
-      alert('Por favor, informe o nome da canoa e do mestre responsável.');
+      alert(tText('Por favor, informe o nome da canoa e do mestre responsável.'));
       return;
     }
     const currentYear = new Date().getFullYear();
@@ -596,7 +597,7 @@ export function TesourariaModule({
     setViewingEmissaoDoc({
       title: 'GUIA OFICIAL DE DESPACHO E SAÍDA DE CANOA',
       documentNumber: docNum,
-      date: new Date().toLocaleDateString('pt-PT'),
+      date: new Date().toLocaleDateString(locale),
       payerName: `Mestre ${saidaCanoaForm.mestreCanoa} (Canoa: ${saidaCanoaForm.nomeCanoa})`,
       amount: valor,
       amountInWords: valorPorExtensoXOF(valor),
@@ -626,14 +627,14 @@ export function TesourariaModule({
   const handleSubmitDominioPublico = (e: FormEvent) => {
     e.preventDefault();
     if (!dominioPublicoForm.concessionario.trim()) {
-      alert('Por favor, informe o concessionário ou requerente da ocupação.');
+      alert(tText('Por favor, informe o concessionário ou requerente da ocupação.'));
       return;
     }
     const currentYear = new Date().getFullYear();
     const docNum = `DOM-${currentYear}-${String(movimentos.length + 401).padStart(4, '0')}`;
     const expDate = new Date();
     expDate.setMonth(expDate.getMonth() + (dominioPublicoForm.validadeMeses || 12));
-    const expDateStr = expDate.toLocaleDateString('pt-PT');
+    const expDateStr = expDate.toLocaleDateString(locale);
     const valor = Number(dominioPublicoForm.valorTaxa) || 125000;
     const tal = dominioPublicoForm.numeroTalao.trim() || `DOM-${dominioPublicoForm.banco}-${Math.floor(100000 + Math.random() * 900000)}`;
 
@@ -657,7 +658,7 @@ export function TesourariaModule({
     setViewingEmissaoDoc({
       title: 'TÍTULO DE OCUPAÇÃO DO DOMÍNIO PÚBLICO MARÍTIMO',
       documentNumber: docNum,
-      date: new Date().toLocaleDateString('pt-PT'),
+      date: new Date().toLocaleDateString(locale),
       payerName: `${dominioPublicoForm.concessionario} (Zona: ${dominioPublicoForm.zonaPortuaria})`,
       amount: valor,
       amountInWords: valorPorExtensoXOF(valor),
@@ -800,7 +801,7 @@ export function TesourariaModule({
               {tText('Tesouraria & Caixa Central')}
             </span>
             <span className="text-xs font-mono text-slate-500">
-              Bancos Autorizados: BAO • CORIS BANK • BANQUE ATLANTIQUE
+              {tText('Bancos Autorizados')}: BAO • CORIS BANK • BANQUE ATLANTIQUE
             </span>
           </div>
           <h2
@@ -822,7 +823,7 @@ export function TesourariaModule({
             type="button"
             onClick={() => setShowEmitirCedulaModal(true)}
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1D63FF] hover:bg-blue-600 text-white rounded-2xl text-xs font-black transition-all shadow-md shadow-blue-600/30 active:scale-95 cursor-pointer"
-            title="Emitir nova Cédula de Inscrição Marítima no Caixa"
+            title={tText('Emitir nova Cédula de Inscrição Marítima no Caixa')}
           >
             <Award className="w-4 h-4 text-blue-100" />
             <span>{tText('Emitir Cédula Marítima')}</span>
@@ -833,7 +834,7 @@ export function TesourariaModule({
             type="button"
             onClick={() => setShowEmitirLicencaModal(true)}
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#009A52] hover:bg-emerald-600 text-white rounded-2xl text-xs font-black transition-all shadow-md shadow-emerald-600/30 active:scale-95 cursor-pointer"
-            title="Emitir Licença Marítima Oficial no Caixa"
+            title={tText('Emitir Licença Marítima Oficial no Caixa')}
           >
             <FileText className="w-4 h-4 text-emerald-100" />
             <span>{tText('Emitir Licença')}</span>
@@ -844,7 +845,7 @@ export function TesourariaModule({
             type="button"
             onClick={() => setShowDominioPublicoModal(true)}
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#6B46FF] hover:bg-indigo-600 text-white rounded-2xl text-xs font-black transition-all shadow-md shadow-indigo-600/30 active:scale-95 cursor-pointer"
-            title="Concessão e Ocupação do Domínio Público Marítimo"
+            title={tText('Concessão e Ocupação do Domínio Público Marítimo')}
           >
             <Compass className="w-4 h-4 text-indigo-100" />
             <span>{tText('Domínio Público')}</span>
@@ -855,7 +856,7 @@ export function TesourariaModule({
             type="button"
             onClick={() => setShowSaidaCanoaModal(true)}
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#D97700] hover:bg-amber-600 text-white rounded-2xl text-xs font-black transition-all shadow-md shadow-amber-600/30 active:scale-95 cursor-pointer"
-            title="Registar e Emitir Despacho de Saída de Canoa Tradicional"
+            title={tText('Registar e Emitir Despacho de Saída de Canoa Tradicional')}
           >
             <Ship className="w-4 h-4 text-amber-100" />
             <span>{tText('Saída de Canoa')}</span>
@@ -866,7 +867,7 @@ export function TesourariaModule({
             type="button"
             onClick={() => setShowNovaSaidaModal(true)}
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#E11D48] hover:bg-rose-600 text-white rounded-2xl text-xs font-black transition-all shadow-md shadow-rose-600/30 active:scale-95 cursor-pointer"
-            title="Registar despesa ou saída de caixa"
+            title={tText('Registar despesa ou saída de caixa')}
           >
             <FileMinus className="w-4 h-4 text-rose-100" />
             <span>{tText('Saída de Caixa')}</span>
@@ -877,7 +878,7 @@ export function TesourariaModule({
             type="button"
             onClick={() => setShowFechoFolhaModal(true)}
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1E293B] hover:bg-slate-800 text-white rounded-2xl text-xs font-black transition-all shadow-md shadow-slate-900/30 active:scale-95 cursor-pointer"
-            title="Emitir balancete de fecho de caixa diário"
+            title={tText('Emitir balancete de fecho de caixa diário')}
           >
             <Printer className="w-4 h-4 text-slate-300" />
             <span>{tText('Fecho Diário')}</span>
@@ -888,7 +889,7 @@ export function TesourariaModule({
             type="button"
             onClick={() => setShowVisaoGeralModal(true)}
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#082B59] hover:bg-blue-900 text-white rounded-2xl text-xs font-black transition-all shadow-xl shadow-blue-900/40 border border-blue-400/30 active:scale-95 cursor-pointer ring-2 ring-blue-500/20"
-            title="Abrir Painel Consolidado de Operações & Prestação de Contas (Tempo Real)"
+            title={tText('Abrir Painel Consolidado de Operações & Prestação de Contas (Tempo Real)')}
           >
             <BarChart3 className="w-4 h-4 text-cyan-300 animate-pulse" />
             <span>{tText('Painel de Operações')}</span>
@@ -1021,12 +1022,12 @@ export function TesourariaModule({
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 uppercase font-mono whitespace-nowrap">
             <Search className="w-4 h-4 text-emerald-500" />
-            <span>Consulta Rápida por Código:</span>
+            <span>{tText('Consulta Rápida por Código:')}</span>
           </div>
           <div className="relative flex-1">
             <input
               type="text"
-              placeholder="Digite o código da fatura (ex: FAT-2026-0001) ou recibo (ex: REC-2026-0001)..."
+              placeholder={tText('Digite o código da fatura (ex: FAT-2026-0001) ou recibo (ex: REC-2026-0001)...')}
               value={codigoBuscaRapida}
               onChange={(e) => setCodigoBuscaRapida(e.target.value)}
               className={`w-full rounded-xl px-4 py-2.5 text-xs font-mono border focus:outline-none focus:border-emerald-500 ${
@@ -1051,13 +1052,13 @@ export function TesourariaModule({
           <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800 space-y-4 animate-in fade-in">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                Resultados Localizados ({buscaRapidaResultado.faturas.length} Fatura(s) • {buscaRapidaResultado.recibos.length} Recibo(s))
+                {tText('Resultados Localizados')} ({buscaRapidaResultado.faturas.length} {tText('Fatura(s)')} • {buscaRapidaResultado.recibos.length} {tText('Recibo(s)')})
               </span>
               <button
                 onClick={() => setCodigoBuscaRapida('')}
                 className="text-[11px] text-slate-500 hover:underline"
               >
-                Fechar Consulta
+                {tText('Fechar Consulta')}
               </button>
             </div>
 
@@ -1102,28 +1103,28 @@ export function TesourariaModule({
                         className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-all shadow flex items-center gap-1.5"
                       >
                         <CreditCard className="w-3.5 h-3.5" />
-                        Cobrar Saldo ({pendente.toLocaleString('pt-PT')} XOF)
+                        {tText('Cobrar Saldo')} ({pendente.toLocaleString(locale)} XOF)
                       </button>
                     )}
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 font-mono">
                     <div>
-                      <span className="text-[10px] text-slate-400 block uppercase">Cliente / Agência:</span>
+                      <span className="text-[10px] text-slate-400 block uppercase">{tText('Cliente / Agência:')}</span>
                       <span className="font-sans font-semibold text-slate-800 dark:text-slate-200">{fat.cliente}</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-400 block uppercase">Navio:</span>
+                      <span className="text-[10px] text-slate-400 block uppercase">{tText('Navio:')}</span>
                       <span className="font-sans text-slate-700 dark:text-slate-300">{fat.navio}</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-400 block uppercase">Total Faturado (X):</span>
-                      <span className="font-bold text-slate-900 dark:text-white">{fat.total.toLocaleString('pt-PT')} XOF</span>
+                      <span className="text-[10px] text-slate-400 block uppercase">{tText('Total Faturado (X):')}</span>
+                      <span className="font-bold text-slate-900 dark:text-white">{fat.total.toLocaleString(locale)} XOF</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-400 block uppercase">Saldo Devedor (Z):</span>
+                      <span className="text-[10px] text-slate-400 block uppercase">{tText('Saldo Devedor (Z):')}</span>
                       <span className={`font-bold ${pendente > 0 ? 'text-amber-500' : 'text-emerald-500'}`}>
-                        {pendente.toLocaleString('pt-PT')} XOF
+                        {pendente.toLocaleString(locale)} XOF
                       </span>
                     </div>
                   </div>
@@ -1131,8 +1132,8 @@ export function TesourariaModule({
                   {/* Progress bar */}
                   <div className="space-y-1">
                     <div className="flex justify-between text-[11px] font-mono">
-                      <span className="text-slate-500">Amortização da Fatura: {percPago}% pago</span>
-                      <span className="text-emerald-600 font-bold">{pago.toLocaleString('pt-PT')} de {fat.total.toLocaleString('pt-PT')} XOF</span>
+                      <span className="text-slate-500">{tText('Amortização da Fatura:')} {percPago}% {tText('pago')}</span>
+                      <span className="text-emerald-600 font-bold">{pago.toLocaleString(locale)} {tText('de')} {fat.total.toLocaleString(locale)} XOF</span>
                     </div>
                     <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden flex">
                       <div className="bg-emerald-500 h-full transition-all" style={{ width: `${percPago}%` }} />
@@ -1144,7 +1145,7 @@ export function TesourariaModule({
                   {fRecibos.length > 0 && (
                     <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
                       <span className="text-[10px] uppercase font-mono font-bold text-slate-400 block mb-1">
-                        Recibos Emitidos para esta Fatura ({fRecibos.length}):
+                        {tText('Recibos Emitidos para esta Fatura')} ({fRecibos.length}):
                       </span>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {fRecibos.map((rec) => (
@@ -1160,15 +1161,15 @@ export function TesourariaModule({
                             </div>
                             <div className="flex items-center gap-2">
                               <span className="font-mono font-bold text-emerald-600">
-                                {rec.valor.toLocaleString('pt-PT')} XOF
+                                {rec.valor.toLocaleString(locale)} XOF
                               </span>
                               <button
                                 onClick={() => setViewingRecibo(rec)}
                                 className="px-2 py-1 rounded-lg bg-emerald-600/10 hover:bg-emerald-600 text-emerald-600 hover:text-white transition-all text-[11px] font-bold flex items-center gap-1"
-                                title="Imprimir Recibo Oficial"
+                                title={tText('Imprimir Recibo Oficial')}
                               >
                                 <Printer className="w-3 h-3" />
-                                <span>Imprimir</span>
+                                <span>{tText('Imprimir')}</span>
                               </button>
                             </div>
                           </div>
@@ -1199,30 +1200,30 @@ export function TesourariaModule({
                         {rec.nRecibo}
                       </span>
                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 uppercase font-bold">
-                        Recibo Pago
+                        {tText('Recibo Pago')}
                       </span>
                     </div>
                     <div className="text-[11px] text-slate-500 mt-0.5">
-                      Fatura: <span className="font-mono font-bold text-slate-700 dark:text-slate-300">{rec.nFatura}</span> • 
-                      Cliente: <span className="font-semibold text-slate-700 dark:text-slate-300">{rec.cliente}</span>
+                      {tText('Fatura:')} <span className="font-mono font-bold text-slate-700 dark:text-slate-300">{rec.nFatura}</span> • 
+                      {tText('Cliente:')} <span className="font-semibold text-slate-700 dark:text-slate-300">{rec.cliente}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <div className="text-[10px] text-slate-400 uppercase font-mono">Valor Pago:</div>
+                    <div className="text-[10px] text-slate-400 uppercase font-mono">{tText('Valor Pago:')}</div>
                     <div className="text-sm font-black text-emerald-600">
-                      {rec.valor.toLocaleString('pt-PT')} XOF
+                      {rec.valor.toLocaleString(locale)} XOF
                     </div>
                   </div>
                   <button
                     onClick={() => setViewingRecibo(rec)}
                     className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-600/20 flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
-                    title="Imprimir Recibo"
+                    title={tText('Imprimir Recibo')}
                   >
                     <Printer className="w-4 h-4" />
-                    <span>Imprimir Recibo</span>
+                    <span>{tText('Imprimir Recibo')}</span>
                   </button>
                 </div>
               </div>
@@ -1240,7 +1241,7 @@ export function TesourariaModule({
         >
           <span className="text-[10px] uppercase font-mono text-slate-400 font-semibold block">{tText('Saldo Físico em Caixa')}</span>
           <div className="text-2xl font-bold font-mono text-emerald-500 mt-1">
-            {saldoFinal.toLocaleString('pt-PT')} XOF
+            {saldoFinal.toLocaleString(locale)} XOF
           </div>
           <span className="text-[11px] text-slate-500 mt-1 block">{tText('Disponibilidade líquida conferida')}</span>
         </div>
@@ -1253,7 +1254,7 @@ export function TesourariaModule({
           <span className="text-[10px] uppercase font-mono text-slate-400 font-semibold block">{tText('Recebimentos no Período')}</span>
           <div className="text-2xl font-bold font-mono text-blue-500 mt-1 flex items-center gap-1.5">
             <ArrowUpRight className="w-5 h-5 text-blue-500" />
-            {totalEntradasPeriodo.toLocaleString('pt-PT')} XOF
+            {totalEntradasPeriodo.toLocaleString(locale)} XOF
           </div>
           <span className="text-[11px] text-slate-500 mt-1 block">{tText('Depósitos bancários & taxas recebidas')}</span>
         </div>
@@ -1266,7 +1267,7 @@ export function TesourariaModule({
           <span className="text-[10px] uppercase font-mono text-slate-400 font-semibold block">{tText('Saídas Justificadas')}</span>
           <div className="text-2xl font-bold font-mono text-rose-500 mt-1 flex items-center gap-1.5">
             <ArrowDownRight className="w-5 h-5 text-rose-500" />
-            {totalSaidasPeriodo.toLocaleString('pt-PT')} XOF
+            {totalSaidasPeriodo.toLocaleString(locale)} XOF
           </div>
           <span className="text-[11px] text-slate-500 mt-1 block">{tText('Com comprovativo documental e autorização')}</span>
         </div>
@@ -1366,7 +1367,7 @@ export function TesourariaModule({
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <span className={theme === 'dark' ? 'text-xs text-slate-400' : 'text-xs text-slate-500'}>
-              Faturas confirmadas pelo setor de Faturação prontas para cobrança (integral ou amortização parcial):
+              {tText('Faturas confirmadas pelo setor de Faturação prontas para cobrança (integral ou amortização parcial):')}
             </span>
           </div>
 
@@ -1399,7 +1400,7 @@ export function TesourariaModule({
                   {faturasParaCobrar.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="p-8 text-center text-slate-500 text-xs">
-                        Não existem faturas pendentes de liquidação no momento.
+                        {tText('Não existem faturas pendentes de liquidação no momento.')}
                       </td>
                     </tr>
                   ) : (
@@ -1424,20 +1425,20 @@ export function TesourariaModule({
                             <div className={`font-semibold ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>
                               {fat.cliente}
                             </div>
-                            <span className="text-[10px] text-slate-400 font-mono">NIF: {fat.nif}</span>
+                            <span className="text-[10px] text-slate-400 font-mono">{tText('NIF:')} {fat.nif}</span>
                           </td>
                           <td className={`p-3.5 whitespace-nowrap ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
                             {fat.navio} <span className="text-slate-400 font-mono">({fat.tipo})</span>
                           </td>
                           <td className="p-3.5 text-right whitespace-nowrap font-mono text-slate-500">
-                            {fat.total.toLocaleString('pt-PT')} XOF
+                            {fat.total.toLocaleString(locale)} XOF
                           </td>
                           <td className="p-3.5 text-right whitespace-nowrap font-mono text-emerald-600 font-semibold">
-                            {pago.toLocaleString('pt-PT')} XOF
+                            {pago.toLocaleString(locale)} XOF
                           </td>
                           <td className="p-3.5 text-right whitespace-nowrap">
                             <span className="font-mono font-bold text-sm text-emerald-500">
-                              {pendente.toLocaleString('pt-PT')} XOF
+                              {pendente.toLocaleString(locale)} XOF
                             </span>
                           </td>
                           <td className="p-3.5 whitespace-nowrap">
@@ -1479,7 +1480,7 @@ export function TesourariaModule({
             <div className={`p-4 rounded-2xl border ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
               <span className="text-[10px] uppercase font-mono text-slate-400 font-semibold block">Total em Dívida Pendente (Z)</span>
               <div className="text-xl font-bold font-mono text-amber-500 mt-1">
-                {devedoresData.totalDividaPendente.toLocaleString('pt-PT')} XOF
+                {devedoresData.totalDividaPendente.toLocaleString(locale)} XOF
               </div>
               <span className="text-[10px] text-slate-500 font-sans">Valor global a liquidar por agências</span>
             </div>
@@ -1487,7 +1488,7 @@ export function TesourariaModule({
             <div className={`p-4 rounded-2xl border ${theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
               <span className="text-[10px] uppercase font-mono text-slate-400 font-semibold block">Total Já Arrecadado (A + Y)</span>
               <div className="text-xl font-bold font-mono text-emerald-500 mt-1">
-                {devedoresData.totalJaAmortizado.toLocaleString('pt-PT')} XOF
+                {devedoresData.totalJaAmortizado.toLocaleString(locale)} XOF
               </div>
               <span className="text-[10px] text-slate-500 font-sans">Total liquidado em recibos de tesouraria</span>
             </div>
@@ -1549,21 +1550,21 @@ export function TesourariaModule({
                   }`}
                 >
                   <tr>
-                    <th className="p-3.5">Identificação Fatura</th>
-                    <th className="p-3.5">Cliente (Agência Marítima)</th>
-                    <th className="p-3.5">Navio / Embarcação</th>
-                    <th className="p-3.5 text-right">Faturado (X)</th>
-                    <th className="p-3.5 text-right">Amortizado (A+Y)</th>
-                    <th className="p-3.5 text-right">Dívida Atual (Z)</th>
-                    <th className="p-3.5 min-w-[140px]">% Pago</th>
-                    <th className="p-3.5 text-right">Ação</th>
+                    <th className="p-3.5">{tText('Identificação Fatura')}</th>
+                    <th className="p-3.5">{tText('Cliente (Agência Marítima)')}</th>
+                    <th className="p-3.5">{tText('Navio / Embarcação')}</th>
+                    <th className="p-3.5 text-right">{tText('Faturado (X)')}</th>
+                    <th className="p-3.5 text-right">{tText('Amortizado (A+Y)')}</th>
+                    <th className="p-3.5 text-right">{tText('Dívida Atual (Z)')}</th>
+                    <th className="p-3.5 min-w-[140px]">{tText('% Pago')}</th>
+                    <th className="p-3.5 text-right">{tText('Ação')}</th>
                   </tr>
                 </thead>
                 <tbody className={theme === 'dark' ? 'divide-y divide-slate-800/60' : 'divide-y divide-slate-100'}>
                   {devedoresData.filtered.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="p-12 text-center text-slate-500 text-xs font-sans italic">
-                        Nenhum registo localizado para o filtro selecionado.
+                        {tText('Nenhum registo localizado para o filtro selecionado.')}
                       </td>
                     </tr>
                   ) : (
@@ -1591,20 +1592,20 @@ export function TesourariaModule({
                               <div className={`font-semibold ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>
                                 {fat.cliente}
                               </div>
-                              <span className="text-[10px] text-slate-400 font-mono">NIF: {fat.nif}</span>
+                              <span className="text-[10px] text-slate-400 font-mono">{tText('NIF:')} {fat.nif}</span>
                             </td>
                             <td className={`p-3.5 whitespace-nowrap ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
                               {fat.navio} <span className="text-slate-400 font-mono text-[10px]">({fat.tipo})</span>
                             </td>
                             <td className="p-3.5 text-right whitespace-nowrap font-mono text-slate-400">
-                              {fat.total.toLocaleString('pt-PT')}
+                              {fat.total.toLocaleString(locale)}
                             </td>
                             <td className="p-3.5 text-right whitespace-nowrap font-mono text-emerald-600 font-bold">
-                              {pago.toLocaleString('pt-PT')}
+                              {pago.toLocaleString(locale)}
                             </td>
                             <td className="p-3.5 text-right whitespace-nowrap">
                               <span className={`font-mono font-bold text-sm ${pendente > 0 ? 'text-amber-500' : 'text-emerald-500'}`}>
-                                {pendente.toLocaleString('pt-PT')} XOF
+                                {pendente.toLocaleString(locale)} XOF
                               </span>
                             </td>
                             <td className="p-3.5 whitespace-nowrap">
@@ -1612,7 +1613,7 @@ export function TesourariaModule({
                                 <div className="flex justify-between text-[10px] font-mono">
                                   <span className="text-slate-400">{perc}%</span>
                                   <span className={pendente > 0 ? 'text-amber-500 font-bold' : 'text-emerald-500 font-bold'}>
-                                    {pendente === 0 ? 'LIQUIDADA' : 'PENDENTE'}
+                                    {pendente === 0 ? tText('LIQUIDADA') : tText('PENDENTE')}
                                   </span>
                                 </div>
                                 <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden flex">
@@ -1631,10 +1632,10 @@ export function TesourariaModule({
                                         ? 'bg-blue-600 text-white shadow'
                                         : theme === 'dark' ? 'bg-slate-800 text-slate-300 hover:text-white' : 'bg-slate-100 text-slate-600 hover:text-blue-600'
                                     }`}
-                                    title="Ver Histórico Cronológico de Pagamentos"
+                                    title={tText('Ver Histórico Cronológico de Pagamentos')}
                                   >
                                     <Receipt className="w-3.5 h-3.5" />
-                                    <span>HISTÓRICO ({fRecibos.length})</span>
+                                    <span>{tText('HISTÓRICO')} ({fRecibos.length})</span>
                                     {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                                   </button>
                                 )}
@@ -1661,7 +1662,7 @@ export function TesourariaModule({
                                       Rastreio de Amortizações (Auditoria IMP) - {fat.nFatura}
                                     </span>
                                     <span className="text-[10px] text-slate-400 font-mono italic">
-                                      Total Amortizado: {pago.toLocaleString('pt-PT')} de {fat.total.toLocaleString('pt-PT')} XOF
+                                      Total Amortizado: {pago.toLocaleString(locale)} de {fat.total.toLocaleString(locale)} XOF
                                     </span>
                                   </div>
                                   
@@ -1682,9 +1683,9 @@ export function TesourariaModule({
                                             </div>
                                           </div>
                                           <div className="text-right">
-                                            <div className="text-[10px] text-slate-400 uppercase font-sans font-bold">VALOR AMORTIZADO:</div>
+                                            <div className="text-[10px] text-slate-400 uppercase font-sans font-bold">{tText('VALOR AMORTIZADO:')}</div>
                                             <span className="font-black text-sm text-emerald-600">
-                                              {rec.valor.toLocaleString('pt-PT')} XOF
+                                              {rec.valor.toLocaleString(locale)} XOF
                                             </span>
                                           </div>
                                         </div>
@@ -1696,7 +1697,7 @@ export function TesourariaModule({
                                           <button
                                             onClick={() => setViewingRecibo(rec)}
                                             className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-all text-[10px] font-bold flex items-center gap-1 shadow-sm active:scale-95 cursor-pointer"
-                                            title="Imprimir Recibo Oficial"
+                                            title={tText('Imprimir Recibo Oficial')}
                                           >
                                             <Printer className="w-3 h-3" />
                                             Imprimir Recibo
@@ -1733,7 +1734,7 @@ export function TesourariaModule({
               <Search className="w-4.5 h-4.5 text-slate-400 shrink-0" />
               <input
                 type="text"
-                placeholder="Pesquisar recibo por nº REC-, fatura FAT-, cliente, navio, banco ou talão..."
+                placeholder={tText('Pesquisar recibo por nº REC-, fatura FAT-, cliente, navio, banco ou talão...')}
                 value={reciboSearchTerm}
                 onChange={(e) => setReciboSearchTerm(e.target.value)}
                 className={`bg-transparent text-xs focus:outline-none w-full font-medium ${
@@ -1757,7 +1758,7 @@ export function TesourariaModule({
                   theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'
                 }`}
               >
-                <span className="text-[10px] font-mono font-bold text-slate-400 uppercase">Total Recibos:</span>
+                <span className="text-[10px] font-mono font-bold text-slate-400 uppercase">{tText('Total Recibos:')}</span>
                 <span className="font-mono font-black text-emerald-500">{filteredRecibos.length}</span>
               </div>
               <div
@@ -1765,9 +1766,9 @@ export function TesourariaModule({
                   theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'
                 }`}
               >
-                <span className="text-[10px] font-mono font-bold text-slate-400 uppercase">Total Arrecadado:</span>
+                <span className="text-[10px] font-mono font-bold text-slate-400 uppercase">{tText('Total Arrecadado:')}</span>
                 <span className="font-mono font-black text-emerald-600">
-                  {filteredRecibos.reduce((s, r) => s + r.valor, 0).toLocaleString('pt-PT')} XOF
+                  {filteredRecibos.reduce((s, r) => s + r.valor, 0).toLocaleString(locale)} XOF
                 </span>
               </div>
             </div>
@@ -1788,15 +1789,15 @@ export function TesourariaModule({
                   }`}
                 >
                   <tr>
-                    <th className="p-3.5">Identificação Recibo</th>
-                    <th className="p-3.5">Fatura Associada</th>
-                    <th className="p-3.5">Cliente / Agência</th>
-                    <th className="p-3.5">Banco & Talão</th>
-                    <th className="p-3.5 text-right">Valor Pago (Y)</th>
-                    <th className="p-3.5 text-right">Saldo Restante (Z)</th>
-                    <th className="p-3.5">Natureza Quitação</th>
-                    <th className="p-3.5">Operador do Caixa</th>
-                    <th className="p-3.5 text-right">Ação / Impressão</th>
+                    <th className="p-3.5">{tText('Identificação Recibo')}</th>
+                    <th className="p-3.5">{tText('Fatura Associada')}</th>
+                    <th className="p-3.5">{tText('Cliente / Agência')}</th>
+                    <th className="p-3.5">{tText('Banco & Talão')}</th>
+                    <th className="p-3.5 text-right">{tText('Valor Pago (Y)')}</th>
+                    <th className="p-3.5 text-right">{tText('Saldo Restante (Z)')}</th>
+                    <th className="p-3.5">{tText('Natureza Quitação')}</th>
+                    <th className="p-3.5">{tText('Operador do Caixa')}</th>
+                    <th className="p-3.5 text-right">{tText('Ação / Impressão')}</th>
                   </tr>
                 </thead>
                 <tbody className={theme === 'dark' ? 'divide-y divide-slate-800/60' : 'divide-y divide-slate-100'}>
@@ -1852,12 +1853,12 @@ export function TesourariaModule({
                         </td>
                         <td className="p-3.5 text-right whitespace-nowrap">
                           <span className="font-mono font-black text-sm text-emerald-600">
-                            {rec.valor.toLocaleString('pt-PT')}
+                            {rec.valor.toLocaleString(locale)}
                           </span>
                         </td>
                         <td className="p-3.5 text-right whitespace-nowrap font-mono font-bold">
                           <span className={rec.saldoRestante && rec.saldoRestante > 0 ? 'text-amber-500' : 'text-slate-400'}>
-                            {rec.saldoRestante !== undefined ? rec.saldoRestante.toLocaleString('pt-PT') : '0'}
+                            {rec.saldoRestante !== undefined ? rec.saldoRestante.toLocaleString(locale) : '0'}
                           </span>
                         </td>
                         <td className="p-3.5 whitespace-nowrap">
@@ -1868,7 +1869,7 @@ export function TesourariaModule({
                                 : 'bg-amber-500/10 text-amber-500 border-amber-500/30'
                             }`}
                           >
-                            {rec.isLiquidacaoTotal ? 'QUITAÇÃO TOTAL' : 'AMORTIZAÇÃO PARCIAL'}
+                            {rec.isLiquidacaoTotal ? tText('QUITAÇÃO TOTAL') : tText('AMORTIZAÇÃO PARCIAL')}
                           </span>
                         </td>
                         <td className="p-3.5 whitespace-nowrap text-slate-400 text-[11px] font-medium italic">
@@ -1878,10 +1879,10 @@ export function TesourariaModule({
                           <button
                             onClick={() => setViewingRecibo(rec)}
                             className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition-all shadow-md shadow-emerald-600/25 flex items-center gap-1.5 ml-auto active:scale-95 cursor-pointer"
-                            title="Visualizar e Imprimir Recibo Oficial de Quitação"
+                            title={tText('Visualizar e Imprimir Recibo Oficial de Quitação')}
                           >
                             <Printer className="w-4 h-4" />
-                            <span>Imprimir Recibo</span>
+                            <span>{tText('Imprimir Recibo')}</span>
                           </button>
                         </td>
                       </tr>
@@ -1940,20 +1941,20 @@ export function TesourariaModule({
                   }`}
                 >
                   <tr>
-                    <th className="p-3.5">Data & Hora</th>
-                    <th className="p-3.5">Natureza da Despesa</th>
-                    <th className="p-3.5">Beneficiário</th>
-                    <th className="p-3.5">Doc. Comprovativo</th>
-                    <th className="p-3.5">Autorizado Por</th>
-                    <th className="p-3.5 text-right">Montante (-)</th>
-                    <th className="p-3.5 text-right">Justificativo</th>
+                    <th className="p-3.5">{tText('Data & Hora')}</th>
+                    <th className="p-3.5">{tText('Natureza da Despesa')}</th>
+                    <th className="p-3.5">{tText('Beneficiário')}</th>
+                    <th className="p-3.5">{tText('Doc. Comprovativo')}</th>
+                    <th className="p-3.5">{tText('Autorizado Por')}</th>
+                    <th className="p-3.5 text-right">{tText('Montante (-)')}</th>
+                    <th className="p-3.5 text-right">{tText('Justificativo')}</th>
                   </tr>
                 </thead>
                 <tbody className={theme === 'dark' ? 'divide-y divide-slate-800/60' : 'divide-y divide-slate-100'}>
                   {saidasMovimentos.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="p-12 text-center text-slate-500 text-xs italic">
-                        Nenhuma saída de numerário registada no período.
+                        {tText('Nenhuma saída de numerário registada no período.')}
                       </td>
                     </tr>
                   ) : (
@@ -1990,7 +1991,7 @@ export function TesourariaModule({
                           {saida.autorizado_por}
                         </td>
                         <td className="p-3.5 text-right whitespace-nowrap font-mono font-black text-rose-600 text-sm">
-                          -{saida.valor.toLocaleString('pt-PT')} XOF
+                          -{saida.valor.toLocaleString(locale)} XOF
                         </td>
                         <td className="p-3.5 text-right whitespace-nowrap">
                           <button
@@ -2025,11 +2026,11 @@ export function TesourariaModule({
             >
               {(['dia', 'semana', 'mes', 'ano', 'tudo'] as PeriodFilter[]).map((p) => {
                 const labels: Record<PeriodFilter, string> = {
-                  dia: 'Hoje',
-                  semana: 'Esta Semana',
-                  mes: 'Este Mês',
-                  ano: 'Este Ano',
-                  tudo: 'Todo o Histórico'
+                  dia: tText('Hoje'),
+                  semana: tText('Esta Semana'),
+                  mes: tText('Este Mês'),
+                  ano: tText('Este Ano'),
+                  tudo: tText('Todo o Histórico')
                 };
                 return (
                   <button
@@ -2057,7 +2058,7 @@ export function TesourariaModule({
               <Search className="w-4.5 h-4.5 text-slate-400" />
               <input
                 type="text"
-                placeholder="Pesquisar movimento, talão, banco..."
+                placeholder={tText('Pesquisar movimento, talão, banco...')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={`bg-transparent text-xs focus:outline-none w-full font-medium ${
@@ -2069,10 +2070,10 @@ export function TesourariaModule({
             <button
               onClick={() => window.print()}
               className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl text-xs font-bold flex items-center gap-2 transition-all shadow-sm active:scale-95 cursor-pointer shrink-0"
-              title="Imprimir Folha Diária / Balancete de Caixa"
+              title={tText('Imprimir Folha Diária / Balancete de Caixa')}
             >
               <Printer className="w-4 h-4 text-emerald-400" />
-              <span>Imprimir Balancete</span>
+              <span>{tText('Imprimir Balancete')}</span>
             </button>
           </div>
 
@@ -2092,21 +2093,21 @@ export function TesourariaModule({
                   }`}
                 >
                   <tr>
-                    <th className="p-3.5">Data & Hora</th>
-                    <th className="p-3.5">Descrição do Lançamento</th>
-                    <th className="p-3.5">Categoria & Documento</th>
-                    <th className="p-3.5 text-right">Crédito (+)</th>
-                    <th className="p-3.5 text-right">Débito (-)</th>
-                    <th className="p-3.5 text-right">Saldo Progressivo</th>
-                    <th className="p-3.5">Operador</th>
-                    <th className="p-3.5 text-right">Comprovativo / Recibo</th>
+                    <th className="p-3.5">{tText('Data & Hora')}</th>
+                    <th className="p-3.5">{tText('Descrição do Lançamento')}</th>
+                    <th className="p-3.5">{tText('Categoria & Documento')}</th>
+                    <th className="p-3.5 text-right">{tText('Crédito (+)')}</th>
+                    <th className="p-3.5 text-right">{tText('Débito (-)')}</th>
+                    <th className="p-3.5 text-right">{tText('Saldo Progressivo')}</th>
+                    <th className="p-3.5">{tText('Operador')}</th>
+                    <th className="p-3.5 text-right">{tText('Comprovativo / Recibo')}</th>
                   </tr>
                 </thead>
                 <tbody className={`font-mono ${theme === 'dark' ? 'divide-y divide-slate-800/60' : 'divide-y divide-slate-100'}`}>
                   {filteredMovimentos.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="p-12 text-center text-slate-500 text-xs italic font-sans">
-                        Nenhum movimento registado no balancete para este período.
+                        {tText('Nenhum movimento registado no balancete para este período.')}
                       </td>
                     </tr>
                   ) : (
@@ -2153,7 +2154,7 @@ export function TesourariaModule({
                         <td className="p-3.5 text-right whitespace-nowrap">
                           {mov.tipo === 'entrada' ? (
                             <span className="text-emerald-600 font-black">
-                              +{mov.valor.toLocaleString('pt-PT')}
+                              +{mov.valor.toLocaleString(locale)}
                             </span>
                           ) : (
                             <span className="text-slate-300 dark:text-slate-800">-</span>
@@ -2162,7 +2163,7 @@ export function TesourariaModule({
                         <td className="p-3.5 text-right whitespace-nowrap">
                           {mov.tipo === 'saida' ? (
                             <span className="text-rose-600 font-black">
-                              -{mov.valor.toLocaleString('pt-PT')}
+                              -{mov.valor.toLocaleString(locale)}
                             </span>
                           ) : (
                             <span className="text-slate-300 dark:text-slate-800">-</span>
@@ -2173,7 +2174,7 @@ export function TesourariaModule({
                             theme === 'dark' ? 'text-white' : 'text-slate-900'
                           }`}
                         >
-                          {mov.saldoApos.toLocaleString('pt-PT')} XOF
+                          {mov.saldoApos.toLocaleString(locale)} XOF
                         </td>
                         <td className="p-3.5 whitespace-nowrap text-slate-400 font-sans text-[11px] font-medium">
                           {mov.criado_por}
@@ -2211,19 +2212,19 @@ export function TesourariaModule({
                                 }
                               }}
                               className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 ml-auto transition-all shadow-sm active:scale-95 cursor-pointer"
-                              title="Imprimir Recibo Oficial deste recebimento"
+                              title={tText('Imprimir Recibo Oficial deste recebimento')}
                             >
                               <Printer className="w-3.5 h-3.5" />
-                              <span>Imprimir Recibo</span>
+                              <span>{tText('Imprimir Recibo')}</span>
                             </button>
                           ) : (
                             <button
                               onClick={() => setViewingSaidaDoc(mov)}
                               className="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 ml-auto transition-all shadow-sm active:scale-95 cursor-pointer"
-                              title="Imprimir Guia de Saída de Caixa"
+                              title={tText('Imprimir Guia de Saída de Caixa')}
                             >
                               <Printer className="w-3.5 h-3.5" />
-                              <span>Imprimir Guia</span>
+                              <span>{tText('Imprimir Guia')}</span>
                             </button>
                           )}
                         </td>
@@ -2289,13 +2290,13 @@ export function TesourariaModule({
                     <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
                       <span className="text-slate-500 text-[11px] font-bold">1. VALOR TOTAL EMITIDO (X):</span>
                       <span className="font-black text-slate-900 dark:text-white text-base">
-                        {faturaParaLiquidar.total.toLocaleString('pt-PT')} XOF
+                        {faturaParaLiquidar.total.toLocaleString(locale)} XOF
                       </span>
                     </div>
                     <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-800 pb-2">
                       <span className="text-slate-500 text-[11px] font-bold">2. JÁ AMORTIZADO ANTERIOR (A):</span>
                       <span className="font-black text-emerald-600">
-                        {pagoAnterior.toLocaleString('pt-PT')} XOF
+                        {pagoAnterior.toLocaleString(locale)} XOF
                       </span>
                     </div>
                     <div className="flex justify-between items-center pt-1">
@@ -2303,7 +2304,7 @@ export function TesourariaModule({
                         3. SALDO ATUAL DEVEDOR (Z = X - A):
                       </span>
                       <span className="font-black text-amber-500 text-xl">
-                        {saldoPendenteAtual.toLocaleString('pt-PT')} XOF
+                        {saldoPendenteAtual.toLocaleString(locale)} XOF
                       </span>
                     </div>
                   </div>
@@ -2315,7 +2316,7 @@ export function TesourariaModule({
                       <div>
                         <span className="font-black block uppercase text-sm mb-1">Bloqueio de Sobrefaturação</span>
                         <p className="leading-relaxed">
-                          O valor digitado <span className="font-black underline">({valorPagamentoInput.toLocaleString('pt-PT')} XOF)</span> excede a dívida real da fatura. O sistema IMP não permite arrecadar valores superiores ao faturado. Por favor, corrija o montante.
+                          O valor digitado <span className="font-black underline">({valorPagamentoInput.toLocaleString(locale)} XOF)</span> excede a dívida real da fatura. O sistema IMP não permite arrecadar valores superiores ao faturado. Por favor, corrija o montante.
                         </p>
                       </div>
                     </div>
@@ -2376,8 +2377,8 @@ export function TesourariaModule({
                           {novoRestante === 0 ? <CheckCircle2 className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
                           <div className="text-xs font-bold leading-snug">
                             {novoRestante === 0 
-                              ? 'QUITAÇÃO TOTAL: Esta operação liquidará permanentemente a dívida desta fatura.' 
-                              : `AMORTIZAÇÃO PARCIAL: Ficará um saldo devedor de ${novoRestante.toLocaleString('pt-PT')} XOF a pagar futuramente.`}
+                              ? `${tText('QUITAÇÃO TOTAL')}: ${tText('Esta operação liquidará permanentemente a dívida desta fatura.')}` 
+                              : `${tText('AMORTIZAÇÃO PARCIAL')}: ${tText('Ficará um saldo devedor de')} ${novoRestante.toLocaleString(locale)} XOF ${tText('a pagar futuramente.')}`}
                           </div>
                         </div>
                       )}
@@ -2475,7 +2476,7 @@ export function TesourariaModule({
                 <button
                   onClick={() => window.print()}
                   className="px-4 py-2 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-emerald-400/25 transition-all active:scale-95 cursor-pointer"
-                  title="Enviar documento para a impressora"
+                  title={tText('Enviar documento para a impressora')}
                 >
                   <Printer className="w-4 h-4" />
                   <span>Imprimir Recibo</span>
@@ -2488,7 +2489,7 @@ export function TesourariaModule({
                   className={`px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 ${
                     isExportingPDF ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
-                  title="Descarregar ficheiro PDF"
+                  title={tText('Descarregar ficheiro PDF')}
                 >
                   {isExportingPDF ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
                   <span>{isExportingPDF ? 'Gerando...' : 'PDF'}</span>
@@ -2497,7 +2498,7 @@ export function TesourariaModule({
                 <button
                   onClick={() => setViewingRecibo(null)}
                   className="p-2 text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition-colors"
-                  title="Fechar"
+                  title={tText('Fechar')}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -2531,7 +2532,7 @@ export function TesourariaModule({
                     className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black flex items-center gap-2 shadow-lg shadow-emerald-600/25 transition-all active:scale-95 cursor-pointer"
                   >
                     <Printer className="w-4 h-4" />
-                    <span>Imprimir Recibo Duplo (A4)</span>
+                    <span>{tText('Imprimir Recibo Duplo (A4)')}</span>
                   </button>
                 </div>
               </div>
@@ -2561,10 +2562,10 @@ export function TesourariaModule({
                 <button
                   onClick={() => window.print()}
                   className="px-4 py-2 bg-rose-500 hover:bg-rose-400 text-white font-black rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-rose-500/25 transition-all active:scale-95 cursor-pointer"
-                  title="Enviar guia para a impressora"
+                  title={tText('Enviar guia para a impressora')}
                 >
                   <Printer className="w-4 h-4" />
-                  <span>Imprimir Guia</span>
+                  <span>{tText('Imprimir Guia')}</span>
                 </button>
 
                 <button
@@ -2660,7 +2661,7 @@ export function TesourariaModule({
 
                   <div className="flex justify-between items-center p-6 bg-rose-900 text-white rounded-2xl shadow-xl shadow-rose-900/20">
                     <span className="font-black text-sm uppercase tracking-widest">Valor do Desembolso:</span>
-                    <span className="text-3xl font-black font-mono">-{viewingSaidaDoc.valor.toLocaleString('pt-PT')} XOF</span>
+                    <span className="text-3xl font-black font-mono">-{viewingSaidaDoc.valor.toLocaleString(locale)} XOF</span>
                   </div>
                 </div>
 
@@ -2707,7 +2708,7 @@ export function TesourariaModule({
                   <h3 className={`font-bold text-base ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                     Lançamento de Saída Justificada de Caixa
                   </h3>
-                  <span className="text-xs text-slate-500">Exige comprovativo documental institucional</span>
+                  <span className="text-xs text-slate-500">{tText('Exige comprovativo documental institucional')}</span>
                 </div>
               </div>
               <button
@@ -2724,7 +2725,7 @@ export function TesourariaModule({
             <div className="p-3 bg-slate-100 dark:bg-slate-950 rounded-xl flex items-center justify-between font-mono text-xs">
               <span className="text-slate-500">Saldo Atual Disponível em Caixa:</span>
               <span className="font-bold text-emerald-500 text-sm">
-                {saldoAtualEmCaixa.toLocaleString('pt-PT')} XOF
+                {saldoAtualEmCaixa.toLocaleString(locale)} XOF
               </span>
             </div>
 
@@ -2734,7 +2735,7 @@ export function TesourariaModule({
                 <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold block">SALDO INSUFICIENTE EM CAIXA</span>
-                  O valor da saída solicitada ({saidaForm.valor.toLocaleString('pt-PT')} XOF) excede o saldo físico existente em caixa ({saldoAtualEmCaixa.toLocaleString('pt-PT')} XOF). Não é permitida saída sem suprimento prévio.
+                  O valor da saída solicitada ({saidaForm.valor.toLocaleString(locale)} XOF) excede o saldo físico existente em caixa ({saldoAtualEmCaixa.toLocaleString(locale)} XOF). Não é permitida saída sem suprimento prévio.
                 </div>
               </div>
             )}
@@ -2929,7 +2930,7 @@ export function TesourariaModule({
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300">
                   Balancete de Fecho Diário
                 </span>
-                <span className="text-sm font-mono font-bold">Folha de Caixa • {new Date().toLocaleDateString('pt-PT')}</span>
+                <span className="text-sm font-mono font-bold">Folha de Caixa • {new Date().toLocaleDateString(locale)}</span>
               </div>
               <div className="flex items-center gap-2 sm:gap-3">
                 {/* Official A4 Exclusive Badge */}
@@ -2943,10 +2944,10 @@ export function TesourariaModule({
                   type="button"
                   onClick={() => window.print()}
                   className="px-4 py-2 bg-blue-500 hover:bg-blue-400 text-white font-black rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-blue-500/25 transition-all active:scale-95 cursor-pointer"
-                  title="Enviar balancete para a impressora"
+                  title={tText('Enviar balancete para a impressora')}
                 >
                   <Printer className="w-4 h-4" />
-                  <span>Imprimir Balancete</span>
+                  <span>{tText('Imprimir Balancete')}</span>
                 </button>
 
                 {/* Secondary: Baixar PDF Oficial */}
@@ -2955,7 +2956,7 @@ export function TesourariaModule({
                   onClick={() => handleDownloadPDF(`IMP_FECHO_CAIXA_${new Date().toISOString().slice(0,10)}`)}
                   disabled={isExportingPDF}
                   className={`px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${isExportingPDF ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  title="Descarregar ficheiro PDF oficial"
+                  title={tText('Descarregar ficheiro PDF oficial')}
                 >
                   {isExportingPDF ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
                   <span>{isExportingPDF ? 'Gerando...' : 'Baixar PDF'}</span>
@@ -2964,7 +2965,7 @@ export function TesourariaModule({
                   type="button"
                   onClick={() => setShowFechoFolhaModal(false)}
                   className="p-2 text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition-colors cursor-pointer"
-                  title="Fechar"
+                  title={tText('Fechar')}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -3029,25 +3030,25 @@ export function TesourariaModule({
                   <div className="p-5 bg-slate-50 border-2 border-slate-200 rounded-2xl">
                     <span className="text-[9px] font-black text-slate-400 uppercase block mb-1">Saldo Inicial:</span>
                     <div className="text-lg font-black text-slate-900 font-mono">
-                      {(movimentos.length > 0 ? movimentos[0].valor : 0).toLocaleString('pt-PT')}
+                      {(movimentos.length > 0 ? movimentos[0].valor : 0).toLocaleString(locale)}
                     </div>
                   </div>
                   <div className="p-5 bg-emerald-50 border-2 border-emerald-100 rounded-2xl">
                     <span className="text-[9px] font-black text-emerald-600 uppercase block mb-1">Total Entradas:</span>
                     <div className="text-lg font-black text-emerald-700 font-mono">
-                      +{totalEntradasPeriodo.toLocaleString('pt-PT')}
+                      +{totalEntradasPeriodo.toLocaleString(locale)}
                     </div>
                   </div>
                   <div className="p-5 bg-rose-50 border-2 border-rose-100 rounded-2xl">
                     <span className="text-[9px] font-black text-rose-600 uppercase block mb-1">Total Saídas:</span>
                     <div className="text-lg font-black text-rose-700 font-mono">
-                      -{totalSaidasPeriodo.toLocaleString('pt-PT')}
+                      -{totalSaidasPeriodo.toLocaleString(locale)}
                     </div>
                   </div>
                   <div className="p-5 bg-blue-900 text-white rounded-2xl shadow-xl shadow-blue-900/20">
                     <span className="text-[9px] font-black text-blue-200 uppercase block mb-1">Saldo Final:</span>
                     <div className="text-xl font-black font-mono">
-                      {saldoFinal.toLocaleString('pt-PT')}
+                      {saldoFinal.toLocaleString(locale)}
                     </div>
                   </div>
                 </div>
@@ -3056,7 +3057,7 @@ export function TesourariaModule({
                 <div className="mb-12">
                   <h4 className="text-xs font-black uppercase text-slate-800 mb-4 flex items-center gap-2">
                     <div className="w-1.5 h-4 bg-blue-600 rounded-full"></div>
-                    Extrato de Movimentos do Período ({new Date().toLocaleDateString('pt-PT')})
+                    Extrato de Movimentos do Período ({new Date().toLocaleDateString(locale)})
                   </h4>
                   <table className="w-full text-[10px] border-collapse">
                     <thead className="bg-slate-100 font-black uppercase text-slate-500 border-y-2 border-slate-200">
@@ -3080,13 +3081,13 @@ export function TesourariaModule({
                           </td>
                           <td className="p-3 text-slate-400">{m.categoria}</td>
                           <td className="p-3 text-right text-emerald-600 font-bold">
-                            {m.tipo === 'entrada' ? m.valor.toLocaleString('pt-PT') : ''}
+                            {m.tipo === 'entrada' ? m.valor.toLocaleString(locale) : ''}
                           </td>
                           <td className="p-3 text-right text-rose-600 font-bold">
-                            {m.tipo === 'saida' ? m.valor.toLocaleString('pt-PT') : ''}
+                            {m.tipo === 'saida' ? m.valor.toLocaleString(locale) : ''}
                           </td>
                           <td className="p-3 text-right font-black text-slate-900">
-                            {m.saldoApos.toLocaleString('pt-PT')}
+                            {m.saldoApos.toLocaleString(locale)}
                           </td>
                         </tr>
                       ))}
@@ -3116,7 +3117,7 @@ export function TesourariaModule({
                   </div>
 
                   <div className="mt-16 flex justify-between items-center text-[8px] font-mono text-slate-300 uppercase">
-                    <span>Gerado em: {new Date().toLocaleString('pt-PT')}</span>
+                    <span>Gerado em: {new Date().toLocaleString(locale)}</span>
                     <span>Página 1 de 1 • Sistema ERP IMP</span>
                     <span>HASH: {Math.random().toString(36).substring(2, 15).toUpperCase()}</span>
                   </div>
@@ -3129,7 +3130,7 @@ export function TesourariaModule({
                       className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-black flex items-center gap-2 shadow-lg shadow-blue-600/25 transition-all active:scale-95 cursor-pointer"
                     >
                       <Printer className="w-4 h-4" />
-                      <span>Imprimir Balancete (A4)</span>
+                      <span>{tText('Imprimir Balancete (A4)')}</span>
                     </button>
                   </div>
                 </div>
@@ -3293,7 +3294,7 @@ export function TesourariaModule({
                   className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-black shadow-lg shadow-blue-600/25 flex items-center gap-2 cursor-pointer active:scale-95"
                 >
                   <Printer className="w-4 h-4" />
-                  <span>Concluir & Emitir Cédula (Duplo A4)</span>
+                  <span>{tText('Concluir & Emitir Cédula (Duplo A4)')}</span>
                 </button>
               </div>
             </form>
@@ -3449,7 +3450,7 @@ export function TesourariaModule({
                   className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-black shadow-lg shadow-emerald-600/25 flex items-center gap-2 cursor-pointer active:scale-95"
                 >
                   <Printer className="w-4 h-4" />
-                  <span>Concluir & Emitir Licença (Duplo A4)</span>
+                  <span>{tText('Concluir & Emitir Licença (Duplo A4)')}</span>
                 </button>
               </div>
             </form>
@@ -3596,7 +3597,7 @@ export function TesourariaModule({
                   className="px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl font-black shadow-lg shadow-amber-600/25 flex items-center gap-2 cursor-pointer active:scale-95"
                 >
                   <Printer className="w-4 h-4" />
-                  <span>Concluir & Emitir Saída de Canoa (Duplo A4)</span>
+                  <span>{tText('Concluir & Emitir Saída de Canoa (Duplo A4)')}</span>
                 </button>
               </div>
             </form>
@@ -3780,7 +3781,7 @@ export function TesourariaModule({
                   className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-black shadow-lg shadow-indigo-600/25 flex items-center gap-2 cursor-pointer active:scale-95"
                 >
                   <Printer className="w-4 h-4" />
-                  <span>Concluir & Emitir Domínio Público (Duplo A4)</span>
+                  <span>{tText('Concluir & Emitir Domínio Público (Duplo A4)')}</span>
                 </button>
               </div>
             </form>
@@ -3812,7 +3813,7 @@ export function TesourariaModule({
                   type="button"
                   onClick={() => window.print()}
                   className="px-4 py-2 bg-blue-500 hover:bg-blue-400 text-white font-black rounded-xl text-xs flex items-center gap-2 shadow-lg shadow-blue-500/25 transition-all active:scale-95 cursor-pointer"
-                  title="Enviar documento para a impressora"
+                  title={tText('Enviar documento para a impressora')}
                 >
                   <Printer className="w-4 h-4" />
                   <span>Imprimir Documento</span>
@@ -3826,7 +3827,7 @@ export function TesourariaModule({
                   className={`px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer ${
                     isExportingPDF ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
-                  title="Descarregar ficheiro PDF"
+                  title={tText('Descarregar ficheiro PDF')}
                 >
                   {isExportingPDF ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
                   <span>{isExportingPDF ? 'Gerando...' : 'PDF'}</span>
@@ -3836,7 +3837,7 @@ export function TesourariaModule({
                   type="button"
                   onClick={() => setViewingEmissaoDoc(null)}
                   className="p-2 text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xl transition-colors cursor-pointer"
-                  title="Fechar"
+                  title={tText('Fechar')}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -3874,7 +3875,7 @@ export function TesourariaModule({
                     className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-black flex items-center gap-2 shadow-lg shadow-blue-600/25 transition-all active:scale-95 cursor-pointer"
                   >
                     <Printer className="w-4 h-4" />
-                    <span>Imprimir Duplo (A4)</span>
+                    <span>{tText('Imprimir Duplo (A4)')}</span>
                   </button>
                 </div>
               </div>

@@ -108,7 +108,7 @@ export function InspeccoesModule({ inspeccoes, onAddInspeccao }: InspeccoesModul
                   {insp.embarcacaoNome}
                 </h3>
                 <p className={`text-xs font-mono mt-0.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                  Tipo: {insp.tipoVistoria}
+                  {tText('Tipo')}: {tText(insp.tipoVistoria)}
                 </p>
               </div>
               <span
@@ -122,7 +122,7 @@ export function InspeccoesModule({ inspeccoes, onAddInspeccao }: InspeccoesModul
               >
                 {insp.resultado === 'Aprovado' && <CheckCircle2 className="w-3 h-3"/>}
                 {insp.resultado === 'Retido / Impedido' && <XCircle className="w-3 h-3"/>}
-                {insp.resultado}
+                {tText(insp.resultado)}
               </span>
             </div>
 
@@ -134,22 +134,22 @@ export function InspeccoesModule({ inspeccoes, onAddInspeccao }: InspeccoesModul
               }`}
             >
               <div className="flex justify-between">
-                <span className="text-slate-500">INSPECTOR RESPONSÁVEL:</span>
+                <span className="text-slate-500">{tText('INSPECTOR RESPONSÁVEL')}:</span>
                 <span className={`font-sans ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{insp.inspectorNome}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">DATA DA VISTORIA:</span>
+                <span className="text-slate-500">{tText('DATA DA VISTORIA')}:</span>
                 <span className={theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}>{insp.dataInspeccao}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">VALIDADE ATRIBUÍDA:</span>
-                <span className="text-blue-500 font-bold">{insp.validadeMeses} Meses</span>
+                <span className="text-slate-500">{tText('VALIDADE ATRIBUÍDA')}:</span>
+                <span className="text-blue-500 font-bold">{insp.validadeMeses} {tText('Meses')}</span>
               </div>
             </div>
 
             <div className={`pt-2 border-t text-xs ${theme === 'dark' ? 'border-slate-800' : 'border-slate-100'}`}>
               <span className="text-slate-500 block text-[10px] uppercase font-mono font-semibold mb-1">
-                Observações da Vistoria:
+                {tText('Observações da Vistoria')}:
               </span>
               <p
                 className={`p-2.5 rounded-lg border leading-relaxed ${
@@ -173,11 +173,11 @@ export function InspeccoesModule({ inspeccoes, onAddInspeccao }: InspeccoesModul
             }`}
           >
             <h3 className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-              Registar Vistoria Marítima
+              {tText('Registar Vistoria Marítima')}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-3 text-xs">
               <div>
-                <label className="block text-slate-500 mb-1">Nome do Navio / Embarcação</label>
+                <label className="block text-slate-500 mb-1">{tText('Nome do Navio / Embarcação')}</label>
                 <input
                   type="text"
                   required
@@ -186,12 +186,12 @@ export function InspeccoesModule({ inspeccoes, onAddInspeccao }: InspeccoesModul
                   className={`w-full rounded-xl px-3 py-2 border focus:outline-none focus:border-blue-500 ${
                     theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
-                  placeholder="Ex: MV Rio Geba Express"
+                  placeholder={tText('Ex: MV Rio Geba Express')}
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-500 mb-1">Tipo de Vistoria</label>
+                  <label className="block text-slate-500 mb-1">{tText('Tipo de Vistoria')}</label>
                   <select
                     value={formData.tipoVistoria}
                     onChange={e => setFormData({ ...formData, tipoVistoria: e.target.value as any })}
@@ -199,14 +199,14 @@ export function InspeccoesModule({ inspeccoes, onAddInspeccao }: InspeccoesModul
                       theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                     }`}
                   >
-                    <option value="Segurança da Navegação">Segurança da Navegação</option>
-                    <option value="Prevenção da Poluição (MARPOL)">Prevenção da Poluição (MARPOL)</option>
-                    <option value="Condições de Habitabilidade">Condições de Habitabilidade</option>
-                    <option value="Estrutural / Casco">Estrutural / Casco</option>
+                    <option value="Segurança da Navegação">{tText('Segurança da Navegação')}</option>
+                    <option value="Prevenção da Poluição (MARPOL)">{tText('Prevenção da Poluição (MARPOL)')}</option>
+                    <option value="Condições de Habitabilidade">{tText('Condições de Habitabilidade')}</option>
+                    <option value="Estrutural / Casco">{tText('Estrutural / Casco')}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-slate-500 mb-1">Resultado da Inspecção</label>
+                  <label className="block text-slate-500 mb-1">{tText('Resultado da Inspecção')}</label>
                   <select
                     value={formData.resultado}
                     onChange={e => setFormData({ ...formData, resultado: e.target.value as any })}
@@ -214,14 +214,14 @@ export function InspeccoesModule({ inspeccoes, onAddInspeccao }: InspeccoesModul
                       theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                     }`}
                   >
-                    <option value="Aprovado">Aprovado</option>
-                    <option value="Aprovado com Recomendações">Aprovado com Recomendações</option>
-                    <option value="Retido / Impedido">Retido / Impedido do Porto</option>
+                    <option value="Aprovado">{tText('Aprovado')}</option>
+                    <option value="Aprovado com Recomendações">{tText('Aprovado com Recomendações')}</option>
+                    <option value="Retido / Impedido">{tText('Retido / Impedido do Porto')}</option>
                   </select>
                 </div>
               </div>
               <div>
-                <label className="block text-slate-500 mb-1">Inspector Técnico</label>
+                <label className="block text-slate-500 mb-1">{tText('Inspector Técnico')}</label>
                 <input
                   type="text"
                   required
@@ -233,7 +233,7 @@ export function InspeccoesModule({ inspeccoes, onAddInspeccao }: InspeccoesModul
                 />
               </div>
               <div>
-                <label className="block text-slate-500 mb-1">Observações Técnicas / Deficiências</label>
+                <label className="block text-slate-500 mb-1">{tText('Observações Técnicas / Deficiências')}</label>
                 <textarea
                   required
                   rows={3}
@@ -242,7 +242,7 @@ export function InspeccoesModule({ inspeccoes, onAddInspeccao }: InspeccoesModul
                   className={`w-full rounded-xl px-3 py-2 border focus:outline-none focus:border-blue-500 ${
                     theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                   }`}
-                  placeholder="Relatório sintético dos equipamentos de emergência ou coletes de salvação..."
+                  placeholder={tText('Relatório sintético dos equipamentos de emergência ou coletes de salvação...')}
                 ></textarea>
               </div>
 
@@ -254,13 +254,13 @@ export function InspeccoesModule({ inspeccoes, onAddInspeccao }: InspeccoesModul
                     theme === 'dark' ? 'bg-slate-800 text-slate-300' : 'bg-slate-100 text-slate-700'
                   }`}
                 >
-                  Cancelar
+                  {tText('Cancelar')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold shadow-lg shadow-blue-600/20"
                 >
-                  Guardar Vistoria
+                  {tText('Guardar Vistoria')}
                 </button>
               </div>
             </form>

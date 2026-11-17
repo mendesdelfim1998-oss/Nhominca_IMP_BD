@@ -55,8 +55,9 @@ export function UtilizadoresModule({
   onToggleUserStatus,
   onAddUtilizador,
 }: UtilizadoresModuleProps) {
-  const { t } = useLanguage();
+  const { t, tText, language } = useLanguage();
   const { theme } = useTheme();
+  const locale = language === 'en' ? 'en-US' : language === 'fr' ? 'fr-FR' : 'pt-PT';
 
   // Filters & Search
   const [searchTerm, setSearchTerm] = useState('');
@@ -181,14 +182,14 @@ export function UtilizadoresModule({
 
     onUpdateUtilizador(updated);
     setEditingUser(null);
-    showToast(`Perfil de ${updated.nome} atualizado com sucesso!`);
+    showToast(tText(`Perfil de ${updated.nome} atualizado com sucesso!`));
   };
 
   // Save New User
   const handleSaveCreate = (e: FormEvent) => {
     e.preventDefault();
     if (!createForm.nome.trim() || !createForm.email.trim()) {
-      showToast('Nome e Email são obrigatórios.', 'warning');
+      showToast(tText('Nome e Email são obrigatórios.'), 'warning');
       return;
     }
 
@@ -204,13 +205,13 @@ export function UtilizadoresModule({
       gender: 'M',
       birthDate: '1990-01-01',
       email: createForm.email.trim(),
-      cargo: createForm.cargo || 'Operador Marítimo',
+      cargo: createForm.cargo || tText('Operador Marítimo'),
       funcao: createForm.funcao,
       role: (createForm.funcao === 'superadmin' || createForm.funcao === 'admin' || createForm.funcao === 'faturacao' || createForm.funcao === 'caixa') ? createForm.funcao : 'faturacao',
-      departamento: createForm.departamento || 'Operações',
+      departamento: createForm.departamento || tText('Operações'),
       status: 'Ativo',
       active: true,
-      ultimoAcesso: 'Hoje, recém-criado',
+      ultimoAcesso: tText('Hoje, recém-criado'),
       fotoUrl: createForm.fotoUrl || PRESET_AVATARS[0],
       avatar: createForm.fotoUrl || PRESET_AVATARS[0],
       telefone: createForm.telefone || '+245 95 000 0000',
@@ -224,12 +225,12 @@ export function UtilizadoresModule({
       email: '',
       cargo: '',
       funcao: 'faturacao',
-      departamento: 'Faturação & Finanças',
+      departamento: tText('Faturação & Finanças'),
       telefone: '',
       senha: '',
       fotoUrl: PRESET_AVATARS[0],
     });
-    showToast(`Novo utilizador ${novo.nome} criado com sucesso!`);
+    showToast(tText(`Novo utilizador ${novo.nome} criado com sucesso!`));
   };
 
   // Handle Image Upload with Automatic Client-Side Resize (max 400px)
@@ -243,7 +244,7 @@ export function UtilizadoresModule({
         } else {
           setCreateForm((prev) => ({ ...prev, fotoUrl: optimizedUrl }));
         }
-        showToast('Foto processada e redimensionada para máx 400px.');
+        showToast(tText('Foto processada e redimensionada para máx 400px.'));
       } catch {
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -262,13 +263,15 @@ export function UtilizadoresModule({
   // Status Toggle by Admin
   const handleToggleStatus = (user: Utilizador) => {
     if (!isAdminGeral) {
-      showToast('Apenas o Administrador Geral (ADMIN_IMP) pode alterar o estado da conta.', 'warning');
+      showToast(tText('Apenas o Administrador Geral (ADMIN_IMP) pode alterar o estado da conta.'), 'warning');
       return;
     }
     const novoStatus = user.status === 'Ativo' ? 'Inativo' : 'Ativo';
     onToggleUserStatus(user.id);
     showToast(
-      `Conta de ${user.nome} foi ${novoStatus === 'Ativo' ? 'ativada' : 'desativada'} com sucesso.`,
+      novoStatus === 'Ativo'
+        ? tText(`Conta de ${user.nome} foi ativada com sucesso.`)
+        : tText(`Conta de ${user.nome} foi desativada com sucesso.`),
       novoStatus === 'Ativo' ? 'success' : 'info'
     );
   };
@@ -375,7 +378,7 @@ export function UtilizadoresModule({
           <div>
             <div className="text-slate-500 text-xs font-medium">{t.users.totalUsers}</div>
             <div className={`text-2xl font-bold font-mono mt-1 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-              {utilizadores.length}
+              {utilizadores.length.toLocaleString(locale)}
             </div>
             <div className="text-[10px] text-slate-400 mt-0.5">{t.users.totalDesc}</div>
           </div>
@@ -391,7 +394,7 @@ export function UtilizadoresModule({
         >
           <div>
             <div className="text-slate-500 text-xs font-medium">{t.users.activeAccounts}</div>
-            <div className="text-2xl font-bold text-emerald-500 font-mono mt-1">{totalActivos}</div>
+            <div className="text-2xl font-bold text-emerald-500 font-mono mt-1">{totalActivos.toLocaleString(locale)}</div>
             <div className="text-[10px] text-emerald-500/80 mt-0.5">{t.users.activeDesc}</div>
           </div>
           <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500">
@@ -406,7 +409,7 @@ export function UtilizadoresModule({
         >
           <div>
             <div className="text-slate-500 text-xs font-medium">{t.users.inactiveAccounts}</div>
-            <div className="text-2xl font-bold text-rose-500 font-mono mt-1">{totalInactivos}</div>
+            <div className="text-2xl font-bold text-rose-500 font-mono mt-1">{totalInactivos.toLocaleString(locale)}</div>
             <div className="text-[10px] text-rose-500/80 mt-0.5">{t.users.inactiveDesc}</div>
           </div>
           <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500">
@@ -447,10 +450,10 @@ export function UtilizadoresModule({
           </div>
           <div>
             <div className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-              Política de Segurança & Privilégios Institucionais
+              {tText('Política de Segurança & Privilégios Institucionais')}
             </div>
             <div className={theme === 'dark' ? 'text-slate-400 text-[11px]' : 'text-slate-500 text-[11px]'}>
-              Cada utilizador pode actualizar a sua foto de perfil, dados de contacto e palavra-passe. O Administrador Geral possui controlo total para ativar ou desativar utilizadores a qualquer momento.
+              {tText('Cada utilizador pode actualizar a sua foto de perfil, dados de contacto e palavra-passe. O Administrador Geral possui controlo total para ativar ou desativar utilizadores a qualquer momento.')}
             </div>
           </div>
         </div>
@@ -461,7 +464,7 @@ export function UtilizadoresModule({
               : 'bg-slate-50 border-slate-200 text-slate-700'
           }`}
         >
-          Sessão: <span className="text-emerald-500 font-bold">{currentUser.nome}</span> ({currentUser.funcao})
+          {tText('Sessão')}: <span className="text-emerald-500 font-bold">{currentUser.nome}</span> ({currentUser.funcao})
         </div>
       </div>
 
@@ -475,7 +478,7 @@ export function UtilizadoresModule({
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Pesquisar por nome, email, departamento..."
+            placeholder={tText('Pesquisar por nome, email, departamento...')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className={`w-full rounded-xl pl-9 pr-4 py-2 text-xs border focus:outline-none focus:border-blue-500 ${
@@ -489,7 +492,7 @@ export function UtilizadoresModule({
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
           <div className="flex items-center gap-2">
             <Filter className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-xs text-slate-500">Função:</span>
+            <span className="text-xs text-slate-500">{tText('Função')}:</span>
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
@@ -499,7 +502,7 @@ export function UtilizadoresModule({
                   : 'bg-slate-50 border-slate-200 text-slate-900'
               }`}
             >
-              <option value="TODOS">Todas as Funções</option>
+              <option value="TODOS">{tText('Todas as Funções')}</option>
               <option value="ADMIN_IMP">ADMIN_IMP</option>
               <option value="INSPECTOR">INSPECTOR</option>
               <option value="CAPITANIA">CAPITANIA</option>
@@ -509,7 +512,7 @@ export function UtilizadoresModule({
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-500">Estado:</span>
+            <span className="text-xs text-slate-500">{tText('Estado')}:</span>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -519,9 +522,9 @@ export function UtilizadoresModule({
                   : 'bg-slate-50 border-slate-200 text-slate-900'
               }`}
             >
-              <option value="TODOS">Todos os Estados</option>
-              <option value="Ativo">Activos</option>
-              <option value="Inativo">Inactivos</option>
+              <option value="TODOS">{tText('Todos os Estados')}</option>
+              <option value="Ativo">{tText('Activos')}</option>
+              <option value="Inativo">{tText('Inactivos')}</option>
             </select>
           </div>
         </div>
@@ -543,20 +546,20 @@ export function UtilizadoresModule({
               }`}
             >
               <tr>
-                <th className="py-3.5 px-4">Utilizador & Foto</th>
-                <th className="py-3.5 px-4">Contactos</th>
-                <th className="py-3.5 px-4">Papel / Perfil RBAC</th>
-                <th className="py-3.5 px-4">Departamento</th>
-                <th className="py-3.5 px-4">Estado da Conta</th>
-                <th className="py-3.5 px-4">Último Acesso</th>
-                <th className="py-3.5 px-4 text-right">Ações & Controlo</th>
+                <th className="py-3.5 px-4">{tText('Utilizador & Foto')}</th>
+                <th className="py-3.5 px-4">{tText('Contactos')}</th>
+                <th className="py-3.5 px-4">{tText('Papel / Perfil RBAC')}</th>
+                <th className="py-3.5 px-4">{tText('Departamento')}</th>
+                <th className="py-3.5 px-4">{tText('Estado da Conta')}</th>
+                <th className="py-3.5 px-4">{tText('Último Acesso')}</th>
+                <th className="py-3.5 px-4 text-right">{tText('Ações & Controlo')}</th>
               </tr>
             </thead>
             <tbody className={theme === 'dark' ? 'divide-y divide-slate-800/60' : 'divide-y divide-slate-100'}>
               {filteredUsers.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-8 text-center text-slate-500 text-xs">
-                    Nenhum utilizador encontrado para os filtros selecionados.
+                    {tText('Nenhum utilizador encontrado para os filtros selecionados.')}
                   </td>
                 </tr>
               ) : (
@@ -594,7 +597,7 @@ export function UtilizadoresModule({
                               className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 ${
                                 theme === 'dark' ? 'border-slate-900' : 'border-white'
                               } ${isUserActive ? 'bg-emerald-500' : 'bg-rose-500'}`}
-                              title={isUserActive ? 'Conta Activa' : 'Conta Inactiva'}
+                              title={isUserActive ? tText('Conta Activa') : tText('Conta Inactiva')}
                             />
                           </div>
 
@@ -603,7 +606,7 @@ export function UtilizadoresModule({
                               {u.nome}
                               {isCurrent && (
                                 <span className="text-[9px] bg-blue-500/20 text-blue-600 border border-blue-500/30 px-1.5 py-0.2 rounded font-mono font-bold">
-                                  Você
+                                  {tText('Você')}
                                 </span>
                               )}
                             </div>
@@ -671,7 +674,7 @@ export function UtilizadoresModule({
                               isUserActive ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'
                             }`}
                           />
-                          {u.status}
+                          {u.status === 'Ativo' ? tText('Ativo') : u.status === 'Inativo' ? tText('Inativo') : tText(u.status)}
                         </span>
                       </td>
 
@@ -690,10 +693,10 @@ export function UtilizadoresModule({
                                 ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700'
                                 : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
                             }`}
-                            title="Editar informações do utilizador"
+                            title={tText('Editar informações do utilizador')}
                           >
                             <Pencil className="w-3.5 h-3.5 text-blue-500" />
-                            Editar
+                            {tText('Editar')}
                           </button>
 
                           {isAdminGeral && (
@@ -706,12 +709,12 @@ export function UtilizadoresModule({
                               }`}
                               title={
                                 isUserActive
-                                  ? 'Desativar este utilizador no sistema'
-                                  : 'Ativar este utilizador no sistema'
+                                  ? tText('Desativar este utilizador no sistema')
+                                  : tText('Ativar este utilizador no sistema')
                               }
                             >
                               <Power className="w-3.5 h-3.5" />
-                              {isUserActive ? 'Desativar' : 'Ativar'}
+                              {isUserActive ? tText('Desativar') : tText('Ativar')}
                             </button>
                           )}
                         </div>
@@ -740,10 +743,10 @@ export function UtilizadoresModule({
                 </div>
                 <div>
                   <h3 className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                    Editar Perfil de Utilizador
+                    {tText('Editar Perfil de Utilizador')}
                   </h3>
                   <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Alteração de dados pessoais, foto de perfil, dados de contacto e credenciais
+                    {tText('Alteração de dados pessoais, foto de perfil, dados de contacto e credenciais')}
                   </p>
                 </div>
               </div>
@@ -765,7 +768,7 @@ export function UtilizadoresModule({
                 }`}
               >
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider font-mono">
-                  Foto de Perfil do Utilizador
+                  {tText('Foto de Perfil do Utilizador')}
                 </label>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -777,7 +780,7 @@ export function UtilizadoresModule({
                       }`}
                     >
                       {editForm.fotoUrl ? (
-                        <img src={editForm.fotoUrl} alt="Avatar Preview" className="w-full h-full object-cover" />
+                        <img src={editForm.fotoUrl} alt={tText('Pré-visualização do avatar')} className="w-full h-full object-cover" />
                       ) : (
                         <Camera className="w-8 h-8 text-slate-400" />
                       )}
@@ -789,7 +792,7 @@ export function UtilizadoresModule({
                     <div className="flex items-center gap-2">
                       <label className="cursor-pointer py-1.5 px-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg flex items-center gap-2 transition-colors">
                         <Upload className="w-3.5 h-3.5" />
-                        Carregar Ficheiro de Foto
+                        {tText('Carregar Ficheiro de Foto')}
                         <input
                           type="file"
                           accept="image/*"
@@ -797,7 +800,7 @@ export function UtilizadoresModule({
                           className="hidden"
                         />
                       </label>
-                      <span className="text-[11px] text-slate-500">ou escolha um dos avatares oficiais:</span>
+                      <span className="text-[11px] text-slate-500">{tText('ou escolha um dos avatares oficiais:')}</span>
                     </div>
 
                     {/* Presets */}
@@ -813,7 +816,7 @@ export function UtilizadoresModule({
                               : 'border-slate-300 opacity-60 hover:opacity-100'
                           }`}
                         >
-                          <img src={url} alt={`Preset ${idx}`} className="w-full h-full object-cover" />
+                          <img src={url} alt={`${tText('Predefinição')} ${idx}`} className="w-full h-full object-cover" />
                         </button>
                       ))}
                     </div>
@@ -821,7 +824,7 @@ export function UtilizadoresModule({
                     {/* Custom Image URL input */}
                     <input
                       type="text"
-                      placeholder="Ou cole a URL da imagem aqui (https://...)"
+                      placeholder={tText('Ou cole a URL da imagem aqui (https://...)')}
                       value={editForm.fotoUrl}
                       onChange={(e) => setEditForm({ ...editForm, fotoUrl: e.target.value })}
                       className={`w-full rounded-lg px-3 py-1.5 text-xs font-mono border focus:outline-none focus:border-blue-500 ${
@@ -837,7 +840,7 @@ export function UtilizadoresModule({
               {/* Editable Fields Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Primeiro Nome</label>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">{tText('Primeiro Nome')}</label>
                   <input
                     type="text"
                     required
@@ -850,7 +853,7 @@ export function UtilizadoresModule({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Sobrenome / Apelido</label>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">{tText('Sobrenome / Apelido')}</label>
                   <input
                     type="text"
                     required
@@ -863,7 +866,7 @@ export function UtilizadoresModule({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Sexo / Género</label>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">{tText('Sexo / Género')}</label>
                   <select
                     value={editForm.gender}
                     onChange={(e) => setEditForm({ ...editForm, gender: e.target.value as any })}
@@ -871,18 +874,18 @@ export function UtilizadoresModule({
                       theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                     }`}
                   >
-                    <option value="M">Masculino (M)</option>
-                    <option value="F">Feminino (F)</option>
-                    <option value="Outro">Outro</option>
+                    <option value="M">{tText('Masculino (M)')}</option>
+                    <option value="F">{tText('Feminino (F)')}</option>
+                    <option value="Outro">{tText('Outro')}</option>
                   </select>
                 </div>
 
                 <div>
                   <div className="flex justify-between items-center mb-1">
-                    <label className="text-xs font-medium text-slate-500">Data de Nascimento</label>
+                    <label className="text-xs font-medium text-slate-500">{tText('Data de Nascimento')}</label>
                     {calculateAge(editForm.birthDate) !== null && (
                       <span className="text-[11px] font-mono text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                        {calculateAge(editForm.birthDate)} anos
+                        {calculateAge(editForm.birthDate)} {tText('anos')}
                       </span>
                     )}
                   </div>
@@ -899,10 +902,10 @@ export function UtilizadoresModule({
 
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-medium text-slate-500">Email Corporativo</label>
+                    <label className="text-xs font-medium text-slate-500">{tText('Email Corporativo')}</label>
                     {!isAdminGeral && (
                       <span className="text-[10px] text-amber-600 flex items-center gap-1 font-mono">
-                        <Lock className="w-3 h-3" /> Bloqueado (SoD)
+                        <Lock className="w-3 h-3" /> {tText('Bloqueado (SoD)')}
                       </span>
                     )}
                   </div>
@@ -925,7 +928,7 @@ export function UtilizadoresModule({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Palavra-passe (Senha)</label>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">{tText('Palavra-passe (Senha)')}</label>
                   <div className="relative">
                     <input
                       type={showPassword ? 'text' : 'password'}
@@ -940,6 +943,7 @@ export function UtilizadoresModule({
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      title={showPassword ? tText('Ocultar palavra-passe') : tText('Mostrar palavra-passe')}
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -947,7 +951,7 @@ export function UtilizadoresModule({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Telefone de Contacto</label>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">{tText('Telefone de Contacto')}</label>
                   <input
                     type="text"
                     value={editForm.telefone}
@@ -961,10 +965,10 @@ export function UtilizadoresModule({
 
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-medium text-slate-500">Cargo / Função RBAC</label>
+                    <label className="text-xs font-medium text-slate-500">{tText('Cargo / Função RBAC')}</label>
                     {!isAdminGeral && (
                       <span className="text-[10px] text-amber-600 flex items-center gap-1 font-mono">
-                        <Lock className="w-3 h-3" /> Bloqueado (SoD)
+                        <Lock className="w-3 h-3" /> {tText('Bloqueado (SoD)')}
                       </span>
                     )}
                   </div>
@@ -976,12 +980,12 @@ export function UtilizadoresModule({
                         theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                       }`}
                     >
-                      <option value="superadmin">SuperAdmin (Desenvolvedor / IT)</option>
-                      <option value="admin">Admin (Diretor Geral / PCA)</option>
-                      <option value="faturacao">Faturação (Tarifas Portuárias)</option>
-                      <option value="caixa">Caixa & Tesouraria Central</option>
-                      <option value="INSPECTOR">Inspector Marítimo</option>
-                      <option value="CAPITANIA">Capitania dos Portos</option>
+                      <option value="superadmin">{tText('SuperAdmin (Desenvolvedor / IT)')}</option>
+                      <option value="admin">{tText('Admin (Diretor Geral / PCA)')}</option>
+                      <option value="faturacao">{tText('Faturação (Tarifas Portuárias)')}</option>
+                      <option value="caixa">{tText('Caixa & Tesouraria Central')}</option>
+                      <option value="INSPECTOR">{tText('Inspector Marítimo')}</option>
+                      <option value="CAPITANIA">{tText('Capitania dos Portos')}</option>
                     </select>
                   ) : (
                     <input
@@ -996,7 +1000,7 @@ export function UtilizadoresModule({
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Departamento Institucional</label>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">{tText('Departamento Institucional')}</label>
                   <input
                     type="text"
                     required
@@ -1017,10 +1021,10 @@ export function UtilizadoresModule({
               >
                 <div className="flex items-center gap-2 text-amber-600 font-semibold text-xs">
                   <Lock className="w-3.5 h-3.5" />
-                  Segregação de Funções (SoD) & Segurança de Perfil:
+                  {tText('Segregação de Funções (SoD) & Segurança de Perfil:')}
                 </div>
                 <p className={`text-[11px] leading-relaxed ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                  Pode alterar a sua foto de perfil (redimensionada para máx 400px), nome, sobrenome, sexo, data de nascimento e palavra-passe. O Email e o Cargo RBAC são protegidos contra auto-elevação de privilégios.
+                  {tText('Pode alterar a sua foto de perfil (redimensionada para máx 400px), nome, sobrenome, sexo, data de nascimento e palavra-passe. O Email e o Cargo RBAC são protegidos contra auto-elevação de privilégios.')}
                 </p>
               </div>
 
@@ -1033,14 +1037,14 @@ export function UtilizadoresModule({
                     theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                   }`}
                 >
-                  Cancelar
+                  {tText('Cancelar')}
                 </button>
                 <button
                   type="submit"
                   className="py-2.5 px-5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 transition-colors shadow-lg shadow-blue-600/20"
                 >
                   <CheckCircle className="w-4 h-4" />
-                  Guardar Alterações
+                  {tText('Guardar Alterações')}
                 </button>
               </div>
             </form>
@@ -1063,10 +1067,10 @@ export function UtilizadoresModule({
                 </div>
                 <div>
                   <h3 className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                    Criar Novo Utilizador
+                    {tText('Criar Novo Utilizador')}
                   </h3>
                   <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Registo institucional de nova conta no sistema marítimo IMP
+                    {tText('Registo institucional de nova conta no sistema marítimo IMP')}
                   </p>
                 </div>
               </div>
@@ -1088,12 +1092,12 @@ export function UtilizadoresModule({
                 }`}
               >
                 <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider font-mono">
-                  Foto do Novo Utilizador
+                  {tText('Foto do Novo Utilizador')}
                 </label>
 
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 rounded-xl bg-slate-800 border-2 border-blue-500/50 overflow-hidden shrink-0">
-                    <img src={createForm.fotoUrl} alt="New Avatar" className="w-full h-full object-cover" />
+                    <img src={createForm.fotoUrl} alt={tText('Novo avatar')} className="w-full h-full object-cover" />
                   </div>
 
                   <div className="space-y-2 flex-1">
@@ -1106,7 +1110,7 @@ export function UtilizadoresModule({
                         }`}
                       >
                         <Upload className="w-3.5 h-3.5 text-blue-500" />
-                        Upload
+                        {tText('Carregar')}
                         <input
                           type="file"
                           accept="image/*"
@@ -1114,7 +1118,7 @@ export function UtilizadoresModule({
                           className="hidden"
                         />
                       </label>
-                      <span className="text-[11px] text-slate-500">ou selecione um avatar preset:</span>
+                      <span className="text-[11px] text-slate-500">{tText('ou selecione um avatar predefinido:')}</span>
                     </div>
 
                     <div className="flex items-center gap-1.5 overflow-x-auto py-1">
@@ -1129,7 +1133,7 @@ export function UtilizadoresModule({
                               : 'border-slate-300 opacity-60 hover:opacity-100'
                           }`}
                         >
-                          <img src={url} alt={`Preset ${idx}`} className="w-full h-full object-cover" />
+                          <img src={url} alt={`${tText('Predefinição')} ${idx}`} className="w-full h-full object-cover" />
                         </button>
                       ))}
                     </div>
@@ -1140,11 +1144,11 @@ export function UtilizadoresModule({
               {/* Form Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Nome Completo *</label>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">{tText('Nome Completo')} *</label>
                   <input
                     type="text"
                     required
-                    placeholder="Ex: Dr. Ansumane Mane"
+                    placeholder={tText('Ex: Dr. Ansumane Mane')}
                     value={createForm.nome}
                     onChange={(e) => setCreateForm({ ...createForm, nome: e.target.value })}
                     className={`w-full rounded-xl px-3.5 py-2 text-xs border focus:outline-none focus:border-blue-500 ${
@@ -1154,7 +1158,7 @@ export function UtilizadoresModule({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Email Corporativo *</label>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">{tText('Email Corporativo')} *</label>
                   <input
                     type="email"
                     required
@@ -1168,7 +1172,7 @@ export function UtilizadoresModule({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Palavra-passe Inicial *</label>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">{tText('Palavra-passe Inicial')} *</label>
                   <input
                     type="password"
                     required
@@ -1182,7 +1186,7 @@ export function UtilizadoresModule({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Função / Perfil RBAC *</label>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">{tText('Função / Perfil RBAC')} *</label>
                   <select
                     value={createForm.funcao}
                     onChange={(e) => setCreateForm({ ...createForm, funcao: e.target.value as UserRole })}
@@ -1190,19 +1194,19 @@ export function UtilizadoresModule({
                       theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                     }`}
                   >
-                    <option value="INSPECTOR">INSPECTOR - Inspecção Marítima</option>
-                    <option value="CAPITANIA">CAPITANIA - Capitania dos Portos</option>
-                    <option value="TESOURARIA">TESOURARIA - Finanças e Facturação</option>
-                    <option value="AGENTE_MARITIMO">AGENTE_MARITIMO - Agências de Navegação</option>
-                    <option value="ADMIN_IMP">ADMIN_IMP - Administrador Geral</option>
+                    <option value="INSPECTOR">{tText('INSPECTOR - Inspecção Marítima')}</option>
+                    <option value="CAPITANIA">{tText('CAPITANIA - Capitania dos Portos')}</option>
+                    <option value="TESOURARIA">{tText('TESOURARIA - Finanças e Facturação')}</option>
+                    <option value="AGENTE_MARITIMO">{tText('AGENTE_MARITIMO - Agências de Navegação')}</option>
+                    <option value="ADMIN_IMP">{tText('ADMIN_IMP - Administrador Geral')}</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Cargo / Posição</label>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">{tText('Cargo / Posição')}</label>
                   <input
                     type="text"
-                    placeholder="Ex: Tabela Táctica / Inspector"
+                    placeholder={tText('Ex: Tabela Táctica / Inspector')}
                     value={createForm.cargo}
                     onChange={(e) => setCreateForm({ ...createForm, cargo: e.target.value })}
                     className={`w-full rounded-xl px-3.5 py-2 text-xs border focus:outline-none focus:border-blue-500 ${
@@ -1212,7 +1216,7 @@ export function UtilizadoresModule({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Telefone</label>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">{tText('Telefone')}</label>
                   <input
                     type="text"
                     placeholder="+245 95 000 0000"
@@ -1234,14 +1238,14 @@ export function UtilizadoresModule({
                     theme === 'dark' ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                   }`}
                 >
-                  Cancelar
+                  {tText('Cancelar')}
                 </button>
                 <button
                   type="submit"
                   className="py-2.5 px-5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 transition-colors shadow-lg shadow-blue-600/20"
                 >
                   <UserPlus className="w-4 h-4" />
-                  Cadastrar Utilizador
+                  {tText('Cadastrar Utilizador')}
                 </button>
               </div>
             </form>
