@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" font-family="Segoe UI, Arial">
+  <rect width="900" height="300" fill="#f8fafc"/>
+  <text x="450" y="30" text-anchor="middle" font-size="17" font-weight="800" fill="#082B59">Segregação de Funções (SoD)</text>
+  <text x="450" y="50" text-anchor="middle" font-size="11" fill="#64748b">Nenhum perfil tem funções cruzadas indevidas — controlado pelo código (Sidebar + App.tsx)</text>
+
+  <rect x="30" y="75" width="260" height="165" rx="14" fill="#fef3c7" stroke="#b45309" stroke-width="2.5"/>
+  <text x="160" y="110" text-anchor="middle" font-weight="800" font-size="16" fill="#b45309">FATURAÇÃO</text>
+  <text x="160" y="138" text-anchor="middle" font-size="11" fill="#92400e">Emite e gere faturas</text>
+  <text x="160" y="158" text-anchor="middle" font-size="11" fill="#92400e">Rascunho → Confirmada → Paga</text>
+  <text x="160" y="178" text-anchor="middle" font-size="11" fill="#92400e">Consulta tarifário / agências</text>
+  <text x="160" y="205" text-anchor="middle" font-size="11" font-weight="800" fill="#b91c1c">✘ NÃO toca em Caixa</text>
+
+  <rect x="330" y="75" width="240" height="165" rx="14" fill="#d1fae5" stroke="#047857" stroke-width="2.5"/>
+  <text x="450" y="110" text-anchor="middle" font-weight="800" font-size="16" fill="#047857">CAIXA</text>
+  <text x="450" y="138" text-anchor="middle" font-size="11" fill="#065f46">Recebe e regista recibos</text>
+  <text x="450" y="158" text-anchor="middle" font-size="11" fill="#065f46">Movimentos caixa / balancetes</text>
+  <text x="450" y="178" text-anchor="middle" font-size="11" fill="#065f46">Imprime recibos oficiais</text>
+  <text x="450" y="205" text-anchor="middle" font-size="11" font-weight="800" fill="#b91c1c">✘ NÃO emite Faturas</text>
+
+  <rect x="610" y="75" width="260" height="165" rx="14" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2.5"/>
+  <text x="740" y="110" text-anchor="middle" font-weight="800" font-size="16" fill="#1d4ed8">ADMINISTRAÇÃO</text>
+  <text x="740" y="138" text-anchor="middle" font-size="11" fill="#1e3a8a">SuperAdmin (tudo + Auditoria)</text>
+  <text x="740" y="158" text-anchor="middle" font-size="11" fill="#1e3a8a">Admin / PCA (negócio)</text>
+  <text x="740" y="178" text-anchor="middle" font-size="11" fill="#1e3a8a">Configuração, Utilizadores</text>
+  <text x="740" y="205" text-anchor="middle" font-size="11" font-weight="800" fill="#047857">✔ Gestão &amp; Controlo</text>
+</svg>

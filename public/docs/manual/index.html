@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Manual do Sistema — IMP / NHOMINCA</title>
+<style>
+  :root{--blue:#082B59;--blue2:#0f3d7a;--accent:#f59e0b;--bg:#f8fafc;--ink:#0f172a;--muted:#64748b;--line:#e2e8f0}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;font-size:14px}
+  header.hero{background:linear-gradient(135deg,#051E3E 0%,#082B59 55%,#0f3d7a 100%);color:#fff;padding:36px 28px 28px}
+  header.hero h1{margin:0 0 6px;font-size:26px;letter-spacing:-.5px}
+  header.hero p{margin:4px 0;color:#bfdbfe;font-size:13px}
+  header.hero .badge{display:inline-block;background:var(--accent);color:#111;font-weight:800;padding:3px 12px;border-radius:999px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+  nav.toc{position:sticky;top:0;z-index:5;background:#ffffffd9;backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:8px 28px;display:flex;gap:14px;flex-wrap:wrap;font-size:12px;font-weight:700}
+  nav.toc a{color:var(--blue);text-decoration:none}
+  main{max-width:1100px;margin:0 auto;padding:24px 28px 80px}
+  section{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 24px;margin:18px 0;box-shadow:0 1px 2px rgba(2,6,23,.05)}
+  h2{color:var(--blue);border-bottom:3px solid var(--accent);display:inline-block;padding-bottom:6px;font-size:19px;margin-top:6px}
+  h3{color:#0f3d7a;font-size:15px;margin-bottom:6px}
+  table{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:#eff6ff;color:var(--blue);text-transform:uppercase;font-size:11px;letter-spacing:.05em}
+  tr:nth-child(even) td{background:#fafcff}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.06em}
+  .pill.superadmin{background:#ede9fe;color:#6d28d9}.pill.admin{background:#dbeafe;color:#1d4ed8}.pill.faturacao{background:#fef3c7;color:#b45309}.pill.caixa{background:#d1fae5;color:#047857}.pill.ins{background:#fee2e2;color:#b91c1c}.pill.cap{background:#e0e7ff;color:#3730a3}
+  .ok{color:#047857;font-weight:800}.no{color:#b91c1c;font-weight:800}.part{color:#b45309;font-weight:800}
+  figure{margin:14px 0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#f1f5f9}
+  figure img{width:100%;display:block}
+  figcaption{padding:8px 12px;font-size:11px;color:var(--muted);background:#fff;border-top:1px solid var(--line)}
+  code{background:#0f172a;color:#e2e8f0;border-radius:6px;padding:2px 6px;font-size:11px}
+  .note{background:#fffbeb;border:1px solid #fde68a;border-left:5px solid var(--accent);padding:10px 14px;border-radius:10px;font-size:12px;margin:12px 0}
+  .tag{display:inline-block;background:#e2e8f0;border-radius:6px;padding:1px 7px;font-size:10px;font-weight:700;color:#334155}
+  footer{text-align:center;color:var(--muted);font-size:11px;padding:20px}
+  @media print{nav.toc{display:none}section{break-inside:avoid;box-shadow:none}body{background:#fff}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <span class="badge">Documento Oficial</span>
+  <h1>IMP / NHOMINCA — Sistema de Gestão Marítima e Financeira</h1>
+  <p>Manual funcional do sistema • Perfis, contas, permissões e módulos</p>
+  <p>Instituto Marítimo Portuário da Guiné-Bissau (IMP) • Versão NHOMINCA v3.0.0-IMP • Nov. 2026</p>
+</header>
+<nav class="toc">
+  <a href="#visao">1. Visão Geral</a>
+  <a href="#stack">2. Arquitetura</a>
+  <a href="#contas">3. Contas &amp; Perfis</a>
+  <a href="#permissoes">4. Matriz de Permissões</a>
+  <a href="#modulos">5. Módulos</a>
+  <a href="#fluxos">6. Fluxos Principais</a>
+  <a href="#seguranca">7. Segurança &amp; SoD</a>
+  <a href="#dados">8. Dados &amp; Persistência</a>
+  <a href="#imagens">9. Ecrãs</a>
+</nav>
+<main>
+
+<section id="visao">
+  <h2>1. Visão Geral</h2>
+  <p>O <strong>NHOMINCA</strong> é o sistema integrado do <strong>Instituto Marítimo Portuário (IMP)</strong> para gestão de autoridade portuária: faturação oficial de taxas e tarifas portuárias, tesouraria e controlo de caixa, recibos de quitação, registos de movimentos de caixa, relatórios oficiais (fluxo de caixa, tráfego de navios, balancetes, auditorias PSC), embarcações, agências marítimas, armadores, atracações/escalas, inspecções, certificados, licenças, multas, auditoria criptográfica (cadeia SHA-256) e gestão de utilizadores com <strong>Segregação de Funções (SoD)</strong>.</p>
+  <p>Cada utilizador vê apenas o que o seu perfil permite. A navegação e as ações são condicionadas pelo <em>cargo/perfil</em> (`role`/`funcao`): <strong>superadmin</strong>, <strong>admin</strong>, <strong>faturacao</strong>, <strong>caixa</strong>, <strong>INSPECTOR</strong> e <strong>CAPITANIA</strong>.</p>
+</section>
+
+<section id="stack">
+  <h2>2. Arquitetura &amp; Tecnologias</h2>
+  <table>
+    <thead><tr><th>Camada</th><th>Tecnologia</th></tr></thead>
+    <tbody>
+      <tr><td>Frontend</td><td>React 19 + Vite + TypeScript + Tailwind (temas claro/escuro, multiidioma PT/FR/EN)</td></tr>
+      <tr><td>Servidor</td><td>Node.js + Express + TypeScript (`server.ts`), serve a API e a SPA</td></tr>
+      <tr><td>Base de Dados</td><td>PostgreSQL (Neon/Supabase) via Drizzle ORM (`src/db/schema.ts`)</td></tr>
+      <tr><td>Persistência</td><td>Variável `DATABASE_URL` → liga à base de dados real; sem ela, o sistema usa dados de demonstração (mock em `src/mock/data.ts`) sem persistência partilhada</td></tr>
+      <tr><td>Autenticação</td><td>Login por credenciais do utilizador; sessão mantida no navegador (refresh não desloga); `/api/auth/me`, tokens no servidor</td></tr>
+      <tr><td>Hospedagem</td><td>Vercel (frontend/servidor) + Neon PostgreSQL (dados) — ou Render via `render.yaml`</td></tr>
+    </tbody>
+  </table>
+  <figure><img src="images/arquitetura.svg" alt="Arquitetura" /><figcaption>Fluxo técnico: navegador (React) → servidor Express na Vercel → Neon PostgreSQL via DATABASE_URL.</figcaption></figure>
+</section>
+
+<section id="contas">
+  <h2>3. Contas &amp; Perfis do Sistema</h2>
+  <p>Contas iniciais (modo de demonstração / seed). Podem ser geridas em <strong>Utilizadores &amp; Perfis</strong> (só admins).</p>
+  <table>
+    <thead><tr><th>Perfil</th><th>Nome / Utilizador</th><th>Email</th><th>Palavra-passe (demo)</th><th>Cargo oficial</th><th>Departamento</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill superadmin">SUPERADMIN</span></td><td>Eng. SuperAdministrador</td><td>superadmin@imp.gw</td><td>superadmin123</td><td>Engenheiro de Sistemas / Desenvolvedor</td><td>Tecnologias de Informação &amp; Auditoria</td></tr>
+      <tr><td><span class="pill admin">ADMIN / PCA</span></td><td>Dr. Gualdino Afonso Té</td><td>admin@imp.gw</td><td>admin123</td><td>Presidente do Conselho (PCA / Admin)</td><td>Direcção Geral (IMP)</td></tr>
+      <tr><td><span class="pill faturacao">FATURAÇÃO</span></td><td>Sr. António Okica de Sá</td><td>faturacao@imp.gw</td><td>faturacao123</td><td>Operador de Faturação</td><td>Secção de Faturação &amp; Tarifas Portuárias</td></tr>
+      <tr><td><span class="pill caixa">CAIXA</span></td><td>Dr. Álvaro Luís Da Silva</td><td>caixa@imp.gw</td><td>caixa123</td><td>Operador de Caixa / Tesouraria</td><td>Tesouraria &amp; Controlo de Valores</td></tr>
+      <tr><td><span class="pill ins">INSPECTOR</span></td><td>Eng. Adama Baldé</td><td>adama.balde@imp.gb</td><td>InspectorPass2026!</td><td>Inspector Chefe de Segurança</td><td>Inspecção e Segurança Marítima</td></tr>
+      <tr><td><span class="pill cap">CAPITANIA</span></td><td>Capitão Bacar Camará</td><td>bacar.camara@imp.gb</td><td>Capitania2026!</td><td>Capitão do Porto de Bissau</td><td>Capitania dos Portos</td></tr>
+    </tbody>
+  </table>
+  <div class="note"><strong>Nota:</strong> as palavras-passe acima são as de demonstração (mock/seed). Em produção, a base de dados real deve ter palavras-passe alteradas e o acesso `/api` protegido (autenticação de API ativa por defeito em produção).</div>
+
+  <h3>3.1 O que cada conta pode fazer</h3>
+  <table>
+    <thead><tr><th>Perfil</th><th>Resumo das funções</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill superadmin">SUPERADMIN</span></td><td><strong>Acesso total.</strong> Tudo o que o admin faz + <strong>Auditoria Criptográfica</strong> (cadeia SHA-256 completa), gestão técnica e configuração avançada. É a única conta com acesso ao módulo de Auditoria.</td></tr>
+      <tr><td><span class="pill admin">ADMIN / PCA</span></td><td><strong>Gestão completa de negócio.</strong> Dashboard global, Faturação, Tesouraria, Receitas/Rubricas, Embarcações, Agências, Armadores, Atracações, Inspecções, Certificados, Licenças, Multas, <strong>Relatórios &amp; Estatísticas</strong>, <strong>Utilizadores &amp; Perfis</strong> (criar/editar operadores, atribuir cargos/perfis), <strong>Configuração</strong>. <u>Não</u> acede à Auditoria Criptográfica (exclusiva do superadmin).</td></tr>
+      <tr><td><span class="pill faturacao">FATURAÇÃO</span></td><td>Caixa separada da tesouraria (SoD). Criar/editar/emitir <strong>Faturas</strong> oficiais (rascunho → confirmada → parcial/paga → anulada com justificação), consultar <strong>Tarifário Oficial</strong>, consultar Agências e Navios (consulta), <strong>Relatórios/Extratos de Faturação</strong>. <u>Nunca</u> vê/movimentos de caixa, recibos de quitação, saídas de caixa, auditoria ou configuração.</td></tr>
+      <tr><td><span class="pill caixa">CAIXA</span></td><td>Operador de tesouraria. Registar <strong>Recibos</strong> (pagamentos totais/parciais de faturas), gerir <strong>Movimentos de Caixa</strong> (entradas/saídas com justificação e autorização), balancetes e consultas, <strong>Relatórios/Balancetes</strong> de tesouraria. <u>Nunca</u> emite/edita faturas, nem auditoria/configuração.</td></tr>
+      <tr><td><span class="pill ins">INSPECTOR</span></td><td>Perfil operacional/consulta amplo: Dashboard, Faturação, Tesouraria, Rubricas, Navios, Agências, Armadores, Atracações. <u>Sem</u> áreas de administração (utilizadores, relatórios, auditoria, configuração, inspecções/certificados/licenças/multas).</td></tr>
+      <tr><td><span class="pill cap">CAPITANIA</span></td><td>Perfil operacional da Capitania: Dashboard, Faturação, Tesouraria, Rubricas, Navios, Agências, Armadores, Atracações. <u>Sem</u> áreas de administração/regulamentação.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="permissoes">
+  <h2>4. Matriz de Permissões (o que pode ver / fazer)</h2>
+  <p>Legenda: <span class="ok">✔</span> completo &nbsp; <span class="part">◐</span> consulta/limitado &nbsp; <span class="no">✘</span> sem acesso</p>
+  <table>
+    <thead><tr><th>Módulo / Área</th><th>Superadmin</th><th>Admin (PCA)</th><th>Faturação</th><th>Caixa</th><th>Inspector / Capitania</th></tr></thead>
+    <tbody>
+      <tr><td>Dashboard / Painel geral</td><td class="ok">✔</td><td class="ok">✔</td><td class="ok">✔ (Painel Faturação)</td><td class="ok">✔ (Painel de Caixa)</td><td class="ok">✔</td></tr>
+      <tr><td>Faturação (criar/editar/emitir/anular faturas)</td><td class="ok">✔</td><td class="ok">✔</td><td class="ok">✔</td><td class="no">✘</td><td class="part">◐</td></tr>
+      <tr><td>Tesouraria / Caixa (recibos, entradas/saídas)</td><td class="ok">✔</td><td class="ok">✔</td><td class="no">✘</td><td class="ok">✔</td><td class="part">◐</td></tr>
+      <tr><td>Receitas &amp; Rubricas / Tarifário Oficial</td><td class="ok">✔</td><td class="ok">✔</td><td class="part">◐ (consultar tarifas)</td><td class="part">◐</td><td class="part">◐</td></tr>
+      <tr><td>Embarcações / Navios</td><td class="ok">✔</td><td class="ok">✔</td><td class="part">◐ Consulta</td><td class="part">◐</td><td class="ok">✔</td></tr>
+      <tr><td>Agências Marítimas</td><td class="ok">✔</td><td class="ok">✔</td><td class="part">◐ Consulta</td><td class="part">◐ Consulta</td><td class="ok">✔</td></tr>
+      <tr><td>Armadores</td><td class="ok">✔</td><td class="ok">✔</td><td class="no">✘</td><td class="no">✘</td><td class="ok">✔</td></tr>
+      <tr><td>Portos / Terminais</td><td class="ok">✔</td><td class="ok">✔</td><td class="no">✘</td><td class="no">✘</td><td class="ok">✔</td></tr>
+      <tr><td>Atracações &amp; Escalas</td><td class="ok">✔</td><td class="ok">✔</td><td class="no">✘</td><td class="no">✘</td><td class="ok">✔</td></tr>
+      <tr><td>Inspecções Marítimas (PSC)</td><td class="ok">✔</td><td class="ok">✔</td><td class="no">✘</td><td class="no">✘</td><td class="no">✘</td></tr>
+      <tr><td>Certificados Marítimos</td><td class="ok">✔</td><td class="ok">✔</td><td class="no">✘</td><td class="no">✘</td><td class="no">✘</td></tr>
+      <tr><td>Licenças de Navegação</td><td class="ok">✔</td><td class="ok">✔</td><td class="no">✘</td><td class="no">✘</td><td class="no">✘</td></tr>
+      <tr><td>Multas &amp; Infrações</td><td class="ok">✔</td><td class="ok">✔</td><td class="no">✘</td><td class="no">✘</td><td class="no">✘</td></tr>
+      <tr><td>Relatórios &amp; Estatísticas (fluxo de caixa, tráfego, balancetes, PSC)</td><td class="ok">✔</td><td class="ok">✔</td><td class="part">◐ Extratos de faturação</td><td class="part">◐ Balancetes</td><td class="no">✘</td></tr>
+      <tr><td>Utilizadores &amp; Perfis (criar/editar contas, cargos, permissões)</td><td class="ok">✔</td><td class="ok">✔</td><td class="no">✘</td><td class="no">✘</td><td class="no">✘</td></tr>
+      <tr><td>Configuração do Sistema</td><td class="ok">✔</td><td class="ok">✔</td><td class="no">✘</td><td class="no">✘</td><td class="no">✘</td></tr>
+      <tr><td>Auditoria Criptográfica (cadeia SHA-256)</td><td class="ok">✔</td><td class="no">✘</td><td class="no">✘</td><td class="no">✘</td><td class="no">✘</td></tr>
+      <tr><td>Imprimir (faturas, recibos, balancetes, extratos)</td><td class="ok">✔</td><td class="ok">✔</td><td class="ok">✔ (faturas)</td><td class="ok">✔ (recibos/balancetes)</td><td class="part">◐</td></tr>
+      <tr><td>Exportar relatórios (CSV/PDF)</td><td class="ok">✔</td><td class="ok">✔</td><td class="part">◐</td><td class="part">◐</td><td class="no">✘</td></tr>
+      <tr><td>Meu Perfil (foto, nome, email, senha, sexo)</td><td class="ok">✔</td><td class="ok">✔</td><td class="ok">✔</td><td class="ok">✔</td><td class="ok">✔</td></tr>
+    </tbody>
+  </table>
+  <p class="tag">SoD = Segregação de Funções: Faturação não toca em Caixa; Caixa não emite Faturas; ninguém tem funções cruzadas indevidas.</p>
+</section>
+
+<section id="modulos">
+  <h2>5. Catálogo de Módulos</h2>
+  <ol>
+    <li><strong>Dashboard / Painel Geral</strong> — visão operacional: faturação do período, tesouraria, atividade, atalhos (“Nova Fatura”, “Emitir Fatura”).</li>
+    <li><strong>Minha Sessão &amp; Perfil</strong> — ver/editar <em>foto, nome completo, email, senha, sexo</em>; <em>cargo/posto e perfil são atribuídos pelo ADMIN</em> (só leitura). Mostrar <em>último acesso ao sistema</em>. Sessão mantida com refresh/atualização.</li>
+    <li><strong>Utilizadores &amp; Perfis</strong> (admin) — criar/editar operadores, atribuir cargo, perfil (funcao/role), departamento, estado; conciliar permissões SoD.</li>
+    <li><strong>Faturação &amp; Tarifas</strong> — lista de faturas IMP; estados: <em>rascunho → confirmada → parcial (amortização) → paga → anulada</em> (anulada exige justificação e é auditada). Emissão de fatura oficial imprimível (A4) com QR/verificação; saldo pago/pendente calculado automaticamente.</li>
+    <li><strong>Caixa &amp; Tesouraria</strong> — recibos (quitação total/parcial de fatura), movimentos de caixa (entradas/saídas), saídas com documento comprovativo, beneficiário, autorização e justificação; balancete diário; impressão de recibo A4/duplo.</li>
+    <li><strong>Receitas &amp; Rubricas (Tarifário Oficial)</strong> — tabela oficial de taxas portuárias IMP (pilotagem, cais/atracação, rebocadores, faróis, licenças, inspecções, multas…).</li>
+    <li><strong>Embarcações</strong> — registo de navios (IMO, tonelagem, armador, agência, certificações).</li>
+    <li><strong>Agências Marítimas</strong> — registo de agentes (NIF, licença, representante, contactos).</li>
+    <li><strong>Armadores</strong> — registo de armadores/proprietários (frota, país, tipo de entidade).</li>
+    <li><strong>Portos &amp; Terminais</strong> — portos, cais, calados e capacidades.</li>
+    <li><strong>Atracações &amp; Escalas</strong> — escalas, cais designados, serviços solicitados, manifesto de carga.</li>
+    <li><strong>Inspecções Marítimas</strong> — vistorias PSC (Segurança, MARPOL), resultados Aprovado/Retido, validade.</li>
+    <li><strong>Certificados</strong> — certificados de navegabilidade, lotação, etc.</li>
+    <li><strong>Licenças de Navegação</strong> — licenças de pesca/cabotagem, validade e estado.</li>
+    <li><strong>Multas &amp; Infrações</strong> — autos de infração com valor e estado.</li>
+    <li><strong>Relatórios &amp; Estatísticas</strong> — Fluxo de Caixa Mensal (com anos anteriores), Tráfego de Navios (filtros), Auditoria de Segurança &amp; Vistorias PSC, Balancete Financeiro &amp; Arrecadação de Taxas IMP; filtros por período/ano/estado; exportação CSV/PDF; impressão oficial.</li>
+    <li><strong>Auditoria Criptográfica</strong> (superadmin) — cadeia imutável de logs de ações (emitir fatura, liquidar, saída de caixa…) encadeada por SHA-256; verificação de integridade.</li>
+    <li><strong>Configuração</strong> (admin) — parâmetros do sistema e dados institucionais.</li>
+  </ol>
+</section>
+
+<section id="fluxos">
+  <h2>6. Fluxos Principais</h2>
+  <h3>6.1 Login &amp; sessão</h3>
+  <ol>
+    <li>Ecrã de login com identificação IMP; autenticação por email + palavra-passe.</li>
+    <li>Ao entrar, o sistema restaura a sessão e o módulo ativo ao atualizar a página (refresh não desloga).</li>
+    <li>“Terminar sessão” no menu do perfil (canto superior direito).</li>
+    <li>Menu do perfil → <strong>Meu Perfil</strong> / <strong>Email de contacto</strong> / <strong>Terminar sessão</strong>.</li>
+  </ol>
+  <h3>6.2 Fatura (Faturação)</h3>
+  <ol>
+    <li>Dashboard → atalho <strong>“Nova Fatura”</strong> → formulário “Emitir Fatura”.</li>
+    <li>Preencher cliente/agência, navio, tipo, tonelagem e linhas de serviço (do tarifário). Total e saldo pendente calculados automaticamente.</li>
+    <li>Estado: <em>Rascunho</em> → <em>Confirmada</em> (impressa/entregue) → após recibos: <em>Amortização Parcial</em> / <em>Totalmente Paga</em>. Anulação exige justificação (fica auditada).</li>
+  </ol>
+  <h3>6.3 Recibo (Caixa)</h3>
+  <ol>
+    <li>Tesouraria → selecionar fatura → <em>Registar Recebimento</em> (total ou parcial) indicando banco e talão.</li>
+    <li>Gera recibo oficial nº REC-2026-XXXX, atualiza saldo da fatura e movimentos de caixa; imprimível A4/duplo.</li>
+  </ol>
+  <h3>6.4 Movimento de saída (Caixa)</h3>
+  <ol>
+    <li>Tesouraria → “Novo Movimento” tipo <strong>Saída</strong>.</li>
+    <li>Obrigatório: descrição, valor, categoria, beneficiário, documento comprovativo (ref., ex.: FAT-PETRO-…), autorizado por e justificação detalhada.</li>
+    <li>Saindo para fora: só com autorização válida (Direção Geral / SuperAdministração); o evento entra na cadeia de auditoria.</li>
+  </ol>
+  <h3>6.5 Perfil (qualquer conta)</h3>
+  <ol>
+    <li>Menu do perfil → <strong>Meu Perfil</strong>. Nome e email visíveis, mas bloqueados até clicar em <strong>“Ativar alterações”</strong>.</li>
+    <li>Podem alterar: foto, nome completo, email, senha (via chave de segurança) e sexo.</li>
+    <li>Cargo/posto e perfil (FATURAÇÃO/CAIXA/ADMIN…) são <strong>atribuídos pelo admin — apenas leitura</strong>.</li>
+  </ol>
+</section>
+
+<section id="seguranca">
+  <h2>7. Segurança &amp; Segregação de Funções (SoD)</h2>
+  <ul>
+    <li><strong>SoD estrita:</strong> Faturação nunca vê Tesouraria; Caixa nunca emite Faturas; perfis cruzados são bloqueados automaticamente no sistema (módulos são redirecionados).</li>
+    <li><strong>Acesso à API:</strong> em produção, as rotas <code>/api/*</code> exigem autenticação (<code>ENABLE_API_AUTH=true</code> por omissão). Headers de segurança (nosniff, HSTS…), CORS configurável (<code>CORS_ORIGIN</code>), limite de body, rate limiting no login.</li>
+    <li><strong>Auditoria criptográfica:</strong> cada ação crítica grava um log encadeado (hash SHA-256 ligado ao log anterior) — falsificação é detetável.</li>
+    <li><strong>Data scoping do Caixa:</strong> o operador de caixa vê apenas as <em>suas</em> ações/recibos nas vistas pessoais (Movimentações próprias), respeitando a privacidade da tesouraria.</li>
+    <li><strong>Sessão:</strong> mantém-se com refresh/atualização; o módulo ativo é restaurado; tokens no servidor têm TTL (12h).</li>
+  </ul>
+</section>
+
+<section id="dados">
+  <h2>8. Dados &amp; Persistência</h2>
+  <ul>
+    <li><strong>Base de dados real = PostgreSQL (Neon)</strong> ligação via <code>DATABASE_URL</code> (já configurada neste projeto/`.env` e nas variáveis da Vercel).</li>
+    <li>Tabelas: <code>users, faturas, recibos, caixa_movs, auditoria_logs, embarcacoes, agencias, armadores, atracacoes</code> (+ índices).</li>
+    <li>Sem <code>DATABASE_URL</code>, o sistema funciona com dados de demonstração (não persistentes/partilhados).</li>
+    <li>Esquema recriável a qualquer momento com <code>scripts/setup-neon-schema.mjs</code>.</li>
+    <li>Exportação de dados: via <em>pg_dump</em>/Neon console ou SQL no painel (Table Editor/SQL Editor); relatórios do sistema exportam CSV/PDF.</li>
+  </ul>
+</section>
+
+<section id="imagens">
+  <h2>9. Ecrãs do Sistema</h2>
+  <div class="note">As imagens reais do sistema devem ser capturadas a partir do ambiente em execução (o ecrã atual pode variar com tema claro/escuro e idioma PT/FR/EN). Abaixo segue um esquema do ecrã de login e os diagramas de arquitetura/SoD. Para inserir capturas reais: abrir o sistema, capturar o ecrã e guardar em <code>public/docs/manual/images/</code> (ex.: <code>02-dashboard.png</code>).</div>
+  <figure><img src="images/tela-login.svg" alt="Ecrã de login (esquema)" /><figcaption>Ecrã de login — esquema ilustrativo do ecrã de acesso seguro ao sistema.</figcaption></figure>
+  <figure><img src="images/arquitetura.svg" alt="Arquitetura" /><figcaption>Diagrama da arquitetura do sistema.</figcaption></figure>
+  <figure><img src="images/sod.svg" alt="Segregação de funções" /><figcaption>Segregação de Funções (SoD) entre Faturação, Caixa e Administração.</figcaption></figure>
+</section>
+
+</main>
+<footer>IMP / NHOMINCA • Documento interno • Imagens ilustrativas do estado atual do sistema (novembro 2026).</footer>
+</body>
+</html>
