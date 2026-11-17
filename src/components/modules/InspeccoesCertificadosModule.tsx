@@ -10,7 +10,13 @@ interface InspeccoesCertificadosModuleProps {
 }
 
 export function InspeccoesCertificadosModule({ inspeccoes, certificados, onAddInspeccao }: InspeccoesCertificadosModuleProps) {
-  const { tText } = useLanguage();
+  const { tText, language } = useLanguage();
+  const locale = language === 'fr' ? 'fr-FR' : language === 'en' ? 'en-US' : 'pt-PT';
+  const formatDate = (value?: string) => {
+    if (!value) return '';
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString(locale);
+  };
   const [activeSubTab, setActiveSubTab] = useState<'inspeccoes' | 'certificados'>('inspeccoes');
 
   return (
@@ -86,7 +92,7 @@ export function InspeccoesCertificadosModule({ inspeccoes, certificados, onAddIn
                 </div>
                 <div>
                   <span className="text-slate-500 text-[10px] block uppercase">{tText('Data da Vistoria')}</span>
-                  <span className="text-slate-200">{insp.dataInspeccao}</span>
+                  <span className="text-slate-200">{formatDate(insp.dataInspeccao)}</span>
                 </div>
               </div>
 
@@ -110,7 +116,7 @@ export function InspeccoesCertificadosModule({ inspeccoes, certificados, onAddIn
                     {tText('Certificado de')} {tText(cert.tipoCertificado)}
                   </span>
                   <h3 className="font-bold text-white text-base mt-2">{cert.embarcacaoNome}</h3>
-                  <div className="text-xs text-slate-400 font-mono mt-0.5">Nº: {cert.numeroCertificado}</div>
+                  <div className="text-xs text-slate-400 font-mono mt-0.5">{tText('Nº')}: {cert.numeroCertificado}</div>
                 </div>
                 <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   {tText(cert.status)}
@@ -120,11 +126,11 @@ export function InspeccoesCertificadosModule({ inspeccoes, certificados, onAddIn
               <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                 <div>
                   <span className="text-slate-500 block text-[10px]">{tText('DATA DE EMISSÃO')}</span>
-                  <span className="text-slate-200">{cert.dataEmissao}</span>
+                  <span className="text-slate-200">{formatDate(cert.dataEmissao)}</span>
                 </div>
                 <div>
                   <span className="text-slate-500 block text-[10px]">{tText('VALIDADE ATÉ')}</span>
-                  <span className="text-emerald-400">{cert.dataExpiracao}</span>
+                  <span className="text-emerald-400">{formatDate(cert.dataExpiracao)}</span>
                 </div>
               </div>
 

@@ -9,7 +9,13 @@ interface MultasLicencasModuleProps {
 }
 
 export function MultasLicencasModule({ multas, licencas }: MultasLicencasModuleProps) {
-  const { tText } = useLanguage();
+  const { tText, language } = useLanguage();
+  const locale = language === 'fr' ? 'fr-FR' : language === 'en' ? 'en-US' : 'pt-PT';
+  const formatDate = (value?: string) => {
+    if (!value) return '';
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString(locale);
+  };
   const [activeSubTab, setActiveSubTab] = useState<'multas' | 'licencas'>('multas');
 
   return (
@@ -66,7 +72,7 @@ export function MultasLicencasModule({ multas, licencas }: MultasLicencasModuleP
                 </div>
 
                 <div className="text-right">
-                  <div className="text-lg font-bold text-rose-400 font-mono">{m.valorMultaXOF.toLocaleString()} XOF</div>
+                  <div className="text-lg font-bold text-rose-400 font-mono">{m.valorMultaXOF.toLocaleString(locale)} XOF</div>
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
                     {tText(m.statusMulta)}
                   </span>
@@ -79,7 +85,7 @@ export function MultasLicencasModule({ multas, licencas }: MultasLicencasModuleP
               </p>
 
               <div className="text-[11px] text-slate-500 font-mono">
-                {tText('Data da Ocorrência')}: {m.dataOcorrencia}
+                {tText('Data da Ocorrência')}: {formatDate(m.dataOcorrencia)}
               </div>
             </div>
           ))}
@@ -97,7 +103,7 @@ export function MultasLicencasModule({ multas, licencas }: MultasLicencasModuleP
                     {lic.tipoActividade}
                   </span>
                   <h3 className="font-bold text-white text-base mt-2">{lic.titular}</h3>
-                  <div className="text-xs text-slate-400 font-mono mt-0.5">Nº: {lic.numeroLicenca}</div>
+                  <div className="text-xs text-slate-400 font-mono mt-0.5">{tText('Nº')}: {lic.numeroLicenca}</div>
                 </div>
                 <span
                   className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${
@@ -113,11 +119,11 @@ export function MultasLicencasModule({ multas, licencas }: MultasLicencasModuleP
               <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                 <div>
                   <span className="text-slate-500 block text-[10px]">{tText('CONCESSÃO')}</span>
-                  <span className="text-slate-200">{lic.dataConcessao}</span>
+                  <span className="text-slate-200">{formatDate(lic.dataConcessao)}</span>
                 </div>
                 <div>
                   <span className="text-slate-500 block text-[10px]">{tText('VALIDADE')}</span>
-                  <span className="text-emerald-400">{lic.dataValidade}</span>
+                  <span className="text-emerald-400">{formatDate(lic.dataValidade)}</span>
                 </div>
               </div>
             </div>

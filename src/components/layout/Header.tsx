@@ -172,7 +172,7 @@ export function Header({
       default:
         return (
           <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-slate-500/10 text-slate-500 border border-slate-500/30 font-bold">
-            {roleStr?.toUpperCase()}
+            {roleStr ? tText(roleStr.toUpperCase()) : ''}
           </span>
         );
     }
@@ -197,8 +197,8 @@ export function Header({
                 ? 'bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700'
                 : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
             }`}
-            title="Abrir Menu de Navegação"
-            aria-label="Abrir Menu"
+            title={tText('Abrir Menu de Navegação')}
+            aria-label={tText('Abrir Menu')}
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -213,27 +213,27 @@ export function Header({
           }`}>
             <img
               src="/assets/aistudio/images__2__12a47efd.jpg"
-              alt="NHOMINCA - IMP Logo"
+              alt={tText('NHOMINCA - IMP Logo')}
               className="w-full h-full object-contain rounded-lg"
             />
           </div>
           <div className="min-w-0">
             <h1 className="font-bold text-sm sm:text-base tracking-tight flex items-center gap-1.5 sm:gap-2 truncate">
               <span className={theme === 'dark' ? 'text-white' : 'text-slate-900 font-extrabold'}>
-                NHOMINCA
+                {t.header.title || 'NHOMINCA'}
               </span>
               <span className={`text-[9px] sm:text-[10px] uppercase font-mono px-1.5 sm:px-2 py-0.5 rounded font-bold border shrink-0 ${
                 theme === 'dark'
                   ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
                   : 'bg-blue-50 text-blue-700 border-blue-200'
               }`}>
-                V1.0 • IMP
+                {t.header.version || 'V1.0 • IMP'}
               </span>
             </h1>
             <p className={`text-[10px] sm:text-[11px] truncate hidden md:block ${
               theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
             }`}>
-              República da Guiné-Bissau • NIF: 910005508
+              {tText('República da Guiné-Bissau')} • {tText('NIF')}: 910005508
             </p>
           </div>
         </div>
@@ -252,7 +252,7 @@ export function Header({
               setIsSearchOpen(true);
             }}
             onFocus={() => setIsSearchOpen(true)}
-            placeholder={t.header.searchPlaceholder || 'Pesquisar navios, armadores, faturas...'}
+            placeholder={t.header.searchPlaceholder || tText('Pesquisar navios, armadores, faturas...')}
             className={`w-full rounded-xl pl-9 pr-8 py-1.5 text-xs placeholder-slate-500 focus:outline-none focus:border-blue-500 border transition-all ${
               theme === 'dark'
                 ? 'bg-slate-950 border-slate-800 text-slate-200 focus:bg-slate-900'
@@ -267,7 +267,8 @@ export function Header({
                 setIsSearchOpen(false);
               }}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer z-10"
-              title="Limpar pesquisa"
+              title={tText('Limpar pesquisa')}
+              aria-label={tText('Limpar pesquisa')}
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -283,13 +284,13 @@ export function Header({
               }`}
             >
               <div className="flex items-center justify-between px-2 py-1 text-[10px] font-mono font-bold uppercase border-b mb-2 border-slate-200 dark:border-slate-800 text-slate-400">
-                <span>Resultados ({totalResults})</span>
-                <span className="text-blue-500">Filtrado em Tempo Real</span>
+                <span>{tText('Resultados')} ({totalResults})</span>
+                <span className="text-blue-500">{tText('Filtrado em Tempo Real')}</span>
               </div>
 
               {totalResults === 0 ? (
                 <div className="py-6 text-center text-xs text-slate-400 font-medium">
-                  Nenhum resultado encontrado para &quot;{searchQuery}&quot;
+                  {tText('Nenhum resultado encontrado para')} &quot;{searchQuery}&quot;
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -298,7 +299,7 @@ export function Header({
                     <div className="space-y-1">
                       <div className="flex items-center gap-1.5 px-2 text-[11px] font-bold text-blue-500 uppercase font-mono">
                         <Ship className="w-3.5 h-3.5" />
-                        <span>Embarcações ({filteredEmbarcacoes.length})</span>
+                        <span>{tText('Embarcações')} ({filteredEmbarcacoes.length})</span>
                       </div>
                       <div className="space-y-0.5">
                         {filteredEmbarcacoes.slice(0, 4).map((emb) => (
@@ -314,9 +315,9 @@ export function Header({
                                 {emb.nome}
                               </div>
                               <div className="text-[10px] text-slate-500 font-mono flex items-center gap-2">
-                                <span>IMO: {emb.numeroIMO || 'N/D'}</span>
+                                <span>{tText('IMO')}: {emb.numeroIMO || tText('N/D')}</span>
                                 <span>•</span>
-                                <span>{emb.tipo || 'Navio'}</span>
+                                <span>{emb.tipo || tText('Navio')}</span>
                                 <span>•</span>
                                 <span className="text-blue-600 dark:text-blue-400">{emb.bandeira}</span>
                               </div>
@@ -333,7 +334,7 @@ export function Header({
                     <div className="space-y-1">
                       <div className="flex items-center gap-1.5 px-2 text-[11px] font-bold text-purple-500 uppercase font-mono">
                         <Building2 className="w-3.5 h-3.5" />
-                        <span>Armadores ({filteredArmadores.length})</span>
+                        <span>{tText('Armadores')} ({filteredArmadores.length})</span>
                       </div>
                       <div className="space-y-0.5">
                         {filteredArmadores.slice(0, 4).map((arm) => (
@@ -349,9 +350,9 @@ export function Header({
                                 {arm.nomeRazaoSocial}
                               </div>
                               <div className="text-[10px] text-slate-500 font-mono flex items-center gap-2">
-                                <span>Origem: {arm.paisOrigem || 'Guiné-Bissau'}</span>
+                                <span>{tText('Origem')}: {arm.paisOrigem || tText('Guiné-Bissau')}</span>
                                 <span>•</span>
-                                <span>{arm.tipoEntidade || 'Entidade'}</span>
+                                <span>{arm.tipoEntidade || tText('Entidade')}</span>
                               </div>
                             </div>
                             <ExternalLink className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -366,7 +367,7 @@ export function Header({
                     <div className="space-y-1">
                       <div className="flex items-center gap-1.5 px-2 text-[11px] font-bold text-emerald-500 uppercase font-mono">
                         <FileText className="w-3.5 h-3.5" />
-                        <span>Faturas IMP ({filteredFaturas.length})</span>
+                        <span>{tText('Faturas IMP')} ({filteredFaturas.length})</span>
                       </div>
                       <div className="space-y-0.5">
                         {filteredFaturas.slice(0, 4).map((fat) => (
@@ -387,11 +388,11 @@ export function Header({
                                     ? 'bg-blue-500/10 text-blue-500'
                                     : 'bg-slate-500/10 text-slate-500'
                                 }`}>
-                                  {fat.estado}
+                                  {tText(fat.estado || '')}
                                 </span>
                               </div>
                               <div className="text-[10px] text-slate-500 font-mono truncate">
-                                {fat.cliente} • {Number(fat.total).toLocaleString('pt-PT')} XOF
+                                {fat.cliente} • {Number(fat.total).toLocaleString(language === 'fr' ? 'fr-FR' : language === 'en' ? 'en-GB' : 'pt-PT')} XOF
                               </div>
                             </div>
                             <ExternalLink className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -414,7 +415,8 @@ export function Header({
               ? 'bg-slate-800/80 border-slate-700/80 text-yellow-400 hover:border-slate-600'
               : 'bg-slate-100 border-slate-200 text-slate-700 hover:border-blue-400'
           }`}
-          title={theme === 'dark' ? 'Mudar para Tema Claro IMP' : 'Mudar para Tema Escuro'}
+          title={theme === 'dark' ? tText('Mudar para Tema Claro IMP') : tText('Mudar para Tema Escuro')}
+          aria-label={theme === 'dark' ? tText('Mudar para Tema Claro IMP') : tText('Mudar para Tema Escuro')}
         >
           {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4 text-slate-700" />}
         </button>
@@ -447,7 +449,7 @@ export function Header({
               <div className={`px-2 py-1 text-[10px] font-mono font-semibold uppercase border-b mb-1 ${
                 theme === 'dark' ? 'text-slate-400 border-slate-800' : 'text-slate-500 border-slate-100'
               }`}>
-                {tText('Idioma')} / Language
+                {tText('Idioma')} / {tText('Language')}
               </div>
               {languages.map((item) => (
                 <button
@@ -480,7 +482,7 @@ export function Header({
         <div ref={profileMenuRef} className={`relative flex items-center gap-1.5 sm:gap-2.5 pl-1.5 sm:pl-3 border-l shrink-0 ${theme === 'dark' ? 'border-slate-800' : 'border-slate-200'}`}>
           <div className="text-right hidden md:block">
             <div className={`text-xs font-bold leading-tight ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-              {currentUser?.nome || 'Utilizador'}
+              {currentUser?.nome || tText('Utilizador')}
             </div>
             <div className="mt-0.5 flex justify-end">
               {getRoleBadge(currentUser?.role || currentUser?.funcao || 'faturacao')}
@@ -491,12 +493,13 @@ export function Header({
             id="user-avatar-btn"
             type="button"
             onClick={() => { setProfileMenuOpen(!profileMenuOpen); setLangDropdownOpen(false); }}
-            title="Abrir menu de perfil"
+            title={tText('Abrir menu de perfil')}
+            aria-label={tText('Abrir menu de perfil')}
             className={`group flex items-center gap-1.5 p-1 rounded-2xl border transition-all cursor-pointer shadow-sm ${theme === 'dark' ? 'bg-slate-800/70 border-slate-700 hover:border-slate-500' : 'bg-white border-slate-200 hover:border-blue-300'}`}
           >
             <span className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl overflow-hidden flex items-center justify-center bg-blue-600/10">
               {currentUser?.fotoUrl || currentUser?.avatar ? (
-                <img src={currentUser.avatar || currentUser.fotoUrl} alt={currentUser.nome} className="w-full h-full object-cover" />
+                <img src={currentUser.avatar || currentUser.fotoUrl} alt={currentUser.nome || tText('Utilizador')} className="w-full h-full object-cover" />
               ) : (
                 <span className="text-blue-600 font-bold text-sm">{(currentUser?.nome || 'U').charAt(0).toUpperCase()}</span>
               )}
@@ -514,12 +517,12 @@ export function Header({
                 >
                   <span className="w-9 h-9 rounded-xl overflow-hidden bg-blue-600/10 border border-blue-500/20 flex items-center justify-center shrink-0">
                     {currentUser?.fotoUrl || currentUser?.avatar ? (
-                      <img src={currentUser.avatar || currentUser.fotoUrl} alt={currentUser.nome} className="w-full h-full object-cover" />
+                      <img src={currentUser.avatar || currentUser.fotoUrl} alt={currentUser.nome || tText('Utilizador')} className="w-full h-full object-cover" />
                     ) : (
                       <User className="w-4 h-4 text-blue-500" />
                     )}
                   </span>
-                  <span className="flex-1 text-left leading-tight">Meu Perfil</span>
+                  <span className="flex-1 text-left leading-tight">{tText('Meu Perfil')}</span>
                 </button>
 
                 <button
@@ -528,7 +531,7 @@ export function Header({
                 >
                   <span className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0"><Mail className="w-4 h-4" /></span>
                   <span className="flex-1 text-left min-w-0">
-                    <span className="block font-medium leading-tight">Email de contacto</span>
+                    <span className="block font-medium leading-tight">{tText('Email de contacto')}</span>
                     <span className={`block text-[11px] truncate mt-0.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{currentUser?.email || '—'}</span>
                   </span>
                 </button>
@@ -541,7 +544,7 @@ export function Header({
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer ${theme === 'dark' ? 'text-rose-400 hover:bg-rose-500/10' : 'text-rose-600 hover:bg-rose-50'}`}
                   >
                     <span className="w-9 h-9 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0"><LogOut className="w-4 h-4" /></span>
-                    <span>Terminar sessão</span>
+                    <span>{tText('Terminar sessão')}</span>
                   </button>
                 </div>
               )}

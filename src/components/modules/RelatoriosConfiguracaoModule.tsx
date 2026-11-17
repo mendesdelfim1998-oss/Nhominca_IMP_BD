@@ -83,20 +83,20 @@ export function RelatoriosConfiguracaoModule({ taxas }: RelatoriosConfiguracaoMo
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
             <h3 className="font-bold text-white text-sm flex items-center gap-2 border-b border-slate-800 pb-2">
               <HardDrive className="w-4 h-4 text-indigo-400" />
-              Estado da Infraestrutura On-Premises (IMP Bissau)
+              {tText('Estado da Infraestrutura On-Premises (IMP Bissau)')}
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
               <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
-                <span className="text-slate-500 text-[10px] block">BASE DE DADOS</span>
+                <span className="text-slate-500 text-[10px] block">{tText('BASE DE DADOS')}</span>
                 <span className="text-emerald-400 font-bold">PostgreSQL 16.2</span>
               </div>
               <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
-                <span className="text-slate-500 text-[10px] block">BACKEND API</span>
+                <span className="text-slate-500 text-[10px] block">{tText('BACKEND API')}</span>
                 <span className="text-blue-400 font-bold">Laravel 12 REST API</span>
               </div>
               <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
-                <span className="text-slate-500 text-[10px] block">AUTENTICAÇÃO</span>
+                <span className="text-slate-500 text-[10px] block">{tText('AUTENTICAÇÃO')}</span>
                 <span className="text-purple-400 font-bold">Laravel Sanctum JWT</span>
               </div>
             </div>

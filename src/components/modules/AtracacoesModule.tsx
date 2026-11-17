@@ -34,15 +34,29 @@ interface AtracacoesModuleProps {
 
 export function AtracacoesModule({ atracacoes, embarcacoes, portos, onAddAtracacao, onUpdateStatus }: AtracacoesModuleProps) {
   const { theme } = useTheme();
-  const { tText } = useLanguage();
+  const { tText, language } = useLanguage();
   const [showModal, setShowModal] = useState(false);
   const [selectedEmbId, setSelectedEmbId] = useState(embarcacoes[0]?.id || '');
   const [selectedPortoId, setSelectedPortoId] = useState(portos[0]?.id || '');
-  const [caisInput, setCaisInput] = useState('Cais Principal - Posto 02');
+  const [caisInput, setCaisInput] = useState(tText('Cais Principal - Posto 02'));
   const [etaInput, setEtaInput] = useState(() => getComputerCurrentDateTime());
   const [etdInput, setEtdInput] = useState(() => getComputerFutureDateTime(48));
-  const [cargaInput, setCargaInput] = useState('Contentores & Carga Geral');
+  const [cargaInput, setCargaInput] = useState(tText('Contentores & Carga Geral'));
   const [toneladasInput, setToneladasInput] = useState(5000);
+
+  const locale = language === 'pt' ? 'pt-PT' : language === 'fr' ? 'fr-FR' : 'en-US';
+  const formatToneladas = (value: number) => new Intl.NumberFormat(locale).format(value);
+  const formatDateTime = (value: string) => {
+    const date = new Date(value.replace(' ', 'T'));
+    if (Number.isNaN(date.getTime())) return value;
+    return new Intl.DateTimeFormat(locale, {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date);
+  };
 
   const handleOpenModal = () => {
     // Sincroniza automaticamente com a data e hora atual do computador
@@ -155,7 +169,7 @@ export function AtracacoesModule({ atracacoes, embarcacoes, portos, onAddAtracac
                     : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
                 }`}
               >
-                {atr.status}
+                {tText(atr.status)}
               </span>
             </div>
 
@@ -173,16 +187,16 @@ export function AtracacoesModule({ atracacoes, embarcacoes, portos, onAddAtracac
               <div>
                 <span className="text-slate-500 text-[10px] block uppercase">{tText('Carga & Movimentação')}</span>
                 <span className={`font-semibold ${theme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>
-                  {atr.manifestoCarga.quantidadeToneladas.toLocaleString()} {tText('Ton')} ({atr.manifestoCarga.operacao})
+                  {formatToneladas(atr.manifestoCarga.quantidadeToneladas)} {tText('Ton')} ({tText(atr.manifestoCarga.operacao)})
                 </span>
               </div>
               <div>
                 <span className="text-slate-500 text-[10px] block uppercase">{tText('ETA (Chegada)')}</span>
-                <span className="text-emerald-500 font-bold">{atr.dataChegadaPrevista}</span>
+                <span className="text-emerald-500 font-bold">{formatDateTime(atr.dataChegadaPrevista)}</span>
               </div>
               <div>
                 <span className="text-slate-500 text-[10px] block uppercase">{tText('ETD (Saída)')}</span>
-                <span className="text-rose-500 font-bold">{atr.dataSaidaPrevista}</span>
+                <span className="text-rose-500 font-bold">{formatDateTime(atr.dataSaidaPrevista)}</span>
               </div>
             </div>
 
@@ -198,7 +212,7 @@ export function AtracacoesModule({ atracacoes, embarcacoes, portos, onAddAtracac
                       : 'bg-slate-100 text-slate-700 border-slate-200'
                   }`}
                 >
-                  {srv}
+                  {tText(srv)}
                 </span>
               ))}
             </div>
@@ -313,7 +327,7 @@ export function AtracacoesModule({ atracacoes, embarcacoes, portos, onAddAtracac
                     type="text"
                     value={etaInput}
                     onChange={(e) => setEtaInput(e.target.value)}
-                    placeholder="YYYY-MM-DD HH:mm"
+                    placeholder={tText('YYYY-MM-DD HH:mm')}
                     className={`w-full rounded-xl px-3 py-2 border font-mono text-xs focus:outline-none focus:border-blue-500 ${
                       theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                     }`}
@@ -341,7 +355,7 @@ export function AtracacoesModule({ atracacoes, embarcacoes, portos, onAddAtracac
                     type="text"
                     value={etdInput}
                     onChange={(e) => setEtdInput(e.target.value)}
-                    placeholder="YYYY-MM-DD HH:mm"
+                    placeholder={tText('YYYY-MM-DD HH:mm')}
                     className={`w-full rounded-xl px-3 py-2 border font-mono text-xs focus:outline-none focus:border-blue-500 ${
                       theme === 'dark' ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                     }`}

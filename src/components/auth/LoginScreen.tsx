@@ -111,7 +111,7 @@ export function LoginScreen({
     setErrorMessage('');
 
     if (!email.trim() || !password) {
-      setErrorMessage('Por favor preencha o email institucional e a palavra-passe.');
+      setErrorMessage(tText('Por favor preencha o email institucional e a palavra-passe.'));
       return;
     }
 
@@ -133,7 +133,7 @@ export function LoginScreen({
     }
 
     if (!user) {
-      setErrorMessage(serverAuth.error || 'Credenciais inválidas. Verifique o seu e-mail institucional.');
+      setErrorMessage(serverAuth.error || tText('Credenciais inválidas. Verifique o seu e-mail institucional.'));
       return;
     }
 
@@ -142,7 +142,7 @@ export function LoginScreen({
     // Account permanently disabled after 8 failed attempts
     if (!isSuperAdminDev && (user.active === false || user.status === 'Inativo')) {
       setErrorMessage(
-        'Conta desativada por motivos de segurança (limite de 8 tentativas atingido). Contacte a Direção Geral ou o Administrador.'
+        tText('Conta desativada por motivos de segurança (limite de 8 tentativas atingido). Contacte a Direção Geral ou o Administrador.')
       );
       return;
     }
@@ -151,7 +151,7 @@ export function LoginScreen({
     if (!isSuperAdminDev && user.lockUntil && user.lockUntil > Date.now()) {
       const sec = Math.ceil((user.lockUntil - Date.now()) / 1000);
       setErrorMessage(
-        `Acesso temporariamente bloqueado pela proteção anti-força bruta. Aguarde ${sec} segundos.`
+        `${tText('Acesso temporariamente bloqueado pela proteção anti-força bruta. Aguarde')} ${sec} ${tText('segundos')}.`
       );
       return;
     }
@@ -164,7 +164,7 @@ export function LoginScreen({
       onLoginSuccess(user);
     } else {
       if (isSuperAdminDev) {
-        setErrorMessage('Palavra-passe incorreta para conta de Desenvolvedor (Dica: superadmin123).');
+        setErrorMessage(tText('Palavra-passe incorreta para conta de Desenvolvedor (Dica: superadmin123).'));
         return;
       }
 
@@ -173,19 +173,19 @@ export function LoginScreen({
       if (currentAttempts >= 8) {
         onUpdateUserSecurity(user.email, currentAttempts, null, false);
         setErrorMessage(
-          'ATENÇÃO: Atingiu 8 tentativas falhadas! A conta foi desativada permanentemente. Contacte a Direção do IMP.'
+          tText('ATENÇÃO: Atingiu 8 tentativas falhadas! A conta foi desativada permanentemente. Contacte a Direção do IMP.')
         );
       } else if (currentAttempts >= 5) {
         const lockTime = Date.now() + 60000;
         onUpdateUserSecurity(user.email, currentAttempts, lockTime, true);
         setLockCountdown(60);
         setErrorMessage(
-          'Proteção Anti-Força Bruta: 5 tentativas incorretas consecutivas. O acesso foi bloqueado por 60 segundos.'
+          tText('Proteção Anti-Força Bruta: 5 tentativas incorretas consecutivas. O acesso foi bloqueado por 60 segundos.')
         );
       } else {
         onUpdateUserSecurity(user.email, currentAttempts, null, true);
         setErrorMessage(
-          `Palavra-passe incorreta. Tentativa ${currentAttempts} de 5 antes do bloqueio temporário (8 para desativação total).`
+          `${tText('Palavra-passe incorreta. Tentativa')} ${currentAttempts} ${tText('de 5 antes do bloqueio temporário (8 para desativação total).')}`
         );
       }
     }
@@ -204,7 +204,7 @@ export function LoginScreen({
               <div className="w-12 h-12 rounded-full overflow-hidden bg-white p-0.5 shadow-md shrink-0 flex items-center justify-center border border-amber-300">
                 <img
                   src="/assets/aistudio/images__2__12a47efd.jpg"
-                  alt="NHOMINCA IMP Logo"
+                  alt={tText('NHOMINCA IMP Logo')}
                   className="w-full h-full object-contain"
                 />
               </div>
@@ -254,7 +254,8 @@ export function LoginScreen({
                   className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     language === 'pt' ? 'bg-white shadow text-blue-700' : 'text-slate-500 hover:text-slate-900'
                   }`}
-                  title="Português (Guiné-Bissau)"
+                  title={tText('Português (Guiné-Bissau)')}
+                  aria-label={tText('Português (Guiné-Bissau)')}
                 >
                   <FlagIcon language="pt" className="w-4 h-3 rounded-xs shadow-xs" />
                   <span>PT</span>
@@ -265,7 +266,8 @@ export function LoginScreen({
                   className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     language === 'fr' ? 'bg-white shadow text-blue-700' : 'text-slate-500 hover:text-slate-900'
                   }`}
-                  title="Français"
+                  title={tText('Français')}
+                  aria-label={tText('Français')}
                 >
                   <FlagIcon language="fr" className="w-4 h-3 rounded-xs shadow-xs" />
                   <span>FR</span>
@@ -276,7 +278,8 @@ export function LoginScreen({
                   className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     language === 'en' ? 'bg-white shadow text-blue-700' : 'text-slate-500 hover:text-slate-900'
                   }`}
-                  title="English"
+                  title={tText('English')}
+                  aria-label={tText('English')}
                 >
                   <FlagIcon language="en" className="w-4 h-3 rounded-xs shadow-xs" />
                   <span>EN</span>
@@ -316,7 +319,7 @@ export function LoginScreen({
                   value={email}
                   disabled={lockCountdown !== null && lockCountdown > 0}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="nome.utilizador@imp.gw"
+                  placeholder={tText('nome.utilizador@imp.gw')}
                   required
                   className={`w-full px-4 py-3 bg-[#F8FAFC] border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all ${
                     lockCountdown ? 'opacity-50 cursor-not-allowed' : ''
@@ -335,7 +338,7 @@ export function LoginScreen({
                     value={password}
                     disabled={lockCountdown !== null && lockCountdown > 0}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Introduza a palavra-passe"
+                    placeholder={tText('Introduza a palavra-passe')}
                     required
                     className={`w-full px-4 py-3 pr-11 bg-[#F8FAFC] border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all ${
                       lockCountdown ? 'opacity-50 cursor-not-allowed' : ''
@@ -346,6 +349,8 @@ export function LoginScreen({
                     onClick={() => setShowPassword(!showPassword)}
                     tabIndex={-1}
                     className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                    title={showPassword ? tText('Ocultar palavra-passe') : tText('Mostrar palavra-passe')}
+                    aria-label={showPassword ? tText('Ocultar palavra-passe') : tText('Mostrar palavra-passe')}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -373,7 +378,7 @@ export function LoginScreen({
           {/* Institutional Compliance Notice */}
           <div className="mt-8 pt-4 border-t border-slate-100">
             <p className="text-[11px] text-slate-400 text-center sm:text-left leading-normal font-sans">
-              DGCI — Certificado 000035C/2022 • IMP Bissau • Proteção Anti-Força Bruta Ativa
+              {tText('DGCI — Certificado 000035C/2022 • IMP Bissau • Proteção Anti-Força Bruta Ativa')}
             </p>
           </div>
         </div>

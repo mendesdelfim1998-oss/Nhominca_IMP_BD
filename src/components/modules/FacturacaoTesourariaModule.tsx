@@ -12,7 +12,18 @@ interface FacturacaoTesourariaModuleProps {
 }
 
 export function FacturacaoTesourariaModule({ facturas, taxas, transacoes, onAddFactura, onPagarFactura }: FacturacaoTesourariaModuleProps) {
-  const { tText } = useLanguage();
+  const { tText, language } = useLanguage();
+  const locale = language === 'fr' ? 'fr-FR' : language === 'en' ? 'en-US' : 'pt-PT';
+  const formatDate = (value?: string) => {
+    if (!value) return '';
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString(locale);
+  };
+  const formatDateTime = (value?: string) => {
+    if (!value) return '';
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? value : d.toLocaleString(locale);
+  };
   const [activeSubTab, setActiveSubTab] = useState<'facturacao' | 'tesouraria' | 'tarifas'>('facturacao');
   const [selectedFacturaModal, setSelectedFacturaModal] = useState<Factura | null>(null);
 
@@ -71,15 +82,15 @@ export function FacturacaoTesourariaModule({ facturas, taxas, transacoes, onAddF
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
           <span className="text-slate-400 text-xs font-mono block">{tText('TOTAL FACTURADO')}</span>
-          <div className="text-xl font-bold text-white mt-1">{totalFacturadoXOF.toLocaleString()} XOF</div>
+          <div className="text-xl font-bold text-white mt-1">{totalFacturadoXOF.toLocaleString(locale)} XOF</div>
         </div>
         <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
           <span className="text-slate-400 text-xs font-mono block">{tText('ARRECADADO (PAGO)')}</span>
-          <div className="text-xl font-bold text-emerald-400 mt-1">{totalRecebidoXOF.toLocaleString()} XOF</div>
+          <div className="text-xl font-bold text-emerald-400 mt-1">{totalRecebidoXOF.toLocaleString(locale)} XOF</div>
         </div>
         <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
           <span className="text-slate-400 text-xs font-mono block">{tText('PENDENTE EM COBRANÇA')}</span>
-          <div className="text-xl font-bold text-amber-400 mt-1">{totalPendenteXOF.toLocaleString()} XOF</div>
+          <div className="text-xl font-bold text-amber-400 mt-1">{totalPendenteXOF.toLocaleString(locale)} XOF</div>
         </div>
       </div>
 
@@ -90,12 +101,12 @@ export function FacturacaoTesourariaModule({ facturas, taxas, transacoes, onAddF
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-950/80 border-b border-slate-800 text-slate-400 uppercase font-mono text-[10px]">
                 <tr>
-                  <th className="py-3 px-4">Nº Factura / Data</th>
-                  <th className="py-3 px-4">Embarcação</th>
-                  <th className="py-3 px-4">Agência Devedora</th>
-                  <th className="py-3 px-4">Valor Total (XOF)</th>
-                  <th className="py-3 px-4">Estado</th>
-                  <th className="py-3 px-4 text-right">Ações Tesouraria</th>
+                  <th className="py-3 px-4">{tText('Nº Factura / Data')}</th>
+                  <th className="py-3 px-4">{tText('Embarcação')}</th>
+                  <th className="py-3 px-4">{tText('Agência Devedora')}</th>
+                  <th className="py-3 px-4">{tText('Valor Total (XOF)')}</th>
+                  <th className="py-3 px-4">{tText('Estado')}</th>
+                  <th className="py-3 px-4 text-right">{tText('Ações Tesouraria')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
@@ -103,7 +114,7 @@ export function FacturacaoTesourariaModule({ facturas, taxas, transacoes, onAddF
                   <tr key={fac.id} className="hover:bg-slate-800/40 transition-colors">
                     <td className="py-3 px-4">
                       <div className="font-mono font-bold text-white text-xs">{fac.numeroFactura}</div>
-                      <div className="text-[11px] text-slate-400">Emissão: {fac.dataEmissao}</div>
+                      <div className="text-[11px] text-slate-400">{tText('Emissão')}: {formatDate(fac.dataEmissao)}</div>
                     </td>
                     <td className="py-3 px-4 font-semibold text-slate-200">
                       {fac.embarcacaoNome}
@@ -112,7 +123,7 @@ export function FacturacaoTesourariaModule({ facturas, taxas, transacoes, onAddF
                       {fac.agenciaNome}
                     </td>
                     <td className="py-3 px-4 font-mono font-bold text-white">
-                      {fac.totalXOF.toLocaleString()} XOF
+                      {fac.totalXOF.toLocaleString(locale)} XOF
                     </td>
                     <td className="py-3 px-4">
                       <span
@@ -122,7 +133,7 @@ export function FacturacaoTesourariaModule({ facturas, taxas, transacoes, onAddF
                             : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                         }`}
                       >
-                        {fac.statusPagamento}
+                        {tText(fac.statusPagamento)}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-right space-x-2">
@@ -131,14 +142,14 @@ export function FacturacaoTesourariaModule({ facturas, taxas, transacoes, onAddF
                           onClick={() => onPagarFactura(fac.id, 'Transferência Bancária')}
                           className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-medium transition-colors"
                         >
-                          Liquidar na Tesouraria
+                          {tText('Liquidar na Tesouraria')}
                         </button>
                       )}
                       <button
                         onClick={() => setSelectedFacturaModal(fac)}
                         className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-[11px] font-medium border border-slate-700 transition-colors"
                       >
-                        Ver Detalhe
+                        {tText('Ver Detalhe')}
                       </button>
                     </td>
                   </tr>
@@ -156,22 +167,22 @@ export function FacturacaoTesourariaModule({ facturas, taxas, transacoes, onAddF
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-950/80 border-b border-slate-800 text-slate-400 uppercase font-mono text-[10px]">
                 <tr>
-                  <th className="py-3 px-4">Data / Hora</th>
-                  <th className="py-3 px-4">Tipo Lançamento</th>
-                  <th className="py-3 px-4">Referência Documento</th>
-                  <th className="py-3 px-4">Entidade Pagadora</th>
-                  <th className="py-3 px-4">Operador / Caixa</th>
-                  <th className="py-3 px-4 text-right">Montante (XOF)</th>
+                  <th className="py-3 px-4">{tText('Data / Hora')}</th>
+                  <th className="py-3 px-4">{tText('Tipo Lançamento')}</th>
+                  <th className="py-3 px-4">{tText('Referência Documento')}</th>
+                  <th className="py-3 px-4">{tText('Entidade Pagadora')}</th>
+                  <th className="py-3 px-4">{tText('Operador / Caixa')}</th>
+                  <th className="py-3 px-4 text-right">{tText('Montante (XOF)')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
                 {transacoes.map((t) => (
                   <tr key={t.id} className="hover:bg-slate-800/40 transition-colors">
                     <td className="py-3 px-4 font-mono text-slate-300">
-                      {t.dataHora}
+                      {formatDateTime(t.dataHora)}
                     </td>
                     <td className="py-3 px-4 font-semibold text-emerald-400">
-                      {t.tipoTransacao}
+                      {tText(t.tipoTransacao)}
                     </td>
                     <td className="py-3 px-4 font-mono text-slate-200">
                       {t.referencia}
@@ -183,7 +194,7 @@ export function FacturacaoTesourariaModule({ facturas, taxas, transacoes, onAddF
                       {t.operadorTesouraria} ({t.caixaNumero})
                     </td>
                     <td className="py-3 px-4 font-mono font-bold text-white text-right">
-                      +{t.valorXOF.toLocaleString()} XOF
+                      +{t.valorXOF.toLocaleString(locale)} XOF
                     </td>
                   </tr>
                 ))}
@@ -200,14 +211,14 @@ export function FacturacaoTesourariaModule({ facturas, taxas, transacoes, onAddF
             <div key={tx.id} className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
               <div>
                 <span className="text-[10px] uppercase font-mono bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded border border-blue-500/20">
-                  {tx.categoria} • {tx.codigoServico}
+                  {tText(tx.categoria)} • {tx.codigoServico}
                 </span>
-                <h4 className="font-semibold text-white text-sm mt-2">{tx.descricaoServico}</h4>
-                <div className="text-xs text-slate-400 mt-1">Base: {tx.unidadeMedida}</div>
+                <h4 className="font-semibold text-white text-sm mt-2">{tText(tx.descricaoServico)}</h4>
+                <div className="text-xs text-slate-400 mt-1">{tText('Base')}: {tText(tx.unidadeMedida)}</div>
               </div>
 
               <div className="text-right font-mono">
-                <div className="text-lg font-bold text-white">{tx.valorUnitarioXOF.toLocaleString()}</div>
+                <div className="text-lg font-bold text-white">{tx.valorUnitarioXOF.toLocaleString(locale)}</div>
                 <div className="text-[10px] text-slate-400">XOF</div>
               </div>
             </div>
@@ -221,36 +232,36 @@ export function FacturacaoTesourariaModule({ facturas, taxas, transacoes, onAddF
           <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full p-6 space-y-5">
             <div className="flex items-start justify-between border-b border-slate-800 pb-4">
               <div>
-                <span className="text-xs text-emerald-400 font-mono font-bold uppercase">Factura Portuária Oficial</span>
+                <span className="text-xs text-emerald-400 font-mono font-bold uppercase">{tText('Factura Portuária Oficial')}</span>
                 <h3 className="text-xl font-bold text-white font-mono">{selectedFacturaModal.numeroFactura}</h3>
               </div>
               <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                {selectedFacturaModal.statusPagamento}
+                {tText(selectedFacturaModal.statusPagamento)}
               </span>
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div>
-                <span className="text-slate-500 block">Embarcação:</span>
+                <span className="text-slate-500 block">{tText('Embarcação')}:</span>
                 <span className="font-semibold text-white text-sm">{selectedFacturaModal.embarcacaoNome}</span>
               </div>
               <div>
-                <span className="text-slate-500 block">Agência Devedora:</span>
+                <span className="text-slate-500 block">{tText('Agência Devedora')}:</span>
                 <span className="font-semibold text-white text-sm">{selectedFacturaModal.agenciaNome}</span>
               </div>
             </div>
 
             <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 text-xs">
-              <div className="font-mono text-[10px] text-slate-500 uppercase border-b border-slate-800 pb-2">Itens & Serviços Portuários Facturados</div>
+              <div className="font-mono text-[10px] text-slate-500 uppercase border-b border-slate-800 pb-2">{tText('Itens & Serviços Portuários Facturados')}</div>
               {selectedFacturaModal.itens.map((item, idx) => (
                 <div key={idx} className="flex items-center justify-between py-1 border-b border-slate-900">
-                  <span className="text-slate-300">{item.descricao}</span>
-                  <span className="font-mono text-white">{item.subtotalXOF.toLocaleString()} XOF</span>
+                  <span className="text-slate-300">{tText(item.descricao)}</span>
+                  <span className="font-mono text-white">{item.subtotalXOF.toLocaleString(locale)} XOF</span>
                 </div>
               ))}
               <div className="flex items-center justify-between pt-2 text-sm font-bold font-mono">
-                <span className="text-white">TOTAL FACTURA:</span>
-                <span className="text-emerald-400">{selectedFacturaModal.totalXOF.toLocaleString()} XOF</span>
+                <span className="text-white">{tText('TOTAL FACTURA')}:</span>
+                <span className="text-emerald-400">{selectedFacturaModal.totalXOF.toLocaleString(locale)} XOF</span>
               </div>
             </div>
 
@@ -259,7 +270,7 @@ export function FacturacaoTesourariaModule({ facturas, taxas, transacoes, onAddF
                 onClick={() => setSelectedFacturaModal(null)}
                 className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl font-medium text-xs"
               >
-                Fechar Ficha
+                {tText('Fechar Ficha')}
               </button>
             </div>
           </div>

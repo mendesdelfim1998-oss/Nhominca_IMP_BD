@@ -53,7 +53,14 @@ export function VisaoGeralModal({
   onViewFatura,
   onViewRecibo
 }: VisaoGeralModalProps) {
-  const { tText } = useLanguage();
+  const { tText, language } = useLanguage();
+  const locale = language === 'fr' ? 'fr-FR' : language === 'en' ? 'en-GB' : 'pt-PT';
+  const formatDateTime = (value: string | Date, options?: Intl.DateTimeFormatOptions) =>
+    new Date(value).toLocaleString(locale, options);
+  const formatDate = (value: string | Date, options?: Intl.DateTimeFormatOptions) =>
+    new Date(value).toLocaleDateString(locale, options);
+  const formatTime = (value: string | Date, options?: Intl.DateTimeFormatOptions) =>
+    new Date(value).toLocaleTimeString(locale, options);
   // Determine user role and segregation of duties
   const role = (currentUser?.role || currentUser?.funcao || '').toLowerCase();
   const userCargo = (currentUser?.cargo || '').toLowerCase();
@@ -87,12 +94,12 @@ export function VisaoGeralModal({
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      setLiveTimestamp(now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+      setLiveTimestamp(now.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
     };
     updateTime();
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [locale]);
 
   // Helper date filtering function based on computer system clock (new Date())
   const matchesPeriodo = (dateStr: string) => {
@@ -387,14 +394,14 @@ export function VisaoGeralModal({
           dataFormatted: f.data,
           tipoModulo: 'fatura',
           codigo: f.nFatura,
-          descricao: `Fatura Portuária • GT ${f.gross_tonnage || 0}`,
+          descricao: `${tText('Fatura Portuária')} • GT ${f.gross_tonnage || 0}`,
           cliente: f.cliente,
           vessel: f.navio,
-          categoria: 'Faturação',
+          categoria: tText('Faturação'),
           valorEntrada: f.total,
           valorSaida: 0,
           estadoOuBanco: f.estado,
-          operador: f.criado_por || 'Operador Faturação',
+          operador: f.criado_por || tText('Operador Faturação'),
           originalRef: f
         });
       });
@@ -409,14 +416,14 @@ export function VisaoGeralModal({
           dataFormatted: `${r.data} ${r.hora || ''}`,
           tipoModulo: 'recibo',
           codigo: r.nRecibo,
-          descricao: `Recibo de Quitação • Fat: ${r.nFatura}`,
+          descricao: `${tText('Recibo de Quitação')} • ${tText('Fat')}: ${r.nFatura}`,
           cliente: r.cliente,
           vessel: r.navio,
-          categoria: 'Recibo Caixa',
+          categoria: tText('Recibo Caixa'),
           valorEntrada: r.valor,
           valorSaida: 0,
           estadoOuBanco: `${r.banco} (${r.talao || ''})`,
-          operador: r.emissor || 'Operador Caixa',
+          operador: r.emissor || tText('Operador Caixa'),
           originalRef: r
         });
       });
@@ -434,11 +441,11 @@ export function VisaoGeralModal({
             codigo: m.talao || m.id,
             descricao: m.descricao,
             cliente: m.beneficiario || m.criado_por || 'IMP',
-            categoria: m.categoria || 'Caixa',
+            categoria: m.categoria || tText('Caixa'),
             valorEntrada: m.tipo === 'entrada' ? m.valor : 0,
             valorSaida: m.tipo === 'saida' ? m.valor : 0,
-            estadoOuBanco: m.banco || 'Caixa Geral',
-            operador: m.criado_por || 'Tesouraria',
+            estadoOuBanco: m.banco || tText('Caixa Geral'),
+            operador: m.criado_por || tText('Tesouraria'),
             originalRef: m
           });
         }
@@ -508,7 +515,7 @@ export function VisaoGeralModal({
               type="button"
               onClick={() => window.print()}
               className="no-print p-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-md transition-all active:scale-95 cursor-pointer"
-              title="Imprimir Relatório Oficial (.printable-document)"
+              title={tText('Imprimir Relatório Oficial')}
             >
               <Printer className="w-4 h-4" />
             </button>
@@ -516,7 +523,7 @@ export function VisaoGeralModal({
               type="button"
               onClick={onClose}
               className="p-2.5 text-slate-300 hover:text-white bg-white/10 hover:bg-white/20 rounded-xl transition-all cursor-pointer"
-              title="Fechar Janela"
+              title={tText('Fechar Janela')}
             >
               <X className="w-5 h-5" />
             </button>
@@ -530,7 +537,7 @@ export function VisaoGeralModal({
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 font-mono uppercase mr-1 flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" />
-              Período:
+              {tText('Período')}:
             </span>
             <button
               type="button"
@@ -679,7 +686,7 @@ export function VisaoGeralModal({
                   {faturasBreakdown.totalCount}
                 </div>
                 <span className="text-[9.5px] text-slate-500 font-mono block truncate">
-                  {faturasBreakdown.totalValor.toLocaleString('pt-PT')} XOF
+                  {faturasBreakdown.totalValor.toLocaleString(locale)} XOF
                 </span>
               </div>
 
@@ -689,7 +696,7 @@ export function VisaoGeralModal({
                   {faturasBreakdown.pagasCount}
                 </div>
                 <span className="text-[9.5px] text-slate-500 font-mono block truncate">
-                  {faturasBreakdown.pagasValor.toLocaleString('pt-PT')} XOF
+                  {faturasBreakdown.pagasValor.toLocaleString(locale)} XOF
                 </span>
               </div>
 
@@ -699,7 +706,7 @@ export function VisaoGeralModal({
                   {faturasBreakdown.parciaisCount}
                 </div>
                 <span className="text-[9.5px] text-slate-500 font-mono block truncate">
-                  {faturasBreakdown.parciaisValor.toLocaleString('pt-PT')} XOF
+                  {faturasBreakdown.parciaisValor.toLocaleString(locale)} XOF
                 </span>
               </div>
 
@@ -739,42 +746,42 @@ export function VisaoGeralModal({
           {isCaixa && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-emerald-200 dark:border-emerald-900 shadow-xs">
-                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">Recibos Emitidos por Si</span>
+                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">{tText('Recibos Emitidos por Si')}</span>
                 <div className="text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400 mt-1">
-                  {caixaBreakdown.totalRecibosCount} Recibos
+                  {caixaBreakdown.totalRecibosCount} {tText('Recibos')}
                 </div>
                 <span className="text-[10px] text-slate-500 font-mono mt-0.5 block">
-                  Total Quitado: {caixaBreakdown.totalRecibosValor.toLocaleString('pt-PT')} XOF
+                  {tText('Total Quitado')}: {caixaBreakdown.totalRecibosValor.toLocaleString(locale)} XOF
                 </span>
               </div>
 
               <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-blue-200 dark:border-blue-900 shadow-xs">
-                <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider block">Total Entradas (Caixa)</span>
+                <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider block">{tText('Total Entradas (Caixa)')}</span>
                 <div className="text-2xl font-black font-mono text-blue-600 dark:text-blue-400 mt-1">
-                  +{caixaBreakdown.totalEntradas.toLocaleString('pt-PT')} XOF
+                  +{caixaBreakdown.totalEntradas.toLocaleString(locale)} XOF
                 </div>
                 <span className="text-[10px] text-slate-500 font-mono mt-0.5 block">
-                  Arrecadações Diretas & Depósitos
+                  {tText('Arrecadações Diretas & Depósitos')}
                 </span>
               </div>
 
               <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-rose-200 dark:border-rose-900 shadow-xs">
-                <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider block">Total Saídas Registadas</span>
+                <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider block">{tText('Total Saídas Registadas')}</span>
                 <div className="text-2xl font-black font-mono text-rose-600 dark:text-rose-400 mt-1">
-                  -{caixaBreakdown.totalSaidas.toLocaleString('pt-PT')} XOF
+                  -{caixaBreakdown.totalSaidas.toLocaleString(locale)} XOF
                 </div>
                 <span className="text-[10px] text-slate-500 font-mono mt-0.5 block">
-                  Despesas e Pagamentos Autorizados
+                  {tText('Despesas e Pagamentos Autorizados')}
                 </span>
               </div>
 
               <div className="p-4 bg-gradient-to-br from-[#082B59] to-[#0f3d7a] text-white rounded-2xl shadow-md">
-                <span className="text-[10px] font-bold text-cyan-200 uppercase tracking-wider block">Saldo da Sua Sessão</span>
+                <span className="text-[10px] font-bold text-cyan-200 uppercase tracking-wider block">{tText('Saldo da Sua Sessão')}</span>
                 <div className="text-2xl font-black font-mono text-white mt-1">
-                  {caixaBreakdown.saldoSessao.toLocaleString('pt-PT')} XOF
+                  {caixaBreakdown.saldoSessao.toLocaleString(locale)} XOF
                 </div>
                 <span className="text-[10px] text-blue-200 font-mono mt-0.5 block">
-                  Responsabilidade Operacional Direta
+                  {tText('Responsabilidade Operacional Direta')}
                 </span>
               </div>
             </div>
@@ -788,7 +795,7 @@ export function VisaoGeralModal({
                   {operatorFilter === 'Álvaro' ? tText('Total Liquidado') : tText('TOTAL FATURADO')}
                 </span>
                 <div className="text-lg sm:text-xl font-black font-mono text-blue-600 dark:text-blue-400 mt-1">
-                  {(operatorFilter === 'Álvaro' ? caixaBreakdown.totalRecibosValor : faturasBreakdown.totalValor).toLocaleString('pt-PT')} XOF
+                  {(operatorFilter === 'Álvaro' ? caixaBreakdown.totalRecibosValor : faturasBreakdown.totalValor).toLocaleString(locale)} XOF
                 </div>
                 <span className="text-[9.5px] text-slate-500 font-mono block">
                   {operatorFilter === 'Álvaro'
@@ -800,7 +807,7 @@ export function VisaoGeralModal({
               <div className="p-3.5 bg-white dark:bg-slate-900 rounded-2xl border border-emerald-200 dark:border-emerald-900 shadow-xs">
                 <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">{tText('ARRECADADO EM CAIXA')}</span>
                 <div className="text-lg sm:text-xl font-black font-mono text-emerald-600 dark:text-emerald-400 mt-1">
-                  +{caixaBreakdown.totalEntradas.toLocaleString('pt-PT')} XOF
+                  +{caixaBreakdown.totalEntradas.toLocaleString(locale)} XOF
                 </div>
                 <span className="text-[9.5px] text-slate-500 font-mono block">
                   {caixaBreakdown.totalRecibosCount} {tText('Recibos emitidos')}
@@ -810,7 +817,7 @@ export function VisaoGeralModal({
               <div className="p-3.5 bg-white dark:bg-slate-900 rounded-2xl border border-rose-200 dark:border-rose-900 shadow-xs">
                 <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider block">{tText('SAÍDAS DA TESOURARIA')}</span>
                 <div className="text-lg sm:text-xl font-black font-mono text-rose-600 dark:text-rose-400 mt-1">
-                  -{caixaBreakdown.totalSaidas.toLocaleString('pt-PT')} XOF
+                  -{caixaBreakdown.totalSaidas.toLocaleString(locale)} XOF
                 </div>
                 <span className="text-[9.5px] text-slate-500 font-mono block">
                   {tText('Despesas autorizadas')}
@@ -820,7 +827,7 @@ export function VisaoGeralModal({
               <div className="p-3.5 bg-white dark:bg-slate-900 rounded-2xl border border-amber-200 dark:border-amber-900 shadow-xs">
                 <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block">{tText('SALDO PENDENTE FATURAÇÃO')}</span>
                 <div className="text-lg sm:text-xl font-black font-mono text-amber-600 dark:text-amber-400 mt-1">
-                  {faturasBreakdown.valorPendente.toLocaleString('pt-PT')} XOF
+                  {faturasBreakdown.valorPendente.toLocaleString(locale)} XOF
                 </div>
                 <span className="text-[9.5px] text-slate-500 font-mono block">
                   {tText('Aguardam cobrança')}
@@ -830,7 +837,7 @@ export function VisaoGeralModal({
               <div className="p-3.5 bg-gradient-to-br from-[#082B59] to-[#0f3d7a] text-white rounded-2xl shadow-md col-span-2 sm:col-span-1">
                 <span className="text-[10px] font-bold text-cyan-200 uppercase tracking-wider block">{tText('SALDO EM CAIXA ATUAL')}</span>
                 <div className="text-lg sm:text-xl font-black font-mono text-white mt-1">
-                  {caixaBreakdown.saldoSessao.toLocaleString('pt-PT')} XOF
+                  {caixaBreakdown.saldoSessao.toLocaleString(locale)} XOF
                 </div>
                 <span className="text-[9.5px] text-blue-200 font-mono block">
                   {tText('Disponibilidade Imediata')}
@@ -856,7 +863,17 @@ export function VisaoGeralModal({
               </span>
             </div>
             <span className="text-[10px] font-mono text-slate-400">
-              {tText('Período Ativo')}: {periodo.toUpperCase()}
+              {tText('Período Ativo')}: {tText(
+                periodo === 'dia' ? 'Hoje (Dia)' :
+                periodo === 'ontem' ? 'Ontem' :
+                periodo === 'semana' ? 'Esta Semana' :
+                periodo === 'semana_passada' ? 'Semana Passada' :
+                periodo === 'mes' ? 'Este Mês' :
+                periodo === 'mes_passado' ? 'Mês Passado' :
+                periodo === 'ano' ? 'Exercício (Ano)' :
+                periodo === 'custom' ? 'Escolher Dia' :
+                'Todo o Histórico'
+              )}
             </span>
           </div>
 
@@ -894,7 +911,7 @@ export function VisaoGeralModal({
                   </>
                 ) : (
                   <div className="w-full bg-slate-300 dark:bg-slate-700 flex items-center justify-center text-[9px] text-slate-500">
-                    Sem faturas emitidas neste período
+                    {tText('Sem faturas emitidas neste período')}
                   </div>
                 )}
               </div>
@@ -939,7 +956,7 @@ export function VisaoGeralModal({
                         }%`
                       }}
                       className="bg-emerald-500 transition-all duration-500"
-                      title="Entradas em Caixa"
+                      title={tText('Entradas em Caixa')}
                     />
                     <div
                       style={{
@@ -950,12 +967,12 @@ export function VisaoGeralModal({
                         }%`
                       }}
                       className="bg-rose-500 transition-all duration-500"
-                      title="Saídas / Despesas"
+                      title={tText('Saídas / Despesas')}
                     />
                   </>
                 ) : (
                   <div className="w-full bg-slate-300 dark:bg-slate-700 flex items-center justify-center text-[9px] text-slate-500">
-                    Sem movimentos no período selecionado
+                    {tText('Sem movimentos no período selecionado')}
                   </div>
                 )}
               </div>
@@ -963,14 +980,14 @@ export function VisaoGeralModal({
               <div className="flex items-center justify-between text-[11px] font-mono text-slate-600 dark:text-slate-300 pt-1">
                 <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold">
                   <ArrowUpRight className="w-4 h-4" />
-                  <span>Entradas: +{caixaBreakdown.totalEntradas.toLocaleString('pt-PT')} XOF</span>
+                  <span>{tText('Entradas')}: +{caixaBreakdown.totalEntradas.toLocaleString(locale)} XOF</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400 font-bold">
                   <ArrowDownRight className="w-4 h-4" />
-                  <span>Saídas: -{caixaBreakdown.totalSaidas.toLocaleString('pt-PT')} XOF</span>
+                  <span>{tText('Saídas')}: -{caixaBreakdown.totalSaidas.toLocaleString(locale)} XOF</span>
                 </div>
                 <div className="font-bold text-slate-800 dark:text-white">
-                  Saldo Líquido: {caixaBreakdown.saldoSessao.toLocaleString('pt-PT')} XOF
+                  {tText('Saldo Líquido')}: {caixaBreakdown.saldoSessao.toLocaleString(locale)} XOF
                 </div>
               </div>
             </div>
@@ -989,7 +1006,7 @@ export function VisaoGeralModal({
                         )}%`
                       }}
                       className="bg-emerald-500 transition-all duration-500"
-                      title={`Cobrado em Caixa: ${faturasBreakdown.valorPago.toLocaleString('pt-PT')} XOF`}
+                      title={`${tText('Cobrado em Caixa')}: ${faturasBreakdown.valorPago.toLocaleString(locale)} XOF`}
                     />
                     <div
                       style={{
@@ -999,12 +1016,12 @@ export function VisaoGeralModal({
                         )}%`
                       }}
                       className="bg-amber-400 transition-all duration-500"
-                      title={`Pendente: ${faturasBreakdown.valorPendente.toLocaleString('pt-PT')} XOF`}
+                      title={`${tText('Pendente')}: ${faturasBreakdown.valorPendente.toLocaleString(locale)} XOF`}
                     />
                   </>
                 ) : (
                   <div className="w-full bg-slate-300 dark:bg-slate-700 flex items-center justify-center text-[9px] text-slate-500">
-                    A aguardar faturação para cálculo do índice
+                    {tText('A aguardar faturação para cálculo do índice')}
                   </div>
                 )}
               </div>
@@ -1012,14 +1029,14 @@ export function VisaoGeralModal({
               <div className="flex items-center justify-between text-[11px] font-mono text-slate-600 dark:text-slate-300 pt-1 flex-wrap gap-2">
                 <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold">
                   <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
-                  <span>{tText('Cobrado:')} {faturasBreakdown.valorPago.toLocaleString('pt-PT')} XOF ({faturasBreakdown.totalValor > 0 ? Math.round((faturasBreakdown.valorPago / faturasBreakdown.totalValor) * 100) : 0}%)</span>
+                  <span>{tText('Cobrado')}: {faturasBreakdown.valorPago.toLocaleString(locale)} XOF ({faturasBreakdown.totalValor > 0 ? Math.round((faturasBreakdown.valorPago / faturasBreakdown.totalValor) * 100) : 0}%)</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-bold">
                   <span className="w-3 h-3 rounded-full bg-amber-400 inline-block"></span>
-                  <span>{tText('Pendente de Cobrança:')} {faturasBreakdown.valorPendente.toLocaleString('pt-PT')} XOF</span>
+                  <span>{tText('Pendente de Cobrança')}: {faturasBreakdown.valorPendente.toLocaleString(locale)} XOF</span>
                 </div>
                 <div className="font-bold text-blue-600 dark:text-blue-400">
-                  {tText('Total Emitido:')} {faturasBreakdown.totalValor.toLocaleString('pt-PT')} XOF
+                  {tText('Total Emitido')}: {faturasBreakdown.totalValor.toLocaleString(locale)} XOF
                 </div>
               </div>
             </div>
@@ -1142,7 +1159,7 @@ export function VisaoGeralModal({
               {unifiedTableList.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="p-10 text-center text-slate-400 font-mono text-xs">
-                    Nenhum registo encontrado com os critérios selecionados para este período.
+                    {tText('Nenhum registo encontrado com os critérios selecionados para este período.')}
                   </td>
                 </tr>
               ) : (
@@ -1193,11 +1210,11 @@ export function VisaoGeralModal({
                     <td className="p-2 sm:p-3 text-right font-mono font-bold whitespace-nowrap">
                       {item.valorEntrada > 0 ? (
                         <span className="text-emerald-600 dark:text-emerald-400">
-                          +{item.valorEntrada.toLocaleString('pt-PT')} XOF
+                          +{item.valorEntrada.toLocaleString(locale)} XOF
                         </span>
                       ) : item.valorSaida > 0 ? (
                         <span className="text-rose-600 dark:text-rose-400">
-                          -{item.valorSaida.toLocaleString('pt-PT')} XOF
+                          -{item.valorSaida.toLocaleString(locale)} XOF
                         </span>
                       ) : (
                         '-'
@@ -1218,7 +1235,9 @@ export function VisaoGeralModal({
                             : 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300'
                         }`}
                       >
-                        {item.estadoOuBanco.toUpperCase()}
+                        {(['paga','parcial','confirmada','anulada','rascunho','total'].includes(item.estadoOuBanco)
+                          ? tText(item.estadoOuBanco === 'paga' ? 'Totalmente Paga' : item.estadoOuBanco === 'parcial' ? 'Amortização Parcial' : item.estadoOuBanco === 'rascunho' ? 'Rascunho' : item.estadoOuBanco === 'confirmada' ? 'Confirmada' : item.estadoOuBanco === 'anulada' ? 'Anulada' : item.estadoOuBanco)
+                          : item.estadoOuBanco).toUpperCase()}
                       </span>
                     </td>
 
@@ -1237,7 +1256,7 @@ export function VisaoGeralModal({
                                 if (onViewFatura) onViewFatura(item.originalRef as FaturaIMP);
                               }}
                               className="p-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg shadow-xs transition-all active:scale-95 cursor-pointer"
-                              title={`Visualizar Detalhes da Fatura ${item.codigo}`}
+                              title={`${tText('Visualizar Detalhes da Fatura')} ${item.codigo}`}
                             >
                               <Eye className="w-3.5 h-3.5" />
                             </button>
@@ -1248,7 +1267,7 @@ export function VisaoGeralModal({
                                 setTimeout(() => window.print(), 300);
                               }}
                               className="p-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-xs transition-all active:scale-95 cursor-pointer"
-                              title={`Imprimir Fatura ${item.codigo}`}
+                              title={`${tText('Imprimir Fatura')} ${item.codigo}`}
                             >
                               <Printer className="w-3.5 h-3.5" />
                             </button>
@@ -1263,7 +1282,7 @@ export function VisaoGeralModal({
                                 if (onViewRecibo) onViewRecibo(item.originalRef as ReciboIMP);
                               }}
                               className="p-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg shadow-xs transition-all active:scale-95 cursor-pointer"
-                              title={`Visualizar Recibo ${item.codigo}`}
+                              title={`${tText('Visualizar Recibo')} ${item.codigo}`}
                             >
                               <Eye className="w-3.5 h-3.5" />
                             </button>
@@ -1274,7 +1293,7 @@ export function VisaoGeralModal({
                                 setTimeout(() => window.print(), 300);
                               }}
                               className="p-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg shadow-xs transition-all active:scale-95 cursor-pointer"
-                              title={`Imprimir Recibo ${item.codigo}`}
+                              title={`${tText('Imprimir Recibo')} ${item.codigo}`}
                             >
                               <Printer className="w-3.5 h-3.5" />
                             </button>
@@ -1286,7 +1305,7 @@ export function VisaoGeralModal({
                             type="button"
                             onClick={() => window.print()}
                             className="p-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg shadow-xs transition-all active:scale-95 cursor-pointer"
-                            title={`Imprimir Comprovativo do Movimento ${item.codigo}`}
+                            title={`${tText('Imprimir Comprovativo do Movimento')} ${item.codigo}`}
                           >
                             <Printer className="w-3.5 h-3.5" />
                           </button>

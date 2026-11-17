@@ -52,7 +52,8 @@ export function HistoricoContaModal({
   recibos
 }: HistoricoContaModalProps) {
   const { theme } = useTheme();
-  const { tText } = useLanguage();
+  const { tText, language } = useLanguage();
+  const locale = language === 'fr' ? 'fr-FR' : language === 'en' ? 'en-GB' : 'pt-PT';
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTipo, setFilterTipo] = useState<'todos' | 'faturas' | 'recibos'>('todos');
@@ -80,7 +81,7 @@ export function HistoricoContaModal({
       tipoDoc: 'FATURA',
       codigoDoc: f.nFatura,
       navio: f.navio || 'N/D',
-      descricao: f.itens && f.itens.length > 0 ? f.itens[0].descricao : 'Emissão de Fatura Portuária',
+      descricao: f.itens && f.itens.length > 0 ? f.itens[0].descricao : tText('Emissão de Fatura Portuária'),
       debito: f.estado === 'anulada' ? 0 : f.total,
       credito: 0,
       saldoRestanteDoc: f.saldo_pendente,
@@ -93,7 +94,7 @@ export function HistoricoContaModal({
       tipoDoc: 'RECIBO',
       codigoDoc: r.nRecibo,
       navio: r.navio || 'N/D',
-      descricao: `Liquidação / Amortização de ${r.nFatura} (${r.banco} • Talão #${r.talao})`,
+      descricao: `${tText('Liquidação / Amortização de')} ${r.nFatura} (${r.banco} • ${tText('Talão')} #${r.talao})`,
       debito: 0,
       credito: r.valor,
       saldoRestanteDoc: r.saldoRestante,
@@ -162,7 +163,7 @@ export function HistoricoContaModal({
                 </span>
                 {clienteNif && (
                   <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
-                    NIF: {clienteNif}
+                    {tText('NIF')}: {clienteNif}
                   </span>
                 )}
               </div>
@@ -202,9 +203,9 @@ export function HistoricoContaModal({
                 <ArrowUpRight className="w-4 h-4 text-blue-500" />
               </div>
               <p className="text-xl sm:text-2xl font-black text-blue-600 dark:text-blue-400 mt-2 font-mono">
-                {totalFacturado.toLocaleString('pt-PT')} <span className="text-xs font-normal">XOF</span>
+                {totalFacturado.toLocaleString(locale)} <span className="text-xs font-normal">XOF</span>
               </p>
-              <span className="text-[10px] text-slate-400 mt-1 block">Faturas oficiais homologadas</span>
+              <span className="text-[10px] text-slate-400 mt-1 block">{tText('Faturas oficiais homologadas')}</span>
             </div>
 
             {/* Total Pago (Créditos) */}
@@ -214,9 +215,9 @@ export function HistoricoContaModal({
                 <ArrowDownRight className="w-4 h-4 text-emerald-500" />
               </div>
               <p className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-2 font-mono">
-                {totalPago.toLocaleString('pt-PT')} <span className="text-xs font-normal">XOF</span>
+                {totalPago.toLocaleString(locale)} <span className="text-xs font-normal">XOF</span>
               </p>
-              <span className="text-[10px] text-slate-400 mt-1 block">Recibos de caixa emitidos</span>
+              <span className="text-[10px] text-slate-400 mt-1 block">{tText('Recibos de caixa emitidos')}</span>
             </div>
 
             {/* Saldo Devedor Restante */}
@@ -238,10 +239,10 @@ export function HistoricoContaModal({
               <p className={`text-xl sm:text-2xl font-black mt-2 font-mono ${
                 saldoDevedor > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'
               }`}>
-                {saldoDevedor.toLocaleString('pt-PT')} <span className="text-xs font-normal">XOF</span>
+                {saldoDevedor.toLocaleString(locale)} <span className="text-xs font-normal">XOF</span>
               </p>
               <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 block font-medium">
-                {saldoDevedor > 0 ? 'Valor pendente de cobrança' : 'Conta totalmente regularizada'}
+                {saldoDevedor > 0 ? tText('Valor pendente de cobrança') : tText('Conta totalmente regularizada')}
               </span>
             </div>
           </div>
@@ -353,14 +354,14 @@ export function HistoricoContaModal({
                             <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">{m.descricao}</p>
                           </td>
                           <td className="py-3 px-4 text-right font-mono font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">
-                            {m.debito > 0 ? `+ ${m.debito.toLocaleString('pt-PT')} XOF` : '—'}
+                            {m.debito > 0 ? `+ ${m.debito.toLocaleString(locale)} XOF` : '—'}
                           </td>
                           <td className="py-3 px-4 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
-                            {m.credito > 0 ? `- ${m.credito.toLocaleString('pt-PT')} XOF` : '—'}
+                            {m.credito > 0 ? `- ${m.credito.toLocaleString(locale)} XOF` : '—'}
                           </td>
                           <td className="py-3 px-4 text-right font-mono font-bold whitespace-nowrap">
                             {m.saldoRestanteDoc !== undefined
-                              ? `${m.saldoRestanteDoc.toLocaleString('pt-PT')} XOF`
+                              ? `${m.saldoRestanteDoc.toLocaleString(locale)} XOF`
                               : '—'}
                           </td>
                           <td className="py-3 px-4 text-center whitespace-nowrap">
@@ -375,7 +376,15 @@ export function HistoricoContaModal({
                                 ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
                                 : 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
                             }`}>
-                              {m.estado}
+                              {tText(
+                                m.estado === 'paga' ? 'Totalmente Paga' :
+                                m.estado === 'parcial' ? 'Amortização Parcial' :
+                                m.estado === 'confirmada' ? 'Confirmada' :
+                                m.estado === 'anulada' ? 'Anulada' :
+                                m.estado === 'total' ? 'Liquidado Totalmente' :
+                                m.estado === 'rascunho' ? 'Rascunho' :
+                                m.estado
+                              )}
                             </span>
                           </td>
                         </tr>
@@ -392,7 +401,7 @@ export function HistoricoContaModal({
         <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between text-xs text-slate-500">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-blue-500" />
-            <span>Extrato Oficial emitido pelo Instituto Marítimo Portuário (IMP)</span>
+            <span>{tText('Extrato Oficial emitido pelo Instituto Marítimo Portuário (IMP)')}</span>
           </div>
           <button
             type="button"

@@ -54,6 +54,7 @@ export function ConfiguracaoModule({
 }: ConfiguracaoModuleProps) {
   const { theme } = useTheme();
   const { language, setLanguage, tText, translationsDict, updateTranslationsDict, resetTranslationsDict } = useLanguage();
+  const locale = language === 'pt' ? 'pt-PT' : language === 'fr' ? 'fr-FR' : 'en-GB';
   const [activeTab, setActiveTab] = useState<'taxas' | 'servidor' | 'smtp' | 'cookies' | 'idiomas' | 'backup' | 'dev'>('taxas');
   const [devSummary, setDevSummary] = useState<any>(null);
   const [devLoading, setDevLoading] = useState(false);
@@ -143,13 +144,13 @@ export function ConfiguracaoModule({
   }, [isSuperAdmin, sysCookies]);
 
   const handleSaveTaxas = () => {
-    setSavedMsg('Tabela de Taxas e Parâmetros Portuários guardada com sucesso!');
+    setSavedMsg(tText('Tabela de Taxas e Parâmetros Portuários guardada com sucesso!'));
     setTimeout(() => setSavedMsg(''), 4000);
   };
 
   const handleAddTaxaSubmit = () => {
     if (!newTaxaData.codigoServico || !newTaxaData.descricaoServico) {
-      alert('Por favor preencha o Código e a Descrição do Serviço.');
+      alert(tText('Por favor preencha o Código e a Descrição do Serviço.'));
       return;
     }
     const created: ParamentroTaxaPortuaria = {
@@ -169,17 +170,17 @@ export function ConfiguracaoModule({
       unidadeMedida: 'Por Manobra',
       valorUnitarioXOF: 100000
     });
-    setSavedMsg(`Novo preço de rubrica ${created.codigoServico} emitido e registado com sucesso!`);
+    setSavedMsg(`${tText('Novo preço de rubrica')} ${created.codigoServico} ${tText('emitido e registado com sucesso!')}`);
     setTimeout(() => setSavedMsg(''), 5000);
   };
 
   const handleSaveSmtp = () => {
-    setSmtpSavedMsg('Configurações de SMTP guardadas com sucesso! Envio automático de faturas PDF ativado.');
+    setSmtpSavedMsg(tText('Configurações de SMTP guardadas com sucesso! Envio automático de faturas PDF ativado.'));
     setTimeout(() => setSmtpSavedMsg(''), 4000);
   };
 
   const handleTestSmtp = () => {
-    setSmtpSavedMsg(`E-mail de teste enviado com sucesso para ${smtpConfig.senderEmail} através de ${smtpConfig.host}:${smtpConfig.port} (${smtpConfig.encryption}). Servidor SMTP respondeu 250 OK.`);
+    setSmtpSavedMsg(`${tText('E-mail de teste enviado com sucesso para')} ${smtpConfig.senderEmail} ${tText('através de')} ${smtpConfig.host}:${smtpConfig.port} (${smtpConfig.encryption}). ${tText('Servidor SMTP respondeu 250 OK.')}`);
     setTimeout(() => setSmtpSavedMsg(''), 6000);
   };
 
@@ -187,7 +188,7 @@ export function ConfiguracaoModule({
     const updated = [...sysCookies];
     updated[idx].value = newVal;
     setSysCookies(updated);
-    setCookieSavedMsg(`Cookie ${updated[idx].name} atualizado com sucesso no ambiente SuperAdmin!`);
+    setCookieSavedMsg(`${tText('Cookie')} ${updated[idx].name} ${tText('atualizado com sucesso no ambiente SuperAdmin!')}`);
     setTimeout(() => setCookieSavedMsg(''), 4000);
   };
 
@@ -199,10 +200,10 @@ export function ConfiguracaoModule({
             theme === 'dark' ? 'text-white' : 'text-slate-900'
           }`}>
             <Settings className="w-5 h-5 text-blue-500" />
-            Configuração do Sistema, Tarifas, Servidor & SMTP
+            {tText('Configuração do Sistema, Tarifas, Servidor & SMTP')}
           </h2>
           <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-            Parâmetros das taxas portuárias, servidor PostgreSQL, envio automático de faturas PDF e cookies de dev SuperAdmin
+            {tText('Parâmetros das taxas portuárias, servidor PostgreSQL, envio automático de faturas PDF e cookies de dev SuperAdmin')}
           </p>
         </div>
       </div>
@@ -221,7 +222,7 @@ export function ConfiguracaoModule({
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
         >
-          1. Tabela de Taxas & Tarifas
+          {tText('1. Tabela de Taxas & Tarifas')}
         </button>
         <button
           onClick={() => setActiveTab('servidor')}
@@ -233,7 +234,7 @@ export function ConfiguracaoModule({
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
         >
-          2. Servidor On-Premises
+          {tText('2. Servidor On-Premises')}
         </button>
         <button
           onClick={() => setActiveTab('smtp')}
@@ -246,7 +247,7 @@ export function ConfiguracaoModule({
           }`}
         >
           <Mail className="w-3.5 h-3.5" />
-          3. Configurações de SMTP & E-mail
+          {tText('3. Configurações de SMTP & E-mail')}
         </button>
 
         {/* 4. SuperAdmin Dev Cookies Tab */}
@@ -261,7 +262,7 @@ export function ConfiguracaoModule({
           }`}
         >
           <Cookie className="w-3.5 h-3.5 text-purple-300" />
-          4. Cookies do Sistema (SuperAdmin)
+          {tText('4. Cookies do Sistema (SuperAdmin)')}
         </button>
 
         {/* 5. SuperAdmin i18n Language Editor Tab */}
@@ -276,7 +277,7 @@ export function ConfiguracaoModule({
           }`}
         >
           <Globe className="w-3.5 h-3.5 text-emerald-300" />
-          5. Idiomas & Dicionário i18n (JSON SuperAdmin)
+          {tText('5. Idiomas & Dicionário i18n (JSON SuperAdmin)')}
         </button>
 
         {/* 6. SuperAdmin System JSON Backup Tab */}
@@ -291,7 +292,7 @@ export function ConfiguracaoModule({
           }`}
         >
           <Database className="w-3.5 h-3.5 text-blue-300" />
-          6. Exportação & Backup JSON (SuperAdmin)
+          {tText('6. Exportação & Backup JSON (SuperAdmin)')}
         </button>
 
         {/* 7. Developer area: sync + trash/restore */}
@@ -306,7 +307,7 @@ export function ConfiguracaoModule({
           }`}
         >
           <Trash2 className="w-3.5 h-3.5" />
-          7. Área de Desenvolvedor (Limpeza & Recuperação)
+          {tText('7. Área de Desenvolvedor (Limpeza & Recuperação)')}
         </button>
       </div>
 
@@ -327,10 +328,10 @@ export function ConfiguracaoModule({
           }`}>
             <div>
               <h3 className={`font-bold text-sm ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                Parâmetros Oficiais de Tarifas Portuárias (XOF)
+                {tText('Parâmetros Oficiais de Tarifas Portuárias (XOF)')}
               </h3>
               <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                Valores aplicados no cálculo automático das faturas de navios
+                {tText('Valores aplicados no cálculo automático das faturas de navios')}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -339,14 +340,14 @@ export function ConfiguracaoModule({
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-lg shadow-blue-600/20 cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
-                Emitir Novo Preço de Rubrica
+                {tText('Emitir Novo Preço de Rubrica')}
               </button>
               <button
                 onClick={handleSaveTaxas}
                 className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-lg shadow-emerald-600/20 cursor-pointer"
               >
                 <Save className="w-4 h-4" />
-                Guardar Alterações
+                {tText('Guardar Alterações')}
               </button>
             </div>
           </div>
@@ -368,19 +369,19 @@ export function ConfiguracaoModule({
                   </p>
                 </div>
                 <div>
-                  <span className="text-slate-500 block text-[10px] font-mono">CATEGORIA:</span>
+                  <span className="text-slate-500 block text-[10px] font-mono">{tText('CATEGORIA:')}</span>
                   <span className={`font-medium ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                    {taxa.categoria}
+                    {tText(taxa.categoria)}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block text-[10px] font-mono">UNIDADE DE MEDIDA:</span>
+                  <span className="text-slate-500 block text-[10px] font-mono">{tText('UNIDADE DE MEDIDA:')}</span>
                   <span className={`font-mono ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                    {taxa.unidadeMedida}
+                    {tText(taxa.unidadeMedida)}
                   </span>
                 </div>
                 <div>
-                  <label className="text-slate-500 block text-[10px] font-mono mb-0.5">VALOR UNITÁRIO (XOF):</label>
+                  <label className="text-slate-500 block text-[10px] font-mono mb-0.5">{tText('VALOR UNITÁRIO (XOF):')}</label>
                   <input
                     type="number"
                     value={taxa.valorUnitarioXOF}
@@ -409,10 +410,10 @@ export function ConfiguracaoModule({
               theme === 'dark' ? 'text-white' : 'text-slate-900'
             }`}>
               <Server className="w-4 h-4 text-emerald-500" />
-              Infraestrutura do Servidor Local On-Premises (IMP Bissau)
+              {tText('Infraestrutura do Servidor Local On-Premises (IMP Bissau)')}
             </h3>
             <p className={`text-xs mt-0.5 ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-              Estado em tempo real da máquina e da base de dados PostgreSQL
+              {tText('Estado em tempo real da máquina e da base de dados PostgreSQL')}
             </p>
           </div>
 
@@ -421,21 +422,21 @@ export function ConfiguracaoModule({
               theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-700'
             }`}>
               <div className="flex justify-between">
-                <span className="text-slate-500">NOME DO SERVIDOR:</span>
+                <span className="text-slate-500">{tText('NOME DO SERVIDOR:')}</span>
                 <span className={`font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                   {servidor.nomeServidor}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">AMBIENTE:</span>
-                <span className="text-emerald-500 font-semibold">{servidor.ambiente}</span>
+                <span className="text-slate-500">{tText('AMBIENTE:')}</span>
+                <span className="text-emerald-500 font-semibold">{tText(servidor.ambiente)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">IP DE REDE LOCAL:</span>
+                <span className="text-slate-500">{tText('IP DE REDE LOCAL:')}</span>
                 <span className="text-blue-500 font-semibold">{servidor.ipLocalServer}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">VERSÃO DA APLICAÇÃO:</span>
+                <span className="text-slate-500">{tText('VERSÃO DA APLICAÇÃO:')}</span>
                 <span className={theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}>{servidor.versaoApp}</span>
               </div>
             </div>
@@ -444,26 +445,26 @@ export function ConfiguracaoModule({
               theme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-700'
             }`}>
               <div className="flex justify-between">
-                <span className="text-slate-500">MOTOR DE BASE DE DADOS:</span>
+                <span className="text-slate-500">{tText('MOTOR DE BASE DE DADOS:')}</span>
                 <span className={`font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                   {servidor.bdEngine}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">DIRETÓRIO DE BACKUP:</span>
+                <span className="text-slate-500">{tText('DIRETÓRIO DE BACKUP:')}</span>
                 <span className={`truncate ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
                   {servidor.diretorioBackup}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">ÚLTIMO BACKUP AUTOMÁTICO:</span>
+                <span className="text-slate-500">{tText('ÚLTIMO BACKUP AUTOMÁTICO:')}</span>
                 <span className="text-emerald-500 font-semibold">{servidor.ultimoBackupAuto}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">ESTADO DA CONEXÃO:</span>
+                <span className="text-slate-500">{tText('ESTADO DA CONEXÃO:')}</span>
                 <span className="text-emerald-500 font-bold flex items-center gap-1">
                   <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                  {servidor.statusConexao}
+                  {tText(servidor.statusConexao)}
                 </span>
               </div>
             </div>
@@ -471,11 +472,11 @@ export function ConfiguracaoModule({
 
           <div className="pt-2 flex justify-end">
             <button
-              onClick={() => alert('Backup manual efetuado e armazenado com sucesso em /var/backups/nhominca/postgresql!')}
+              onClick={() => alert(tText('Backup manual efetuado e armazenado com sucesso em /var/backups/nhominca/postgresql!'))}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-lg shadow-blue-600/20 cursor-pointer"
             >
               <HardDrive className="w-4 h-4" />
-              Executar Backup Manual Agora
+              {tText('Executar Backup Manual Agora')}
             </button>
           </div>
         </div>
@@ -489,10 +490,10 @@ export function ConfiguracaoModule({
             <div>
               <h3 className={`font-bold text-sm flex items-center gap-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                 <Mail className="w-4 h-4 text-blue-500" />
-                Configurações do Servidor de E-mail (SMTP) & Envio Automático de Faturas PDF
+                {tText('Configurações do Servidor de E-mail (SMTP) & Envio Automático de Faturas PDF')}
               </h3>
               <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                Permite enviar faturas digitais e recibos PDF diretamente para o e-mail cadastrado das agências marítimas
+                {tText('Permite enviar faturas digitais e recibos PDF diretamente para o e-mail cadastrado das agências marítimas')}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -501,14 +502,14 @@ export function ConfiguracaoModule({
                 className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-blue-600/20 cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5" />
-                Testar Conexão SMTP
+                {tText('Testar Conexão SMTP')}
               </button>
               <button
                 onClick={handleSaveSmtp}
                 className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-lg shadow-emerald-600/20 cursor-pointer"
               >
                 <Save className="w-4 h-4" />
-                Guardar SMTP
+                {tText('Guardar SMTP')}
               </button>
             </div>
           </div>
@@ -522,7 +523,7 @@ export function ConfiguracaoModule({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             <div>
-              <label className="block text-slate-500 font-mono text-[10px] mb-1">SERVIDOR SMTP HOST:</label>
+              <label className="block text-slate-500 font-mono text-[10px] mb-1">{tText('SERVIDOR SMTP HOST:')}</label>
               <input
                 type="text"
                 value={smtpConfig.host}
@@ -533,7 +534,7 @@ export function ConfiguracaoModule({
               />
             </div>
             <div>
-              <label className="block text-slate-500 font-mono text-[10px] mb-1">PORTA SMTP:</label>
+              <label className="block text-slate-500 font-mono text-[10px] mb-1">{tText('PORTA SMTP:')}</label>
               <input
                 type="text"
                 value={smtpConfig.port}
@@ -544,7 +545,7 @@ export function ConfiguracaoModule({
               />
             </div>
             <div>
-              <label className="block text-slate-500 font-mono text-[10px] mb-1">ENCRIPTAÇÃO:</label>
+              <label className="block text-slate-500 font-mono text-[10px] mb-1">{tText('ENCRIPTAÇÃO:')}</label>
               <select
                 value={smtpConfig.encryption}
                 onChange={(e) => setSmtpConfig({ ...smtpConfig, encryption: e.target.value })}
@@ -554,11 +555,11 @@ export function ConfiguracaoModule({
               >
                 <option value="TLS">TLS (STARTTLS)</option>
                 <option value="SSL">SSL / TLS</option>
-                <option value="Nenhum">Nenhum (Plain)</option>
+                <option value="Nenhum">{tText('Nenhum (Plain)')}</option>
               </select>
             </div>
             <div>
-              <label className="block text-slate-500 font-mono text-[10px] mb-1">UTILIZADOR / AUTENTICAÇÃO SMTP:</label>
+              <label className="block text-slate-500 font-mono text-[10px] mb-1">{tText('UTILIZADOR / AUTENTICAÇÃO SMTP:')}</label>
               <input
                 type="text"
                 value={smtpConfig.username}
@@ -569,7 +570,7 @@ export function ConfiguracaoModule({
               />
             </div>
             <div>
-              <label className="block text-slate-500 font-mono text-[10px] mb-1">PALAVRA-PASSE SMTP:</label>
+              <label className="block text-slate-500 font-mono text-[10px] mb-1">{tText('PALAVRA-PASSE SMTP:')}</label>
               <input
                 type="password"
                 value={smtpConfig.password}
@@ -580,7 +581,7 @@ export function ConfiguracaoModule({
               />
             </div>
             <div>
-              <label className="block text-slate-500 font-mono text-[10px] mb-1">E-MAIL DO REMETENTE (FROM):</label>
+              <label className="block text-slate-500 font-mono text-[10px] mb-1">{tText('E-MAIL DO REMETENTE (FROM):')}</label>
               <input
                 type="text"
                 value={smtpConfig.senderEmail}
@@ -591,7 +592,7 @@ export function ConfiguracaoModule({
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-slate-500 font-mono text-[10px] mb-1">NOME DO REMETENTE:</label>
+              <label className="block text-slate-500 font-mono text-[10px] mb-1">{tText('NOME DO REMETENTE:')}</label>
               <input
                 type="text"
                 value={smtpConfig.senderName}
@@ -612,7 +613,7 @@ export function ConfiguracaoModule({
                 className="w-4 h-4 text-blue-600 rounded border-slate-700 focus:ring-blue-500"
               />
               <span className={`text-xs font-medium ${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>
-                Ativar envio automático de faturas digitais em PDF por e-mail para as Agências Marítimas ao confirmar e emitir fatura oficial
+                {tText('Ativar envio automático de faturas digitais em PDF por e-mail para as Agências Marítimas ao confirmar e emitir fatura oficial')}
               </span>
             </label>
           </div>
@@ -628,14 +629,14 @@ export function ConfiguracaoModule({
             <div>
               <h3 className={`font-bold text-sm flex items-center gap-2 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-900'}`}>
                 <Cookie className="w-5 h-5 text-purple-500" />
-                Configuração de Cookies de Sistema & Dev Tools (Privilégio SuperAdmin)
+                {tText('Configuração de Cookies de Sistema & Dev Tools (Privilégio SuperAdmin)')}
               </h3>
               <p className={`text-xs ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                Parâmetros avançados de cookies do navegador, chaves de encriptação e tokens de auditoria de desenvolvimento
+                {tText('Parâmetros avançados de cookies do navegador, chaves de encriptação e tokens de auditoria de desenvolvimento')}
               </p>
             </div>
             <span className="text-[10px] font-mono px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold uppercase">
-              SuperAdmin Exclusive
+              {tText('SuperAdmin Exclusive')}
             </span>
           </div>
 
@@ -649,9 +650,9 @@ export function ConfiguracaoModule({
           {!isSuperAdmin ? (
             <div className="p-8 text-center rounded-2xl bg-slate-950 border border-rose-500/30 text-rose-300 space-y-3">
               <Lock className="w-10 h-10 text-rose-500 mx-auto" />
-              <h4 className="font-bold text-sm uppercase tracking-wider">Acesso Restrito ao Desenvolvedor (SuperAdmin)</h4>
+              <h4 className="font-bold text-sm uppercase tracking-wider">{tText('Acesso Restrito ao Desenvolvedor (SuperAdmin)')}</h4>
               <p className="text-xs max-w-md mx-auto text-slate-400">
-                Apenas o perfil <strong>SuperAdmin (Desenvolvedor de Sistemas)</strong> possui autorização institucional para consultar e modificar os cookies de sessão, chaves de encriptação e cabeçalhos HTTP do sistema.
+                {tText('Apenas o perfil')} <strong>SuperAdmin ({tText('Desenvolvedor de Sistemas')})</strong> {tText('possui autorização institucional para consultar e modificar os cookies de sessão, chaves de encriptação e cabeçalhos HTTP do sistema.')}
               </p>
             </div>
           ) : (
@@ -659,10 +660,10 @@ export function ConfiguracaoModule({
               <div className="p-4 rounded-xl bg-purple-950/30 border border-purple-500/30 text-purple-200 text-xs font-mono flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Terminal className="w-4 h-4 text-purple-400" />
-                  <span>Sessão Dev SuperAdmin Autenticada • document.cookie sincronizado em tempo real</span>
+                  <span>{tText('Sessão Dev SuperAdmin Autenticada • document.cookie sincronizado em tempo real')}</span>
                 </div>
                 <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30">
-                  HTTP-Only & Secure Active
+                  {tText('HTTP-Only & Secure Active')}
                 </span>
               </div>
 
@@ -678,7 +679,7 @@ export function ConfiguracaoModule({
                       <div className="flex items-center gap-2">
                         <Key className="w-3.5 h-3.5 text-purple-400" />
                         <span className="font-bold text-purple-400">{c.name}</span>
-                        <span className="text-[10px] text-slate-500">Domain: {c.domain} | Path: {c.path}</span>
+                        <span className="text-[10px] text-slate-500">{tText('Domínio:')} {c.domain} | {tText('Caminho:')} {c.path}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-[9px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded">
@@ -708,7 +709,7 @@ export function ConfiguracaoModule({
                         className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow cursor-pointer"
                       >
                         <Save className="w-3.5 h-3.5" />
-                        Gravar
+                        {tText('Gravar')}
                       </button>
                     </div>
                   </div>
@@ -727,20 +728,20 @@ export function ConfiguracaoModule({
             <div>
               <div className="flex items-center gap-2">
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase">
-                  Módulo de Internacionalização (i18n)
+                  {tText('Módulo de Internacionalização (i18n)')}
                 </span>
                 <span className="text-xs font-mono text-slate-500">
-                  Edição em Tempo Real • Persistência Local
+                  {tText('Edição em Tempo Real • Persistência Local')}
                 </span>
               </div>
               <h3 className={`text-base font-bold tracking-tight mt-1 flex items-center gap-2 ${
                 theme === 'dark' ? 'text-white' : 'text-slate-900'
               }`}>
                 <Globe className="w-5 h-5 text-emerald-500" />
-                Gestão de Idiomas & Edição de Ficheiros JSON de Tradução
+                {tText('Gestão de Idiomas & Edição de Ficheiros JSON de Tradução')}
               </h3>
               <p className="text-xs text-slate-400">
-                Ajuste qualquer texto do sistema (Português, Français, English). As alterações aplicam-se instantaneamente em todo o dashboard e formulários.
+                {tText('Ajuste qualquer texto do sistema (Português, Français, English). As alterações aplicam-se instantaneamente em todo o dashboard e formulários.')}
               </p>
             </div>
 
@@ -748,17 +749,17 @@ export function ConfiguracaoModule({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => {
-                  if (window.confirm('Tem a certeza que deseja restaurar as traduções padrão de fábrica? Todas as edições personalizadas serão eliminadas.')) {
+                  if (window.confirm(tText('Tem a certeza que deseja restaurar as traduções padrão de fábrica? Todas as edições personalizadas serão eliminadas.'))) {
                     resetTranslationsDict();
-                    setSavedMsg('Dicionários de tradução repostos para as configurações padrão de fábrica!');
+                    setSavedMsg(tText('Dicionários de tradução repostos para as configurações padrão de fábrica!'));
                     setTimeout(() => setSavedMsg(''), 4000);
                   }
                 }}
                 className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all border border-slate-700 cursor-pointer"
-                title="Repor ficheiros JSON padrão de fábrica"
+                title={tText('Repor ficheiros JSON padrão de fábrica')}
               >
                 <RotateCcw className="w-4 h-4 text-amber-400" />
-                <span>Restaurar Padrão</span>
+                <span>{tText('Restaurar Padrão')}</span>
               </button>
             </div>
           </div>
@@ -767,7 +768,7 @@ export function ConfiguracaoModule({
           {!isSuperAdmin && (
             <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-500 text-xs flex items-center gap-2 font-mono">
               <Lock className="w-4 h-4 shrink-0" />
-              <span>Privilégio de SuperAdmin / Dev: Você está em modo de pré-visualização. Apenas SuperAdministradores podem publicar alterações nos ficheiros JSON.</span>
+              <span>{tText('Privilégio de SuperAdmin / Dev: Você está em modo de pré-visualização. Apenas SuperAdministradores podem publicar alterações nos ficheiros JSON.')}</span>
             </div>
           )}
 
@@ -775,7 +776,7 @@ export function ConfiguracaoModule({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             {/* Language Selection */}
             <div className="flex items-center gap-2 p-1.5 rounded-xl bg-slate-950 border border-slate-800">
-              <span className="text-[10px] font-mono text-slate-400 uppercase font-bold px-2">Editar Idioma:</span>
+              <span className="text-[10px] font-mono text-slate-400 uppercase font-bold px-2">{tText('Editar Idioma:')}</span>
               <button
                 onClick={() => {
                   setEditLang('pt');
@@ -787,7 +788,7 @@ export function ConfiguracaoModule({
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                🇵🇹 Português (PT)
+                {tText('🇵🇹 Português (PT)')}
               </button>
               <button
                 onClick={() => {
@@ -800,7 +801,7 @@ export function ConfiguracaoModule({
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                🇫🇷 Français (FR)
+                {tText('🇫🇷 Français (FR)')}
               </button>
               <button
                 onClick={() => {
@@ -813,7 +814,7 @@ export function ConfiguracaoModule({
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                🇺🇸 English (EN)
+                {tText('🇺🇸 English (EN)')}
               </button>
             </div>
 
@@ -828,7 +829,7 @@ export function ConfiguracaoModule({
                 }`}
               >
                 <Edit3 className="w-3.5 h-3.5" />
-                <span>Editor Visual por Secção</span>
+                <span>{tText('Editor Visual por Secção')}</span>
               </button>
               <button
                 onClick={() => setI18nMode('json')}
@@ -839,7 +840,7 @@ export function ConfiguracaoModule({
                 }`}
               >
                 <FileJson className="w-3.5 h-3.5" />
-                <span>Editor JSON Direto</span>
+                <span>{tText('Editor JSON Direto')}</span>
               </button>
             </div>
           </div>
@@ -847,7 +848,7 @@ export function ConfiguracaoModule({
           {/* JSON Error Message */}
           {jsonErr && (
             <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-mono">
-              ⚠ Erro no Ficheiro JSON: {jsonErr}
+              {tText('⚠ Erro no Ficheiro JSON:')} {jsonErr}
             </div>
           )}
 
@@ -856,10 +857,10 @@ export function ConfiguracaoModule({
             <div className="space-y-4">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-mono text-slate-400">
-                  Ficheiro: <strong className="text-emerald-400">i18n/{editLang}.json</strong>
+                  {tText('Ficheiro:')} <strong className="text-emerald-400">i18n/{editLang}.json</strong>
                 </span>
                 <span className="text-[10px] text-slate-500 italic">
-                  * Edite a estrutura JSON e clique em Guardar para atualizar todo o sistema em tempo real.
+                  {tText('* Edite a estrutura JSON e clique em Guardar para atualizar todo o sistema em tempo real.')}
                 </span>
               </div>
 
@@ -889,17 +890,17 @@ export function ConfiguracaoModule({
                       };
                       setEditableDict(updatedDict);
                       updateTranslationsDict(updatedDict);
-                      setSavedMsg(`Ficheiro JSON de tradução para ${editLang.toUpperCase()} guardado com sucesso! Todo o sistema atualizado em tempo real.`);
+                      setSavedMsg(`${tText('Ficheiro JSON de tradução para')} ${editLang.toUpperCase()} ${tText('guardado com sucesso! Todo o sistema atualizado em tempo real.')}`);
                       setTimeout(() => setSavedMsg(''), 5000);
                       setJsonErr('');
                     } catch (err: any) {
-                      setJsonErr(err.message || 'Sintaxe JSON inválida');
+                      setJsonErr(err.message || tText('Sintaxe JSON inválida'));
                     }
                   }}
                   className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/30 flex items-center gap-2 cursor-pointer active:scale-95 transition-all"
                 >
                   <Save className="w-4 h-4" />
-                  <span>Guardar Ficheiro JSON ({editLang.toUpperCase()})</span>
+                  <span>{tText('Guardar Ficheiro JSON')} ({editLang.toUpperCase()})</span>
                 </button>
               </div>
             </div>
@@ -910,12 +911,12 @@ export function ConfiguracaoModule({
               <div className={`p-4 rounded-xl border space-y-4 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
                 <div className="flex items-center gap-2 border-b pb-2">
                   <Globe className="w-4 h-4 text-blue-400" />
-                  <span className="text-xs font-black uppercase text-slate-400">1. Textos do Painel & Dashboard ({editLang.toUpperCase()})</span>
+                  <span className="text-xs font-black uppercase text-slate-400">{tText('1. Textos do Painel & Dashboard')} ({editLang.toUpperCase()})</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Título do Dashboard:</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">{tText('Título do Dashboard:')}</label>
                     <input
                       type="text"
                       value={editableDict[editLang]?.dashboard?.title || ''}
@@ -937,7 +938,7 @@ export function ConfiguracaoModule({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Subtítulo do Dashboard:</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">{tText('Subtítulo do Dashboard:')}</label>
                     <input
                       type="text"
                       value={editableDict[editLang]?.dashboard?.subtitle || ''}
@@ -959,7 +960,7 @@ export function ConfiguracaoModule({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Botão "Personalizar Widgets":</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">{tText('Botão "Personalizar Widgets":')}</label>
                     <input
                       type="text"
                       value={editableDict[editLang]?.dashboard?.customizeWidgets || ''}
@@ -981,7 +982,7 @@ export function ConfiguracaoModule({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Botão "Concluir Edição":</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">{tText('Botão "Concluir Edição":')}</label>
                     <input
                       type="text"
                       value={editableDict[editLang]?.dashboard?.finishEdit || ''}
@@ -1008,12 +1009,12 @@ export function ConfiguracaoModule({
               <div className={`p-4 rounded-xl border space-y-4 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
                 <div className="flex items-center gap-2 border-b pb-2">
                   <FileJson className="w-4 h-4 text-emerald-400" />
-                  <span className="text-xs font-black uppercase text-slate-400">2. Textos do Módulo de Faturação & Tarifas ({editLang.toUpperCase()})</span>
+                  <span className="text-xs font-black uppercase text-slate-400">{tText('2. Textos do Módulo de Faturação & Tarifas')} ({editLang.toUpperCase()})</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Botão "Emitir Nova Fatura":</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">{tText('Botão "Emitir Nova Fatura":')}</label>
                     <input
                       type="text"
                       value={editableDict[editLang]?.invoicing?.newInvoice || ''}
@@ -1035,7 +1036,7 @@ export function ConfiguracaoModule({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Banner Fatura Pro-Forma:</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">{tText('Banner Fatura Pro-Forma:')}</label>
                     <input
                       type="text"
                       value={editableDict[editLang]?.invoicing?.proformaBanner || ''}
@@ -1057,7 +1058,7 @@ export function ConfiguracaoModule({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Opção Incluir IVA:</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">{tText('Opção Incluir IVA:')}</label>
                     <input
                       type="text"
                       value={editableDict[editLang]?.invoicing?.applyIva || ''}
@@ -1079,7 +1080,7 @@ export function ConfiguracaoModule({
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Campo Desconto Comercial (%):</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">{tText('Campo Desconto Comercial (%):')}</label>
                     <input
                       type="text"
                       value={editableDict[editLang]?.invoicing?.commercialDiscount || ''}
@@ -1107,13 +1108,13 @@ export function ConfiguracaoModule({
                 <button
                   onClick={() => {
                     updateTranslationsDict(editableDict);
-                    setSavedMsg(`Dicionário de tradução (${editLang.toUpperCase()}) atualizado com sucesso em todo o sistema!`);
+                    setSavedMsg(`${tText('Dicionário de tradução')} (${editLang.toUpperCase()}) ${tText('atualizado com sucesso em todo o sistema!')}`);
                     setTimeout(() => setSavedMsg(''), 5000);
                   }}
                   className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/30 flex items-center gap-2 cursor-pointer active:scale-95 transition-all"
                 >
                   <Save className="w-4 h-4" />
-                  <span>Aplicar & Guardar Alterações em Tempo Real</span>
+                  <span>{tText('Aplicar & Guardar Alterações em Tempo Real')}</span>
                 </button>
               </div>
             </div>
@@ -1128,34 +1129,34 @@ export function ConfiguracaoModule({
             <div>
               <div className="flex items-center gap-2">
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase">
-                  Segurança & Recuperação de Dados
+                  {tText('Segurança & Recuperação de Dados')}
                 </span>
                 <span className="text-xs font-mono text-slate-500">
-                  Exportação JSON • Nível SuperAdmin
+                  {tText('Exportação JSON • Nível SuperAdmin')}
                 </span>
               </div>
               <h3 className={`text-base font-bold tracking-tight mt-1 flex items-center gap-2 ${
                 theme === 'dark' ? 'text-white' : 'text-slate-900'
               }`}>
                 <Database className="w-5 h-5 text-blue-500" />
-                Exportação de Dados do Sistema (JSON Backup & Disaster Recovery)
+                {tText('Exportação de Dados do Sistema (JSON Backup & Disaster Recovery)')}
               </h3>
               <p className="text-xs text-slate-400">
-                Gere e transfira uma cópia integral encriptada em formato JSON de todas as tabelas, faturas, recibos, caixa e cadastros institucionais para salvaguarda off-site.
+                {tText('Gere e transfira uma cópia integral encriptada em formato JSON de todas as tabelas, faturas, recibos, caixa e cadastros institucionais para salvaguarda off-site.')}
               </p>
             </div>
 
             <span className="text-[10px] font-mono px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/40 font-bold uppercase shrink-0">
-              Privilégio SuperAdmin
+              {tText('Privilégio SuperAdmin')}
             </span>
           </div>
 
           {!isSuperAdmin ? (
             <div className="p-8 text-center rounded-2xl bg-slate-950 border border-rose-500/30 text-rose-300 space-y-3">
               <Lock className="w-10 h-10 text-rose-500 mx-auto" />
-              <h4 className="font-bold text-sm uppercase tracking-wider">Acesso Restrito ao Desenvolvedor (SuperAdmin)</h4>
+              <h4 className="font-bold text-sm uppercase tracking-wider">{tText('Acesso Restrito ao Desenvolvedor (SuperAdmin)')}</h4>
               <p className="text-xs max-w-md mx-auto text-slate-400">
-                Apenas utilizadores com o perfil <strong>SuperAdmin (Desenvolvedor de Sistemas)</strong> podem exportar backups integrais de dados em formato JSON para garantir a privacidade e segurança institucional da Guiné-Bissau.
+                {tText('Apenas utilizadores com o perfil')} <strong>SuperAdmin ({tText('Desenvolvedor de Sistemas')})</strong> {tText('podem exportar backups integrais de dados em formato JSON para garantir a privacidade e segurança institucional da Guiné-Bissau.')}
               </p>
             </div>
           ) : (
@@ -1163,27 +1164,27 @@ export function ConfiguracaoModule({
               {/* Summary Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className={`p-4 rounded-xl border space-y-1 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
-                  <span className="text-[10px] font-mono uppercase text-slate-400">Faturas & Recibos</span>
-                  <div className="text-lg font-bold font-mono text-blue-500">{faturas.length} Faturas / {recibos.length} Recibos</div>
-                  <span className="text-[10px] text-slate-500">Módulos de Faturação & Caixa</span>
+                  <span className="text-[10px] font-mono uppercase text-slate-400">{tText('Faturas & Recibos')}</span>
+                  <div className="text-lg font-bold font-mono text-blue-500">{faturas.length.toLocaleString(locale)} {tText('Faturas')} / {recibos.length.toLocaleString(locale)} {tText('Recibos')}</div>
+                  <span className="text-[10px] text-slate-500">{tText('Módulos de Faturação & Caixa')}</span>
                 </div>
 
                 <div className={`p-4 rounded-xl border space-y-1 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
-                  <span className="text-[10px] font-mono uppercase text-slate-400">Marítimo & Frotas</span>
-                  <div className="text-lg font-bold font-mono text-purple-500">{embarcacoes.length} Navios / {armadores.length} Armadores</div>
-                  <span className="text-[10px] text-slate-500">Atracações e Escalas em Bissau</span>
+                  <span className="text-[10px] font-mono uppercase text-slate-400">{tText('Marítimo & Frotas')}</span>
+                  <div className="text-lg font-bold font-mono text-purple-500">{embarcacoes.length.toLocaleString(locale)} {tText('Navios')} / {armadores.length.toLocaleString(locale)} {tText('Armadores')}</div>
+                  <span className="text-[10px] text-slate-500">{tText('Atracações e Escalas em Bissau')}</span>
                 </div>
 
                 <div className={`p-4 rounded-xl border space-y-1 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
-                  <span className="text-[10px] font-mono uppercase text-slate-400">Caixa & Tesouraria</span>
-                  <div className="text-lg font-bold font-mono text-emerald-500">{movimentos.length} Lançamentos</div>
-                  <span className="text-[10px] text-slate-500">Movimentações de Entradas/Saídas</span>
+                  <span className="text-[10px] font-mono uppercase text-slate-400">{tText('Caixa & Tesouraria')}</span>
+                  <div className="text-lg font-bold font-mono text-emerald-500">{movimentos.length.toLocaleString(locale)} {tText('Lançamentos')}</div>
+                  <span className="text-[10px] text-slate-500">{tText('Movimentações de Entradas/Saídas')}</span>
                 </div>
 
                 <div className={`p-4 rounded-xl border space-y-1 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
-                  <span className="text-[10px] font-mono uppercase text-slate-400">Cadeia de Auditoria</span>
-                  <div className="text-lg font-bold font-mono text-amber-500">{auditoriaLogs.length} Logs SHA-256</div>
-                  <span className="text-[10px] text-slate-500">Assinaturas Criptográficas</span>
+                  <span className="text-[10px] font-mono uppercase text-slate-400">{tText('Cadeia de Auditoria')}</span>
+                  <div className="text-lg font-bold font-mono text-amber-500">{auditoriaLogs.length.toLocaleString(locale)} {tText('Logs SHA-256')}</div>
+                  <span className="text-[10px] text-slate-500">{tText('Assinaturas Criptográficas')}</span>
                 </div>
               </div>
 
@@ -1194,10 +1195,10 @@ export function ConfiguracaoModule({
                 <div className="space-y-1">
                   <h4 className={`text-sm font-bold flex items-center gap-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                     <FileJson className="w-5 h-5 text-blue-500" />
-                    Gerar & Transferir Ficheiro JSON de Backup Completo
+                    {tText('Gerar & Transferir Ficheiro JSON de Backup Completo')}
                   </h4>
                   <p className="text-xs text-slate-400 max-w-xl">
-                    O ficheiro exportado inclui a totalidade das tabelas relacionais do sistema em JSON limpo e estruturado. Pode ser armazenado em discos externos, servidores de réplica ou importado para recuperação rápida em caso de desastre.
+                    {tText('O ficheiro exportado inclui a totalidade das tabelas relacionais do sistema em JSON limpo e estruturado. Pode ser armazenado em discos externos, servidores de réplica ou importado para recuperação rápida em caso de desastre.')}
                   </p>
                 </div>
 
@@ -1265,13 +1266,13 @@ export function ConfiguracaoModule({
                       document.body.removeChild(a);
                       URL.revokeObjectURL(url);
 
-                      setSavedMsg(`Backup JSON do sistema (${filename}) exportado com sucesso! Contém todas as tabelas e dados institucionais.`);
+                      setSavedMsg(`${tText('Backup JSON do sistema')} (${filename}) ${tText('exportado com sucesso! Contém todas as tabelas e dados institucionais.')}`);
                       setTimeout(() => setSavedMsg(''), 6000);
                     }}
                     className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/30 flex items-center gap-2 cursor-pointer active:scale-95 transition-all w-full sm:w-auto justify-center"
                   >
                     <Download className="w-4 h-4" />
-                    <span>Exportar Backup JSON (SuperAdmin)</span>
+                    <span>{tText('Exportar Backup JSON (SuperAdmin)')}</span>
                   </button>
                 </div>
               </div>
@@ -1284,16 +1285,16 @@ export function ConfiguracaoModule({
             <div>
               <h3 className={`text-base font-bold tracking-tight flex items-center gap-2 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                 <Shield className="w-5 h-5 text-rose-500" />
-                Área de Desenvolvedor: Base de Dados, Limpeza e Recuperação
+                {tText('Área de Desenvolvedor: Base de Dados, Limpeza e Recuperação')}
               </h3>
               <p className="text-xs text-slate-400">
                 {syncStatus?.mode === 'direct_neon'
-                  ? 'Ligação direta ao Neon ativa. Os dados são gravados diretamente na base Neon. Limpezas movem dados para recuperação por 60 dias.'
-                  : 'Modo local/offline com sincronização para Neon (quando disponível). Limpezas movem dados para recuperação por 60 dias.'}
+                  ? tText('Ligação direta ao Neon ativa. Os dados são gravados diretamente na base Neon. Limpezas movem dados para recuperação por 60 dias.')
+                  : tText('Modo local/offline com sincronização para Neon (quando disponível). Limpezas movem dados para recuperação por 60 dias.')}
               </p>
             </div>
             <button onClick={loadDevData} disabled={devLoading} className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center gap-2 disabled:opacity-50">
-              <RefreshCw className={`w-4 h-4 ${devLoading ? 'animate-spin' : ''}`} /> Atualizar
+              <RefreshCw className={`w-4 h-4 ${devLoading ? 'animate-spin' : ''}`} /> {tText('Atualizar')}
             </button>
           </div>
 
@@ -1302,8 +1303,8 @@ export function ConfiguracaoModule({
           {!isSuperAdmin ? (
             <div className="p-8 text-center rounded-2xl bg-slate-950 border border-rose-500/30 text-rose-300 space-y-3">
               <Lock className="w-10 h-10 text-rose-500 mx-auto" />
-              <h4 className="font-bold text-sm uppercase tracking-wider">Acesso Restrito ao SuperAdmin</h4>
-              <p className="text-xs max-w-md mx-auto text-slate-400">Apenas SuperAdmin pode limpar dados e aceder à área de recuperação.</p>
+              <h4 className="font-bold text-sm uppercase tracking-wider">{tText('Acesso Restrito ao SuperAdmin')}</h4>
+              <p className="text-xs max-w-md mx-auto text-slate-400">{tText('Apenas SuperAdmin pode limpar dados e aceder à área de recuperação.')}</p>
             </div>
           ) : (
             <>
@@ -1311,20 +1312,20 @@ export function ConfiguracaoModule({
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <div className="flex items-center gap-2 text-xs font-semibold">
                     <Cloud className="w-4 h-4 text-blue-500" />
-                    <span>{syncStatus?.mode === 'direct_neon' ? 'Ligação à Base de Dados (Neon)' : 'Sincronização Local ↔ Neon'}</span>
+                    <span>{syncStatus?.mode === 'direct_neon' ? tText('Ligação à Base de Dados (Neon)') : tText('Sincronização Local ↔ Neon')}</span>
                     {(() => {
                       const healthy = !!syncStatus?.healthy;
                       const hasProblem = !syncStatus?.dbConnected || (!!syncStatus?.enabled && ((syncStatus?.pending ?? 0) > 0 || (syncStatus?.failed ?? 0) > 0)) || (syncStatus?.mode !== 'direct_neon' && syncStatus?.enabled && !syncStatus?.remoteConnected);
                       if (healthy) {
-                        return <span className="text-emerald-500 flex items-center gap-1"><Wifi className="w-3.5 h-3.5"/>{syncStatus?.mode === 'direct_neon' ? 'Ligado ao Neon (100%)' : 'Sincronizado (100%)'}</span>;
+                        return <span className="text-emerald-500 flex items-center gap-1"><Wifi className="w-3.5 h-3.5"/>{syncStatus?.mode === 'direct_neon' ? tText('Ligado ao Neon (100%)') : tText('Sincronizado (100%)')}</span>;
                       }
                       if (!syncStatus?.dbConnected) {
-                        return <span className="text-red-500 flex items-center gap-1"><WifiOff className="w-3.5 h-3.5"/>Sem ligação à base de dados</span>;
+                        return <span className="text-red-500 flex items-center gap-1"><WifiOff className="w-3.5 h-3.5"/>{tText('Sem ligação à base de dados')}</span>;
                       }
                       if (hasProblem) {
-                        return <span className="text-purple-500 flex items-center gap-1"><WifiOff className="w-3.5 h-3.5"/>{syncStatus?.mode === 'direct_neon' ? 'Ligação com problemas' : 'Sincronização pendente/falhada'}</span>;
+                        return <span className="text-purple-500 flex items-center gap-1"><WifiOff className="w-3.5 h-3.5"/>{syncStatus?.mode === 'direct_neon' ? tText('Ligação com problemas') : tText('Sincronização pendente/falhada')}</span>;
                       }
-                      return <span className="text-red-500 flex items-center gap-1"><WifiOff className="w-3.5 h-3.5"/>Não sincronizado</span>;
+                      return <span className="text-red-500 flex items-center gap-1"><WifiOff className="w-3.5 h-3.5"/>{tText('Não sincronizado')}</span>;
                     })()}
                   </div>
                   {syncStatus?.mode !== 'direct_neon' && (
@@ -1332,28 +1333,28 @@ export function ConfiguracaoModule({
                       onClick={async () => {
                         const r = await apiRunSync();
                         if (r?.reason === 'sync_disabled') {
-                          setDevMsg('Sincronização desativada: a aplicação está em modo direto (Neon) e grava diretamente na base ativa.');
+                          setDevMsg(tText('Sincronização desativada: a aplicação está em modo direto (Neon) e grava diretamente na base ativa.'));
                         } else if (r?.ok) {
-                          setDevMsg(`Sincronização concluída: processados ${r.processed ?? 0}, sincronizados ${r.synced ?? 0}, falhas ${r.failed ?? 0}.`);
+                          setDevMsg(`${tText('Sincronização concluída: processados')} ${r.processed ?? 0}, ${tText('sincronizados')} ${r.synced ?? 0}, ${tText('falhas')} ${r.failed ?? 0}.`);
                         } else {
-                          setDevMsg(`Sincronização: ${JSON.stringify(r && Object.keys(r).length ? r : { ok: false, reason: 'sem_resposta' })}`);
+                          setDevMsg(`${tText('Sincronização:')} ${JSON.stringify(r && Object.keys(r).length ? r : { ok: false, reason: 'sem_resposta' })}`);
                         }
                         loadDevData();
                       }}
                       className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold"
-                    >Sincronizar agora</button>
+                    >{tText('Sincronizar agora')}</button>
                   )}
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                  <div className="p-2 rounded-lg bg-slate-900/40 border border-slate-800"><div className="text-slate-400">Pendentes</div><div className="font-bold text-amber-400">{syncStatus?.pending ?? 0}</div></div>
-                  <div className="p-2 rounded-lg bg-slate-900/40 border border-slate-800"><div className="text-slate-400">Sincronizados</div><div className="font-bold text-emerald-400">{syncStatus?.synced ?? 0}</div></div>
-                  <div className="p-2 rounded-lg bg-slate-900/40 border border-slate-800"><div className="text-slate-400">Total fila</div><div className="font-bold text-blue-400">{syncStatus?.total ?? 0}</div></div>
-                  <div className="p-2 rounded-lg bg-slate-900/40 border border-slate-800"><div className="text-slate-400">{syncStatus?.mode === 'direct_neon' ? 'Base ativa' : 'Remoto configurado'}</div><div className="font-bold">{syncStatus?.mode === 'direct_neon' ? 'Neon (direto)' : (syncStatus?.remoteConfigured ? 'Sim' : 'Não')}</div></div>
+                  <div className="p-2 rounded-lg bg-slate-900/40 border border-slate-800"><div className="text-slate-400">{tText('Pendentes')}</div><div className="font-bold text-amber-400">{(syncStatus?.pending ?? 0).toLocaleString(locale)}</div></div>
+                  <div className="p-2 rounded-lg bg-slate-900/40 border border-slate-800"><div className="text-slate-400">{tText('Sincronizados')}</div><div className="font-bold text-emerald-400">{(syncStatus?.synced ?? 0).toLocaleString(locale)}</div></div>
+                  <div className="p-2 rounded-lg bg-slate-900/40 border border-slate-800"><div className="text-slate-400">{tText('Total fila')}</div><div className="font-bold text-blue-400">{(syncStatus?.total ?? 0).toLocaleString(locale)}</div></div>
+                  <div className="p-2 rounded-lg bg-slate-900/40 border border-slate-800"><div className="text-slate-400">{syncStatus?.mode === 'direct_neon' ? tText('Base ativa') : tText('Remoto configurado')}</div><div className="font-bold">{syncStatus?.mode === 'direct_neon' ? tText('Neon (direto)') : (syncStatus?.remoteConfigured ? tText('Sim') : tText('Não'))}</div></div>
                 </div>
                 <p className="text-[11px] text-slate-500">
                   {syncStatus?.mode === 'direct_neon'
-                    ? 'A aplicação está ligada diretamente ao Neon. As operações de limpeza e recuperação continuam disponíveis nesta área.'
-                    : 'Os dados são gravados primeiro na base local. Quando a ligação ao Neon estiver disponível, a fila local é enviada automaticamente (e pode ser forçada aqui).'}
+                    ? tText('A aplicação está ligada diretamente ao Neon. As operações de limpeza e recuperação continuam disponíveis nesta área.')
+                    : tText('Os dados são gravados primeiro na base local. Quando a ligação ao Neon estiver disponível, a fila local é enviada automaticamente (e pode ser forçada aqui).')}
                 </p>
               </div>
 
@@ -1366,21 +1367,21 @@ export function ConfiguracaoModule({
                     <div key={entity} className="p-3 rounded-lg border border-slate-800 bg-slate-900/30 flex items-center justify-between gap-2">
                       <div>
                         <div className="text-xs font-semibold">{entity}</div>
-                        <div className="text-[11px] text-slate-400">{Number(count)} registos</div>
+                        <div className="text-[11px] text-slate-400">{Number(count).toLocaleString(locale)} {tText('registos')}</div>
                       </div>
                       <button
                         onClick={async () => {
-                          if (!window.confirm(`Limpar "${entity}"? Os dados serão movidos para recuperação por 60 dias.`)) return;
+                          if (!window.confirm(`${tText('Limpar')} "${entity}"? ${tText('Os dados serão movidos para recuperação por 60 dias.')}`)) return;
                           const r = await apiClearEntityData(entity, currentUser?.nome || 'SuperAdmin');
-                          setDevMsg(r?.ok ? `Limpeza "${entity}": ${r.moved || 0} registos movidos para recuperação.` : `Falha ao limpar "${entity}": ${r?.error || 'erro'}`);
+                          setDevMsg(r?.ok ? `${tText('Limpeza')} "${entity}": ${r.moved || 0} ${tText('registos movidos para recuperação.')}` : `${tText('Falha ao limpar')} "${entity}": ${r?.error || tText('erro')}`);
                           loadDevData();
                         }}
                         className="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-[11px] font-semibold"
-                      >Limpar</button>
+                      >{tText('Limpar')}</button>
                     </div>
                   ))}
                 </div>
-                <p className="text-[11px] text-amber-500">A limpeza remove os registos da tabela ativa e guarda-os na área de recuperação (lixeira) por pelo menos 60 dias.</p>
+                <p className="text-[11px] text-amber-500">{tText('A limpeza remove os registos da tabela ativa e guarda-os na área de recuperação (lixeira) por pelo menos 60 dias.')}</p>
               </div>
 
               <div className={`p-4 rounded-xl border space-y-3 ${theme === 'dark' ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
@@ -1398,17 +1399,17 @@ export function ConfiguracaoModule({
                       <div key={item.trashUid || item.id} className="p-3 rounded-lg border border-slate-800 bg-slate-900/30 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div className="text-xs min-w-0">
                           <div className="font-semibold truncate">{item.entity} — {item.label || item.entityId}</div>
-                          <div className="text-[11px] text-slate-400">Apagado: {item.deletedAt ? new Date(item.deletedAt).toLocaleString() : '-'} · Expira: {expiresAt ? expiresAt.toLocaleString() : '-'}{daysLeft !== null ? ` (${daysLeft} dia(s) restante(s))` : ''}</div>
-                          <div className="text-[11px] text-slate-500">Por: {item.deletedBy || '-'} · ID: {item.entityId}</div>
+                          <div className="text-[11px] text-slate-400">{tText('Apagado')}: {item.deletedAt ? new Date(item.deletedAt).toLocaleString(locale) : '-'} · {tText('Expira')}: {expiresAt ? expiresAt.toLocaleString(locale) : '-'}{daysLeft !== null ? ` (${daysLeft.toLocaleString(locale)} ${tText('dia(s) restante(s)')})` : ''}</div>
+                          <div className="text-[11px] text-slate-500">{tText('Por')}: {item.deletedBy || '-'} · ID: {item.entityId}</div>
                         </div>
                         <button
                           onClick={async () => {
                             const r = await apiRestoreTrashItem(item.trashUid);
-                            setDevMsg(r?.ok ? `Restaurado: ${item.entity}/${item.entityId}` : `Falha ao restaurar: ${r?.error || 'erro'}`);
+                            setDevMsg(r?.ok ? `${tText('Restaurado')}: ${item.entity}/${item.entityId}` : `${tText('Falha ao restaurar')}: ${r?.error || tText('erro')}`);
                             loadDevData();
                           }}
                           className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-semibold shrink-0"
-                        >Recuperar</button>
+                        >{tText('Recuperar')}</button>
                       </div>
                     );
                   })}
@@ -1429,11 +1430,12 @@ export function ConfiguracaoModule({
             <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
               <div className="flex items-center gap-2">
                 <Plus className="w-5 h-5 text-blue-500" />
-                <h3 className="font-bold text-base">Emitir Novo Preço de Rubrica / Tarifa</h3>
+                <h3 className="font-bold text-base">{tText('Emitir Novo Preço de Rubrica / Tarifa')}</h3>
               </div>
               <button
                 onClick={() => setIsAddTaxaModalOpen(false)}
                 className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                title={tText('Fechar')}
               >
                 ✕
               </button>
@@ -1441,10 +1443,10 @@ export function ConfiguracaoModule({
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="block text-slate-500 font-mono text-[10px] uppercase mb-1">Código do Serviço / Rubrica (*)</label>
+                <label className="block text-slate-500 font-mono text-[10px] uppercase mb-1">{tText('Código do Serviço / Rubrica (*)')}</label>
                 <input
                   type="text"
-                  placeholder="Ex: PIL-04 ou PIL-ESP"
+                  placeholder={tText('Ex: PIL-04 ou PIL-ESP')}
                   value={newTaxaData.codigoServico || ''}
                   onChange={(e) => setNewTaxaData({ ...newTaxaData, codigoServico: e.target.value })}
                   className={`w-full rounded-xl px-3 py-2 font-mono uppercase font-bold border focus:outline-none focus:border-blue-500 ${
@@ -1454,10 +1456,10 @@ export function ConfiguracaoModule({
               </div>
 
               <div>
-                <label className="block text-slate-500 font-mono text-[10px] uppercase mb-1">Descrição do Serviço / Tarifa (*)</label>
+                <label className="block text-slate-500 font-mono text-[10px] uppercase mb-1">{tText('Descrição do Serviço / Tarifa (*)')}</label>
                 <input
                   type="text"
-                  placeholder="Ex: Serviço de Pilotagem Noturna Especial"
+                  placeholder={tText('Ex: Serviço de Pilotagem Noturna Especial')}
                   value={newTaxaData.descricaoServico || ''}
                   onChange={(e) => setNewTaxaData({ ...newTaxaData, descricaoServico: e.target.value })}
                   className={`w-full rounded-xl px-3 py-2 border focus:outline-none focus:border-blue-500 ${
@@ -1468,7 +1470,7 @@ export function ConfiguracaoModule({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-500 font-mono text-[10px] uppercase mb-1">Categoria</label>
+                  <label className="block text-slate-500 font-mono text-[10px] uppercase mb-1">{tText('Categoria')}</label>
                   <select
                     value={newTaxaData.categoria || 'Pilotagem'}
                     onChange={(e) => setNewTaxaData({ ...newTaxaData, categoria: e.target.value })}
@@ -1476,17 +1478,17 @@ export function ConfiguracaoModule({
                       theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                     }`}
                   >
-                    <option value="Pilotagem">Pilotagem</option>
-                    <option value="Cais & Permanência">Cais & Permanência</option>
-                    <option value="Rebocador & Apoio">Rebocador & Apoio</option>
-                    <option value="Serviços Portuários">Serviços Portuários</option>
-                    <option value="Licenciamento">Licenciamento</option>
-                    <option value="Inspecção & Segurança">Inspecção & Segurança</option>
+                    <option value="Pilotagem">{tText('Pilotagem')}</option>
+                    <option value="Cais & Permanência">{tText('Cais & Permanência')}</option>
+                    <option value="Rebocador & Apoio">{tText('Rebocador & Apoio')}</option>
+                    <option value="Serviços Portuários">{tText('Serviços Portuários')}</option>
+                    <option value="Licenciamento">{tText('Licenciamento')}</option>
+                    <option value="Inspecção & Segurança">{tText('Inspecção & Segurança')}</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-slate-500 font-mono text-[10px] uppercase mb-1">Unidade de Medida</label>
+                  <label className="block text-slate-500 font-mono text-[10px] uppercase mb-1">{tText('Unidade de Medida')}</label>
                   <select
                     value={newTaxaData.unidadeMedida || 'Por Manobra'}
                     onChange={(e) => setNewTaxaData({ ...newTaxaData, unidadeMedida: e.target.value })}
@@ -1494,18 +1496,18 @@ export function ConfiguracaoModule({
                       theme === 'dark' ? 'bg-slate-950 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                     }`}
                   >
-                    <option value="Por Manobra">Por Manobra</option>
-                    <option value="Por Hora de Pilotagem">Por Hora de Pilotagem</option>
-                    <option value="Por GT/Dia">Por GT/Dia</option>
-                    <option value="Taxa Fixa">Taxa Fixa</option>
-                    <option value="Por Anuidade">Por Anuidade</option>
-                    <option value="Por Tonelada">Por Tonelada</option>
+                    <option value="Por Manobra">{tText('Por Manobra')}</option>
+                    <option value="Por Hora de Pilotagem">{tText('Por Hora de Pilotagem')}</option>
+                    <option value="Por GT/Dia">{tText('Por GT/Dia')}</option>
+                    <option value="Taxa Fixa">{tText('Taxa Fixa')}</option>
+                    <option value="Por Anuidade">{tText('Por Anuidade')}</option>
+                    <option value="Por Tonelada">{tText('Por Tonelada')}</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-slate-500 font-mono text-[10px] uppercase mb-1">Valor Unitário Oficial (XOF) (*)</label>
+                <label className="block text-slate-500 font-mono text-[10px] uppercase mb-1">{tText('Valor Unitário Oficial (XOF) (*)')}</label>
                 <input
                   type="number"
                   placeholder="1500000"
@@ -1523,14 +1525,14 @@ export function ConfiguracaoModule({
                 onClick={() => setIsAddTaxaModalOpen(false)}
                 className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
               >
-                Cancelar
+                {tText('Cancelar')}
               </button>
               <button
                 onClick={handleAddTaxaSubmit}
                 className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/30 flex items-center gap-1.5 cursor-pointer"
               >
                 <Save className="w-4 h-4" />
-                Emitir Preço de Rubrica
+                {tText('Emitir Preço de Rubrica')}
               </button>
             </div>
           </div>

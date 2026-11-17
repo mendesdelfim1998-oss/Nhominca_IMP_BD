@@ -60,7 +60,7 @@ export function AgenciasArmadoresModule({ agencias, armadores }: AgenciasArmador
               <div className={`flex items-start justify-between border-b pb-3 ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
                 <div>
                   <h3 className={`font-bold text-base ${isDark ? 'text-white' : 'text-slate-900'}`}>{ag.nomeComercial}</h3>
-                  <div className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>NIF: <span className={`font-mono ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>{ag.nif}</span></div>
+                  <div className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{tText('NIF')}: <span className={`font-mono ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>{ag.nif}</span></div>
                 </div>
                 <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                   {tText(ag.status)}

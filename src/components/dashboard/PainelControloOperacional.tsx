@@ -24,7 +24,8 @@ export function PainelControloOperacional({
   periodoInicial = 'mes'
 }: PainelControloOperacionalProps) {
   const { theme } = useTheme();
-  const { tText } = useLanguage();
+  const { tText, language } = useLanguage();
+  const locale = language === 'fr' ? 'fr-FR' : language === 'en' ? 'en-GB' : 'pt-PT';
   const [periodo, setPeriodo] = useState<'diario' | 'semana' | 'mes' | 'ano'>(periodoInicial);
 
   const role = (currentUser?.role || currentUser?.funcao || '').toLowerCase();
@@ -49,12 +50,17 @@ export function PainelControloOperacional({
   // Real-time time-series data aggregation based on selected period
   const { chartData, estadoData, totalFaturado, totalEntradas } = useMemo(() => {
     const buckets: Record<string, { label: string; faturas: number; entradas: number; saidas: number }> = {};
-    const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const monthNames =
+      language === 'fr'
+        ? ['Janv', 'Févr', 'Mars', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc']
+        : language === 'en'
+        ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        : ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
     const getBucketInfo = (dateStr: string) => {
       const cleanDate = (dateStr || '').split(' ')[0];
       if (!cleanDate || cleanDate.length < 4) {
-        return { key: 'outro', label: 'Outro' };
+        return { key: 'outro', label: tText('Outro') };
       }
 
       const parts = cleanDate.split('-');
@@ -71,7 +77,7 @@ export function PainelControloOperacional({
           const firstDay = new Date(year, 0, 1);
           const pastDays = (d.getTime() - firstDay.getTime()) / 86400000;
           const weekNum = Math.ceil((pastDays + firstDay.getDay() + 1) / 7);
-          return { key: `${year}-W${weekNum}`, label: `Sem ${weekNum}` };
+          return { key: `${year}-W${weekNum}`, label: `${tText('Sem')} ${weekNum}` };
         }
         if (periodo === 'mes') {
           return { key: `${year}-${String(month + 1).padStart(2, '0')}`, label: `${monthNames[month] || parts[1]} ${year}` };
@@ -119,19 +125,19 @@ export function PainelControloOperacional({
     });
 
     const estadoChart = [
-      { name: 'rascunho', label: 'Rascunho', value: counts.rascunho, color: '#94a3b8' },
-      { name: 'confirmada', label: 'Confirmada', value: counts.confirmada, color: '#3b82f6' },
-      { name: 'paga', label: 'Totalmente Paga', value: counts.paga, color: '#10b981' },
-      { name: 'anulada', label: 'Anulada', value: counts.anulada, color: '#f43f5e' }
+      { name: tText('Rascunho'), label: tText('Rascunho'), value: counts.rascunho, color: '#94a3b8' },
+      { name: tText('Confirmada'), label: tText('Confirmada'), value: counts.confirmada, color: '#3b82f6' },
+      { name: tText('Totalmente Paga'), label: tText('Totalmente Paga'), value: counts.paga, color: '#10b981' },
+      { name: tText('Anulada'), label: tText('Anulada'), value: counts.anulada, color: '#f43f5e' }
     ];
 
     return {
-      chartData: sortedBuckets.length > 0 ? sortedBuckets : [{ label: 'Sem dados', faturas: 0, entradas: 0, saidas: 0 }],
+      chartData: sortedBuckets.length > 0 ? sortedBuckets : [{ label: tText('Sem dados'), faturas: 0, entradas: 0, saidas: 0 }],
       estadoData: estadoChart,
       totalFaturado: sumFaturas,
       totalEntradas: sumEntradas
     };
-  }, [scopedFaturas, scopedMovimentos, periodo]);
+  }, [scopedFaturas, scopedMovimentos, periodo, language, tText]);
 
   const COLORS = ['#94a3b8', '#3b82f6', '#10b981', '#f43f5e'];
 
@@ -143,7 +149,7 @@ export function PainelControloOperacional({
           {payload.map((entry: any, index: number) => (
             <div key={`item-${index}`} className="flex justify-between gap-4">
               <span style={{ color: entry.color || entry.fill }}>{entry.name}:</span>
-              <span className="font-bold">{Number(entry.value).toLocaleString('pt-PT')} XOF</span>
+              <span className="font-bold">{Number(entry.value).toLocaleString(locale)} XOF</span>
             </div>
           ))}
         </div>
@@ -226,7 +232,7 @@ export function PainelControloOperacional({
               {tText('Faturação por Período (XOF)')}
             </h3>
             <span className="text-xs font-mono font-bold text-blue-500">
-              {totalFaturado.toLocaleString('pt-PT')} XOF
+              {totalFaturado.toLocaleString(locale)} XOF
             </span>
           </div>
           <div className="h-60 w-full pt-2">
@@ -251,7 +257,7 @@ export function PainelControloOperacional({
               {tText('Volume de Caixa (Entradas/Saídas)')}
             </h3>
             <span className="text-xs font-mono font-bold text-emerald-500">
-              {totalEntradas.toLocaleString('pt-PT')} XOF
+              {totalEntradas.toLocaleString(locale)} XOF
             </span>
           </div>
           <div className="h-60 w-full pt-2">

@@ -176,15 +176,16 @@ export function Sidebar({ activeModule, currentUser, onSelectModule, isMobileOpe
           <div className="flex items-center gap-2">
             <img
               src="/assets/aistudio/images__2__12a47efd.jpg"
-              alt="IMP Logo"
+              alt={tText('IMP Logo')}
               className="w-7 h-7 object-contain rounded-lg bg-white p-0.5"
             />
-            <span className="font-extrabold text-sm tracking-tight text-white">Menu NHOMINCA</span>
+            <span className="font-extrabold text-sm tracking-tight text-white">{tText('Menu NHOMINCA')}</span>
           </div>
           <button
             onClick={onCloseMobile}
             className="p-1.5 text-white/80 hover:text-white hover:bg-white/10 rounded-xl transition-colors cursor-pointer"
-            title="Fechar menu"
+            title={tText('Fechar menu')}
+            aria-label={tText('Fechar menu')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -198,7 +199,7 @@ export function Sidebar({ activeModule, currentUser, onSelectModule, isMobileOpe
         }`}
       >
         <span className="text-[10px] uppercase font-mono font-bold tracking-wider">
-          Segregação SoD
+          {tText('Segregação SoD')}
         </span>
         <span
           className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
@@ -211,7 +212,7 @@ export function Sidebar({ activeModule, currentUser, onSelectModule, isMobileOpe
               : 'bg-blue-500/20 text-blue-300'
           }`}
         >
-          {userRole.toUpperCase()}
+          {tText(userRole.toUpperCase())}
         </span>
       </div>
 
@@ -293,12 +294,12 @@ export function Sidebar({ activeModule, currentUser, onSelectModule, isMobileOpe
         <div className="flex items-center gap-2.5">
           <img
             src="/assets/aistudio/images__2__12a47efd.jpg"
-            alt="NHOMINCA"
+            alt={tText('NHOMINCA')}
             className="w-6 h-6 object-contain rounded-full bg-white p-0.5 shadow-sm"
           />
           <div>
             <div className="text-[11px] font-bold">NHOMINCA • IMP</div>
-            <div className="text-[10px] text-emerald-400">Sistema Integral v3.0</div>
+            <div className="text-[10px] text-emerald-400">{tText('Sistema Integral v3.0')}</div>
           </div>
         </div>
         <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>

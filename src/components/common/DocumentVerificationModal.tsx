@@ -23,7 +23,8 @@ interface DocumentVerificationModalProps {
 }
 
 export function DocumentVerificationModal({ data, onClose }: DocumentVerificationModalProps) {
-  const { tText } = useLanguage();
+  const { tText, language } = useLanguage();
+  const locale = language === 'fr' ? 'fr-FR' : language === 'en' ? 'en-GB' : 'pt-PT';
   const [copied, setCopied] = useState(false);
   const verificationUrl = buildVerificationUrl(data);
 
@@ -35,8 +36,8 @@ export function DocumentVerificationModal({ data, onClose }: DocumentVerificatio
 
   const formattedAmount =
     typeof data.amount === 'number'
-      ? data.amount.toLocaleString('pt-PT')
-      : Number(data.amount).toLocaleString('pt-PT');
+      ? data.amount.toLocaleString(locale)
+      : Number(data.amount).toLocaleString(locale);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
@@ -48,11 +49,11 @@ export function DocumentVerificationModal({ data, onClose }: DocumentVerificatio
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="text-[10px] font-black uppercase tracking-wider text-blue-200">
-                  REPÚBLICA DA
+                  {tText('REPÚBLICA DA')}
                 </span>
                 <GuineBissauCoatOfArms className="w-5 h-5 object-contain" />
                 <span className="text-[10px] font-black uppercase tracking-wider text-blue-200">
-                  GUINÉ-BISSAU
+                  {tText('GUINÉ-BISSAU')}
                 </span>
               </div>
               <h2 className="text-sm font-black uppercase tracking-tight text-white mt-0.5">

@@ -119,7 +119,7 @@ export function ProfileModal({ isOpen, onClose, currentUser, onUpdateUser, initi
           <div className={`flex items-start gap-4 sm:gap-5 pb-4 border-b ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
             <div className="flex flex-col items-center gap-2">
               <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden border-4 border-blue-500/30 bg-slate-200 flex items-center justify-center shrink-0">
-                {newPhoto ? <img src={newPhoto} alt="Foto de perfil" className="w-full h-full object-cover" /> : <User className="w-10 h-10 text-slate-500" />}
+                {newPhoto ? <img src={newPhoto} alt={tText('Foto de perfil')} className="w-full h-full object-cover" /> : <User className="w-10 h-10 text-slate-500" />}
               </div>
               <label className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer border ${isDark ? 'border-slate-700 hover:bg-slate-800' : 'border-slate-300 hover:bg-slate-50'}`}>
                 <Camera className="w-3.5 h-3.5" /> {tText('Foto')}
